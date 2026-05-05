@@ -730,13 +730,89 @@
   .star-input span:hover, .star-input span.on { color: var(--accent); transform: scale(1.1); }
 
   @media (max-width: 700px) {
-    body { padding: 20px 16px 60px; }
-    .brand h1 { font-size: 34px; }
-    .search { width: 100%; }
-    header { flex-direction: column; align-items: stretch; }
-    .toolbar { flex-direction: column; align-items: stretch; }
-    .stats { grid-template-columns: 1fr; }
-    .modal { padding: 24px; }
+    body { padding: 16px 14px 80px; }
+    /* Header compact : titre + sous-titre + actions sur 2 lignes */
+    .brand h1 { font-size: 26px; letter-spacing: -0.8px; }
+    .brand p { display: none; }
+    header { margin-bottom: 16px; gap: 12px; align-items: center; flex-wrap: nowrap; }
+    .toolbar { flex-direction: row; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .search { width: 100%; order: 10; flex: 1 1 100%; padding: 9px 12px 9px 36px; font-size: 13px; }
+    .search-wrap { order: 10; flex: 1 1 100%; }
+    .add-btn { padding: 9px 14px; font-size: 13px; }
+    .add-btn span, .add-btn-text { display: none; }
+    .icon-btn { padding: 9px; }
+    .profile-pill { padding: 7px 10px 7px 8px; font-size: 13px; }
+    .profile-pill .avatar { width: 20px; height: 20px; font-size: 10px; }
+
+    /* Stats : tab bar horizontale scrollable au lieu de 5 cards empilées */
+    .stats {
+      display: flex;
+      overflow-x: auto;
+      grid-template-columns: none;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 4px;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .stats::-webkit-scrollbar { display: none; }
+    .stat-card {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      scroll-snap-align: start;
+    }
+    .stat-card .stat-sub { display: none; }
+    .stat-label { font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--text); }
+    .stat-label .dot { width: 7px; height: 7px; }
+    .stat-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 0;
+      letter-spacing: 0;
+      padding: 1px 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      min-width: 24px;
+      text-align: center;
+    }
+    .stat-card.active .stat-value { background: rgba(0,0,0,0.25); }
+
+    /* Tag filter bar plus compact */
+    .tag-filter-bar { padding: 10px 12px; margin-bottom: 14px; }
+    .tag-filter-bar .label { width: 100%; margin-bottom: 4px; }
+
+    /* Cards plus serrées */
+    .grid { grid-template-columns: 1fr; gap: 12px; }
+    .card { padding: 16px 18px; border-radius: 14px; }
+    .card-title { font-size: 17px; }
+
+    /* Sticky header pour garder la nav accessible en scrollant */
+    .stats {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg);
+      padding-top: 6px;
+      margin-left: -14px;
+      margin-right: -14px;
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    .modal { padding: 22px; border-radius: 16px; }
+    .profile-dropdown { right: 0; min-width: 220px; }
+  }
+  /* Très petits écrans */
+  @media (max-width: 380px) {
+    .brand h1 { font-size: 22px; }
+    .stat-card { padding: 9px 12px; }
+    .add-btn { padding: 9px 12px; }
   }
 </style>
 </head>
@@ -1616,7 +1692,14 @@ function setRating(n) {
 function setActiveCat(cat) {
   currentCat = cat;
   // Les filtres tag sont globaux : on ne les reset plus en changeant de catégorie
-  document.querySelectorAll('.stat-card').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+  document.querySelectorAll('.stat-card').forEach(c => {
+    const isActive = c.dataset.cat === cat;
+    c.classList.toggle('active', isActive);
+    // Sur mobile, scrolle pour rendre visible la catégorie active dans la barre horizontale
+    if (isActive && window.matchMedia('(max-width: 700px)').matches) {
+      c.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  });
   render();
 }
 
