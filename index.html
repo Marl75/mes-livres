@@ -135,6 +135,135 @@
     backdrop-filter: blur(10px);
   }
   .icon-btn:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface-hover); }
+  /* Profile selector */
+  .profile-selector {
+    position: relative;
+  }
+  .profile-pill {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 14px 9px 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+  .profile-pill:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+  .profile-pill .avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a1426;
+    flex-shrink: 0;
+  }
+  .profile-pill .chevron { width: 12px; height: 12px; opacity: 0.6; }
+  .profile-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 240px;
+    background: #1a1822;
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    padding: 6px;
+    display: none;
+    z-index: 50;
+  }
+  .profile-dropdown.active { display: block; }
+  .profile-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 14px;
+    transition: background 0.15s;
+  }
+  .profile-item:hover { background: var(--surface-hover); }
+  .profile-item.current { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  .profile-item .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #1a1426;
+    flex-shrink: 0;
+  }
+  .profile-item .check { margin-left: auto; opacity: 0.7; }
+  .profile-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+  .profile-action {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 13px;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .profile-action:hover { background: var(--surface-hover); color: var(--text); }
+  .profile-action svg { width: 14px; height: 14px; }
+  /* Profile manager modal */
+  .profile-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    background: var(--surface);
+  }
+  .profile-row .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #1a1426;
+    flex-shrink: 0;
+  }
+  .profile-row .info { flex: 1; }
+  .profile-row .name { font-weight: 500; font-size: 14px; }
+  .profile-row .meta { font-size: 12px; color: var(--text-faint); }
+  .profile-row .row-actions { display: flex; gap: 6px; }
+  .profile-row .row-actions button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 5px 9px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+  }
+  .profile-row .row-actions button:hover { background: var(--surface-hover); color: var(--text); }
+  .profile-row .row-actions .danger:hover { color: var(--danger); border-color: var(--danger); }
+  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .color-swatch {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .color-swatch.active { border-color: var(--text); transform: scale(1.1); }
   .icon-btn.syncing svg { animation: spin 1s linear infinite; }
   .icon-btn.synced { color: #6dbfa8; border-color: rgba(109, 191, 168, 0.3); }
   .icon-btn.error { color: var(--danger); border-color: rgba(224, 122, 108, 0.3); }
@@ -627,6 +756,14 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Ajouter
       </button>
+      <div class="profile-selector">
+        <button class="profile-pill" id="profile-pill" onclick="toggleProfileDropdown(event)">
+          <span class="avatar" id="profile-pill-avatar"></span>
+          <span id="profile-pill-name">—</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="profile-dropdown" id="profile-dropdown"></div>
+      </div>
       <button class="icon-btn" id="sync-btn" onclick="openSyncModal()" title="Synchronisation">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
       </button>
@@ -665,6 +802,31 @@
   <div class="tag-filter-bar" id="tag-filter-bar"></div>
 
   <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal">
+    <h2>Gérer les profils</h2>
+    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px; line-height: 1.5;">
+      Chaque profil a sa propre liste de livres. Tous les profils sont synchronisés sur le même bin cloud — accessibles depuis n'importe quel appareil.
+    </p>
+    <div id="profile-list"></div>
+    <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 12px;">
+      <h3 style="font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 12px;">Nouveau profil</h3>
+      <div class="field">
+        <label>Nom</label>
+        <input type="text" id="f-profile-name" placeholder="ex: Marlène, Sophie…" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Couleur</label>
+        <div class="color-picker" id="color-picker"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeProfileModal()">Fermer</button>
+      <button class="btn-primary" onclick="createProfileFromForm()">Créer le profil</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="sync-modal">
@@ -751,12 +913,69 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'mes-livres-v1';
+const STORAGE_KEY = 'mes-livres-v1';        // ancien (livres seuls)
+const STATE_KEY = 'mes-livres-state-v2';   // nouveau (profils)
+const CURRENT_PROFILE_KEY = 'mes-livres-current-profile'; // par navigateur
 const SYNC_KEY = 'mes-livres-sync-v1';
-let books = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+const PROFILE_COLORS = ['#c9a961', '#6dbfa8', '#b899d8', '#d4936a', '#6a9bd4', '#e07a6c', '#a3c971'];
+
+let state = loadState();
+let books = []; // alias vers profils[currentId].books
 let syncConfig = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null');
 let syncTimer = null;
 let isSyncing = false;
+let newProfileColor = PROFILE_COLORS[0];
+
+function newId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
+
+function loadState() {
+  // Charger v2
+  const raw = localStorage.getItem(STATE_KEY);
+  if (raw) {
+    const s = JSON.parse(raw);
+    if (s.profiles && s.profiles.length) {
+      // Restaurer le profil courant depuis ce navigateur si possible
+      const localCurrent = localStorage.getItem(CURRENT_PROFILE_KEY);
+      if (localCurrent && s.profiles.find(p => p.id === localCurrent)) {
+        s.currentId = localCurrent;
+      } else if (!s.profiles.find(p => p.id === s.currentId)) {
+        s.currentId = s.profiles[0].id;
+      }
+      return s;
+    }
+  }
+  // Migration v1 → v2
+  const oldBooks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const id = newId();
+  return {
+    version: 2,
+    currentId: id,
+    profiles: [{ id, name: 'Moi', color: PROFILE_COLORS[0], books: oldBooks, createdAt: Date.now() }],
+  };
+}
+
+function getCurrentProfile() {
+  return state.profiles.find(p => p.id === state.currentId) || state.profiles[0];
+}
+
+function bindBooksToProfile() {
+  const p = getCurrentProfile();
+  books = p ? p.books : [];
+}
+
+function syncBooksToProfile() {
+  const p = getCurrentProfile();
+  if (p) p.books = books;
+}
+
+function saveState() {
+  syncBooksToProfile();
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  localStorage.setItem(CURRENT_PROFILE_KEY, state.currentId);
+}
+
+bindBooksToProfile();
 let currentCat = 'lu';
 let currentSearch = '';
 let currentRating = 0;
@@ -767,7 +986,7 @@ let suggestionIndex = -1; // index du suggestion-tag mis en surbrillance
 const CAT_LABELS = { 'lu': 'Lu', 'en-cours': 'En cours', 'a-lire': 'À lire', 'abandonne': 'Abandonné', 'wishlist': 'Wishlist' };
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+  saveState();
   scheduleCloudSync();
 }
 
@@ -802,6 +1021,7 @@ function scheduleCloudSync() {
 
 async function pushToCloud() {
   if (!syncConfig || isSyncing) return;
+  syncBooksToProfile();
   isSyncing = true;
   setSyncBtnState('syncing');
   setSyncStatus('Synchronisation en cours…');
@@ -812,7 +1032,7 @@ async function pushToCloud() {
         'Content-Type': 'application/json',
         'X-Master-Key': syncConfig.key,
       },
-      body: JSON.stringify({ books, updatedAt: Date.now() }),
+      body: JSON.stringify({ profiles: state.profiles, updatedAt: Date.now() }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     syncConfig.lastSync = Date.now();
@@ -839,17 +1059,28 @@ async function pullFromCloud() {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const cloudBooks = (data.record && data.record.books) || [];
-    if (Array.isArray(cloudBooks)) {
-      books = cloudBooks;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
-      syncConfig.lastSync = Date.now();
-      localStorage.setItem(SYNC_KEY, JSON.stringify(syncConfig));
-      setSyncBtnState('synced');
-      setSyncStatus(`✓ ${books.length} livre(s) chargés depuis le cloud`, 'ok');
-      render();
-      setTimeout(() => setSyncBtnState(null), 2500);
+    const record = data.record || {};
+    if (Array.isArray(record.profiles) && record.profiles.length > 0) {
+      // Format v2 — multi-profils
+      state.profiles = record.profiles;
+      // Garder le profil courant si il existe encore, sinon prendre le premier
+      if (!state.profiles.find(p => p.id === state.currentId)) {
+        state.currentId = state.profiles[0].id;
+      }
+    } else if (Array.isArray(record.books)) {
+      // Format v1 (anciennes données cloud) — wrapper dans le profil courant
+      const cur = getCurrentProfile();
+      if (cur) cur.books = record.books;
     }
+    bindBooksToProfile();
+    saveState();
+    syncConfig.lastSync = Date.now();
+    localStorage.setItem(SYNC_KEY, JSON.stringify(syncConfig));
+    setSyncBtnState('synced');
+    setSyncStatus(`✓ Synchronisé · ${state.profiles.length} profil(s), ${books.length} livre(s) actifs`, 'ok');
+    renderProfileSelector();
+    render();
+    setTimeout(() => setSyncBtnState(null), 2500);
   } catch (e) {
     setSyncBtnState('error');
     setSyncStatus(`Erreur : ${e.message}`, 'err');
@@ -888,17 +1119,22 @@ async function saveSyncConfig() {
     const data = await res.json();
     syncConfig = { binId, key, lastSync: 0 };
     localStorage.setItem(SYNC_KEY, JSON.stringify(syncConfig));
-    const cloudBooks = (data.record && data.record.books) || [];
-    // Fusion intelligente : si le cloud est vide et qu'on a des livres locaux, on push. Sinon on pull.
-    if (cloudBooks.length === 0 && books.length > 0) {
-      result.innerHTML = '<span style="color: var(--accent);">Bin vide — envoi de tes livres locaux…</span>';
-      await pushToCloud();
-    } else {
-      result.innerHTML = `<span style="color: #6dbfa8;">✓ Connecté — ${cloudBooks.length} livre(s) dans le cloud</span>`;
-      if (cloudBooks.length > 0) {
-        const replace = books.length === 0 || confirm(`Le cloud contient ${cloudBooks.length} livre(s). Remplacer tes ${books.length} livre(s) locaux par ceux du cloud ?`);
-        if (replace) await pullFromCloud();
+    const record = data.record || {};
+    const cloudProfiles = Array.isArray(record.profiles) ? record.profiles : null;
+    const cloudBooks = Array.isArray(record.books) ? record.books : null;
+    if (cloudProfiles && cloudProfiles.length > 0) {
+      const totalBooks = cloudProfiles.reduce((n, p) => n + (p.books || []).length, 0);
+      result.innerHTML = `<span style="color: #6dbfa8;">✓ Connecté — ${cloudProfiles.length} profil(s), ${totalBooks} livre(s) dans le cloud</span>`;
+      const replace = books.length === 0 || confirm(`Le cloud contient ${cloudProfiles.length} profil(s). Charger ces données ?`);
+      if (replace) await pullFromCloud();
+    } else if (cloudBooks && cloudBooks.length > 0) {
+      result.innerHTML = `<span style="color: #6dbfa8;">✓ ${cloudBooks.length} livre(s) (ancien format) à migrer</span>`;
+      if (confirm(`Le cloud contient ${cloudBooks.length} livre(s) au format v1. Les charger dans le profil « ${getCurrentProfile().name} » ?`)) {
+        await pullFromCloud();
       }
+    } else {
+      result.innerHTML = '<span style="color: var(--accent);">Bin vide — envoi des profils locaux…</span>';
+      await pushToCloud();
     }
     setTimeout(closeSyncModal, 1200);
   } catch (e) {
@@ -906,9 +1142,10 @@ async function saveSyncConfig() {
   }
 }
 
-// Export / Import JSON manuel (backup)
+// Export / Import JSON manuel (backup) — exporte tous les profils
 function exportBooks() {
-  const blob = new Blob([JSON.stringify({ books, exportedAt: Date.now() }, null, 2)], { type: 'application/json' });
+  syncBooksToProfile();
+  const blob = new Blob([JSON.stringify({ profiles: state.profiles, exportedAt: Date.now() }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `mes-livres-${new Date().toISOString().slice(0, 10)}.json`;
@@ -923,13 +1160,26 @@ function importBooks(e) {
   reader.onload = ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      const imported = Array.isArray(data) ? data : data.books;
-      if (!Array.isArray(imported)) throw new Error('Format invalide');
-      if (confirm(`Importer ${imported.length} livre(s) ? (Remplacera ta liste actuelle de ${books.length} livre(s))`)) {
-        books = imported;
-        save();
-        render();
-        closeSyncModal();
+      if (Array.isArray(data.profiles) && data.profiles.length) {
+        if (confirm(`Importer ${data.profiles.length} profil(s) ? (Remplacera tous tes profils actuels)`)) {
+          state.profiles = data.profiles;
+          state.currentId = data.profiles[0].id;
+          bindBooksToProfile();
+          save();
+          renderProfileSelector();
+          render();
+          closeSyncModal();
+        }
+      } else {
+        const imported = Array.isArray(data) ? data : data.books;
+        if (!Array.isArray(imported)) throw new Error('Format invalide');
+        if (confirm(`Importer ${imported.length} livre(s) dans le profil « ${getCurrentProfile().name} » ?`)) {
+          books.length = 0;
+          imported.forEach(b => books.push(b));
+          save();
+          render();
+          closeSyncModal();
+        }
       }
     } catch (err) {
       alert('Erreur d\'import : ' + err.message);
@@ -938,6 +1188,146 @@ function importBooks(e) {
   reader.readAsText(file);
   e.target.value = '';
 }
+
+// ===== PROFILS =====
+function initials(name) {
+  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+}
+
+function renderProfileSelector() {
+  const cur = getCurrentProfile();
+  if (!cur) return;
+  const avatar = document.getElementById('profile-pill-avatar');
+  avatar.textContent = initials(cur.name);
+  avatar.style.background = cur.color;
+  document.getElementById('profile-pill-name').textContent = cur.name;
+
+  const dd = document.getElementById('profile-dropdown');
+  dd.innerHTML = state.profiles.map(p => `
+    <div class="profile-item ${p.id === state.currentId ? 'current' : ''}" onclick="switchProfile('${p.id}')">
+      <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
+      <span>${escapeHtml(p.name)}</span>
+      <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${(p.books || []).length} livre${(p.books || []).length > 1 ? 's' : ''}</span>
+    </div>
+  `).join('') + `
+    <div class="profile-divider"></div>
+    <button class="profile-action" onclick="openProfileModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Nouveau profil / gérer
+    </button>
+  `;
+}
+
+function toggleProfileDropdown(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('profile-dropdown').classList.toggle('active');
+}
+
+function switchProfile(id) {
+  syncBooksToProfile(); // sauve le profil courant avant de switcher
+  state.currentId = id;
+  bindBooksToProfile();
+  saveState();
+  document.getElementById('profile-dropdown').classList.remove('active');
+  // Reset filtres pour ne pas afficher des tags qui n'existent pas dans ce profil
+  activeTagFilters = [];
+  currentSearch = '';
+  document.getElementById('search').value = '';
+  renderProfileSelector();
+  render();
+}
+
+function openProfileModal() {
+  document.getElementById('profile-dropdown').classList.remove('active');
+  document.getElementById('f-profile-name').value = '';
+  newProfileColor = PROFILE_COLORS[state.profiles.length % PROFILE_COLORS.length];
+  renderColorPicker();
+  renderProfileList();
+  document.getElementById('profile-modal').classList.add('active');
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('active');
+}
+
+function renderColorPicker() {
+  document.getElementById('color-picker').innerHTML = PROFILE_COLORS.map(c =>
+    `<div class="color-swatch ${c === newProfileColor ? 'active' : ''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
+  ).join('');
+}
+
+function pickColor(c) {
+  newProfileColor = c;
+  renderColorPicker();
+}
+
+function renderProfileList() {
+  const list = document.getElementById('profile-list');
+  if (state.profiles.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = state.profiles.map(p => `
+    <div class="profile-row">
+      <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
+      <div class="info">
+        <div class="name">${escapeHtml(p.name)}${p.id === state.currentId ? ' <span style="color:var(--accent); font-size:11px;">(actif)</span>' : ''}</div>
+        <div class="meta">${(p.books || []).length} livre${(p.books || []).length > 1 ? 's' : ''}</div>
+      </div>
+      <div class="row-actions">
+        <button onclick="renameProfile('${p.id}')">Renommer</button>
+        ${state.profiles.length > 1 ? `<button class="danger" onclick="deleteProfile('${p.id}')">Supprimer</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function createProfileFromForm() {
+  const name = document.getElementById('f-profile-name').value.trim();
+  if (!name) { alert('Donne un nom au profil.'); return; }
+  const profile = { id: newId(), name, color: newProfileColor, books: [], createdAt: Date.now() };
+  state.profiles.push(profile);
+  state.currentId = profile.id;
+  bindBooksToProfile();
+  save();
+  activeTagFilters = [];
+  currentSearch = '';
+  document.getElementById('search').value = '';
+  renderProfileSelector();
+  render();
+  closeProfileModal();
+}
+
+function renameProfile(id) {
+  const p = state.profiles.find(x => x.id === id);
+  if (!p) return;
+  const name = prompt('Nouveau nom du profil :', p.name);
+  if (!name || !name.trim()) return;
+  p.name = name.trim();
+  save();
+  renderProfileSelector();
+  renderProfileList();
+}
+
+function deleteProfile(id) {
+  const p = state.profiles.find(x => x.id === id);
+  if (!p) return;
+  if (state.profiles.length <= 1) { alert('Impossible de supprimer le dernier profil.'); return; }
+  if (!confirm(`Supprimer le profil « ${p.name} » et ses ${(p.books || []).length} livre(s) ? Cette action est irréversible.`)) return;
+  state.profiles = state.profiles.filter(x => x.id !== id);
+  if (state.currentId === id) state.currentId = state.profiles[0].id;
+  bindBooksToProfile();
+  save();
+  renderProfileSelector();
+  renderProfileList();
+  render();
+}
+
+// Fermer le dropdown si clic en dehors
+document.addEventListener('click', e => {
+  const dd = document.getElementById('profile-dropdown');
+  const pill = document.getElementById('profile-pill');
+  if (dd && dd.classList.contains('active') && !dd.contains(e.target) && !pill.contains(e.target)) {
+    dd.classList.remove('active');
+  }
+});
 
 function render() {
   const grid = document.getElementById('grid');
@@ -1276,11 +1666,16 @@ document.getElementById('sync-modal').addEventListener('click', e => {
   if (e.target.id === 'sync-modal') closeSyncModal();
 });
 
+document.getElementById('profile-modal').addEventListener('click', e => {
+  if (e.target.id === 'profile-modal') closeProfileModal();
+});
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeSyncModal(); }
+  if (e.key === 'Escape') { closeModal(); closeSyncModal(); closeProfileModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
 });
 
+renderProfileSelector();
 render();
 
 // Au démarrage : si la sync est configurée, on pull depuis le cloud
