@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Livres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0e13;
+    --bg-soft: #16151c;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-hover: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --text: #f4f2ed;
+    --text-dim: #a09bb0;
+    --text-faint: #6b6678;
+    --accent: #c9a961;
+    --accent-soft: rgba(201, 169, 97, 0.15);
+    --danger: #e07a6c;
+    --gradient-1: linear-gradient(135deg, #2a1e3f 0%, #1a1426 100%);
+    --gradient-2: linear-gradient(135deg, #3d2817 0%, #1f1410 100%);
+    --gradient-3: linear-gradient(135deg, #1e3a3a 0%, #0f1f1f 100%);
+    --gradient-4: linear-gradient(135deg, #2a3147 0%, #14182a 100%);
+    --gradient-5: linear-gradient(135deg, #3a2424 0%, #1f1414 100%);
+  }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 24px 80px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(201, 169, 97, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(120, 80, 200, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .brand h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 44px;
+    font-weight: 600;
+    letter-spacing: -1.5px;
+    line-height: 1;
+    background: linear-gradient(135deg, #f4f2ed 0%, #c9a961 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .brand p {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-top: 8px;
+    letter-spacing: 0.2px;
+  }
+  .toolbar { display: flex; gap: 10px; align-items: center; }
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+  .search {
+    padding: 11px 14px 11px 40px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    width: 260px;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+  .search:focus { outline: none; border-color: var(--accent); background: var(--surface-hover); }
+  .search::placeholder { color: var(--text-faint); }
+  .add-btn {
+    background: var(--accent);
+    color: #1a1426;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(201, 169, 97, 0.25);
+  }
+  .add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201, 169, 97, 0.35); }
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 11px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface-hover); }
+  .icon-btn.syncing svg { animation: spin 1s linear infinite; }
+  .icon-btn.synced { color: #6dbfa8; border-color: rgba(109, 191, 168, 0.3); }
+  .icon-btn.error { color: var(--danger); border-color: rgba(224, 122, 108, 0.3); }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  .sync-status {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-bottom: 16px;
+    margin-top: -32px;
+    text-align: right;
+    min-height: 16px;
+  }
+  .sync-status .ok { color: #6dbfa8; }
+  .sync-status .err { color: var(--danger); }
+
+  /* Stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+  }
+  .stat-card[data-cat="lu"]::before { background: var(--gradient-3); }
+  .stat-card[data-cat="en-cours"]::before { background: var(--gradient-4); }
+  .stat-card[data-cat="a-lire"]::before { background: var(--gradient-2); }
+  .stat-card[data-cat="abandonne"]::before { background: var(--gradient-5); }
+  .stat-card[data-cat="wishlist"]::before { background: var(--gradient-1); }
+  .stat-card.active::before { opacity: 1; }
+  .stat-card.active { border-color: var(--border-strong); }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+  .stat-card > * { position: relative; z-index: 1; }
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-label .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .stat-card[data-cat="lu"] .dot { background: #6dbfa8; }
+  .stat-card[data-cat="en-cours"] .dot { background: #6a9bd4; }
+  .stat-card[data-cat="a-lire"] .dot { background: #d4936a; }
+  .stat-card[data-cat="abandonne"] .dot { background: #c97070; }
+  .stat-card[data-cat="wishlist"] .dot { background: #b899d8; }
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 600;
+    margin-top: 6px;
+    letter-spacing: -1px;
+  }
+  .stat-sub { font-size: 13px; color: var(--text-faint); margin-top: 2px; }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--cat-color, var(--accent));
+    opacity: 0.6;
+  }
+  .card[data-cat="lu"] { --cat-color: #6dbfa8; }
+  .card[data-cat="en-cours"] { --cat-color: #6a9bd4; }
+  .card[data-cat="a-lire"] { --cat-color: #d4936a; }
+  .card[data-cat="abandonne"] { --cat-color: #c97070; }
+  .card[data-cat="wishlist"] { --cat-color: #b899d8; }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    background: var(--surface-hover);
+  }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  .card-menu {
+    background: transparent;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .card-menu:hover { background: var(--surface-hover); color: var(--text); }
+  .card-author {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+  .stars { display: flex; gap: 2px; margin-top: 4px; }
+  .stars svg { width: 14px; height: 14px; }
+  .stars .filled { color: var(--accent); fill: var(--accent); }
+  .stars .empty { color: var(--text-faint); fill: none; }
+  .reco-by {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 6px;
+    align-self: flex-start;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 2px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tag:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .tag.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .tag-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    backdrop-filter: blur(20px);
+  }
+  .tag-filter-bar .label {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+    margin-right: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tag-filter-bar .label svg { width: 13px; height: 13px; }
+  .tag-filter-bar .tag .count {
+    margin-left: 5px;
+    font-size: 10px;
+    opacity: 0.65;
+    font-weight: 600;
+  }
+  .tag-filter-bar .clear {
+    background: transparent;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 11px;
+    font-family: inherit;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-left: auto;
+    transition: all 0.15s;
+  }
+  .tag-filter-bar .clear:hover { color: var(--text); background: var(--surface-hover); }
+  /* Tag suggestions dropdown */
+  .tag-input-wrap { position: relative; }
+  .tag-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #1a1822;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    max-height: 180px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+  }
+  .tag-suggestions.active { display: block; }
+  .tag-suggestion {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.1s;
+  }
+  .tag-suggestion:hover, .tag-suggestion.highlight { background: var(--accent-soft); color: var(--accent); }
+  .tag-suggestion .usage { font-size: 11px; opacity: 0.6; }
+  .tag-suggestion .new { font-size: 11px; color: var(--accent); font-weight: 600; }
+  /* Tag input editor */
+  .tag-editor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    min-height: 44px;
+    align-items: center;
+  }
+  .tag-editor:focus-within { border-color: var(--accent); }
+  .tag-editor .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-editor .chip button {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.7;
+  }
+  .tag-editor .chip button:hover { opacity: 1; }
+  .tag-editor input {
+    flex: 1;
+    min-width: 100px;
+    border: none !important;
+    background: transparent !important;
+    padding: 4px !important;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .tag-editor input:focus { outline: none; }
+  .field-hint {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    line-height: 1.55;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .actions button {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: inherit;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .actions button:hover { background: var(--surface-hover); color: var(--text); border-color: var(--border-strong); }
+  .actions .delete:hover { color: var(--danger); border-color: var(--danger); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-faint);
+    grid-column: 1 / -1;
+  }
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  .empty-state h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .empty-state p { font-size: 14px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 14, 19, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: linear-gradient(180deg, #1a1822 0%, #16151c 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    padding: 32px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface-hover);
+  }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a09bb0' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .btn-secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--border-strong); }
+  .btn-primary {
+    background: var(--accent);
+    color: #1a1426;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(201, 169, 97, 0.3); }
+  .star-input { display: flex; gap: 6px; cursor: pointer; }
+  .star-input span {
+    color: var(--text-faint);
+    transition: all 0.1s;
+    font-size: 26px;
+    line-height: 1;
+  }
+  .star-input span:hover, .star-input span.on { color: var(--accent); transform: scale(1.1); }
+
+  @media (max-width: 700px) {
+    body { padding: 20px 16px 60px; }
+    .brand h1 { font-size: 34px; }
+    .search { width: 100%; }
+    header { flex-direction: column; align-items: stretch; }
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .stats { grid-template-columns: 1fr; }
+    .modal { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand">
+      <h1>Bibliothèque</h1>
+      <p>Lectures, en attente, et envies</p>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="search" id="search" placeholder="Rechercher…">
+      </div>
+      <button class="add-btn" onclick="openModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter
+      </button>
+      <button class="icon-btn" id="sync-btn" onclick="openSyncModal()" title="Synchronisation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="sync-status" id="sync-status"></div>
+
+  <div class="stats">
+    <div class="stat-card active" data-cat="lu">
+      <div class="stat-label"><span class="dot"></span> Lu</div>
+      <div class="stat-value" id="count-lu">0</div>
+      <div class="stat-sub">livres terminés</div>
+    </div>
+    <div class="stat-card" data-cat="en-cours">
+      <div class="stat-label"><span class="dot"></span> En cours</div>
+      <div class="stat-value" id="count-en-cours">0</div>
+      <div class="stat-sub">lectures en cours</div>
+    </div>
+    <div class="stat-card" data-cat="a-lire">
+      <div class="stat-label"><span class="dot"></span> À lire</div>
+      <div class="stat-value" id="count-a-lire">0</div>
+      <div class="stat-sub">en attente sur l'étagère</div>
+    </div>
+    <div class="stat-card" data-cat="abandonne">
+      <div class="stat-label"><span class="dot"></span> Abandonné</div>
+      <div class="stat-value" id="count-abandonne">0</div>
+      <div class="stat-sub">commencés, non terminés</div>
+    </div>
+    <div class="stat-card" data-cat="wishlist">
+      <div class="stat-label"><span class="dot"></span> Wishlist</div>
+      <div class="stat-value" id="count-wishlist">0</div>
+      <div class="stat-sub">recommandations à découvrir</div>
+    </div>
+  </div>
+
+  <div class="tag-filter-bar" id="tag-filter-bar"></div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal-overlay" id="sync-modal">
+  <div class="modal">
+    <h2>Synchronisation cloud</h2>
+    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+      Connecte ton bin <strong style="color: var(--accent);">JSONBin.io</strong> pour synchroniser tes livres entre ordinateur, téléphone et autres utilisateurs.
+    </p>
+    <div class="field">
+      <label>Bin ID</label>
+      <input type="text" id="f-bin-id" placeholder="ex: 69f9b15a856a682189aa8ada" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Master Key (X-Master-Key)</label>
+      <input type="password" id="f-bin-key" placeholder="$2a$10$…" autocomplete="off">
+      <div class="field-hint">Stockée localement sur cet appareil uniquement. Ne sera jamais envoyée ailleurs que vers JSONBin.</div>
+    </div>
+    <div id="sync-test-result" style="font-size: 13px; margin: 8px 0; min-height: 18px;"></div>
+    <div class="modal-actions" style="justify-content: space-between;">
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-secondary" onclick="exportBooks()">⬇ Exporter</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆ Importer</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBooks(event)">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-secondary" onclick="closeSyncModal()">Fermer</button>
+        <button class="btn-primary" onclick="saveSyncConfig()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">Ajouter un livre</h2>
+    <input type="hidden" id="edit-id">
+    <div class="field">
+      <label>Titre</label>
+      <input type="text" id="f-titre" placeholder="Le nom du livre">
+    </div>
+    <div class="field">
+      <label>Auteur</label>
+      <input type="text" id="f-auteur" placeholder="Qui l'a écrit ?">
+    </div>
+    <div class="field">
+      <label>Catégorie</label>
+      <select id="f-categorie">
+        <option value="lu">Lu</option>
+        <option value="en-cours">En cours</option>
+        <option value="a-lire">À lire</option>
+        <option value="abandonne">Abandonné</option>
+        <option value="wishlist">Wishlist</option>
+      </select>
+    </div>
+    <div class="field" id="field-note">
+      <label>Note</label>
+      <div class="star-input" id="star-input">
+        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      </div>
+    </div>
+    <div class="field" id="field-avis">
+      <label>Avis</label>
+      <textarea id="f-avis" placeholder="Ce que tu en as pensé…"></textarea>
+    </div>
+    <div class="field" id="field-reco" style="display:none;">
+      <label>Recommandé par</label>
+      <input type="text" id="f-reco" placeholder="Qui te l'a conseillé ?">
+    </div>
+    <div class="field">
+      <label>Tags</label>
+      <div class="tag-input-wrap">
+        <div class="tag-editor" id="tag-editor" onclick="document.getElementById('f-tag-input').focus()">
+          <input type="text" id="f-tag-input" placeholder="Ajouter un tag…" autocomplete="off">
+        </div>
+        <div class="tag-suggestions" id="tag-suggestions"></div>
+      </div>
+      <div class="field-hint">Tape pour voir les tags existants — Entrée / virgule pour valider, Tab pour autocompléter</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn-primary" onclick="saveBook()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'mes-livres-v1';
+const SYNC_KEY = 'mes-livres-sync-v1';
+let books = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let syncConfig = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null');
+let syncTimer = null;
+let isSyncing = false;
+let currentCat = 'lu';
+let currentSearch = '';
+let currentRating = 0;
+let currentTags = []; // tags en cours d'édition dans le modal
+let activeTagFilters = []; // filtres tag actifs sur la grille (multi-sélection, AND)
+let suggestionIndex = -1; // index du suggestion-tag mis en surbrillance
+
+const CAT_LABELS = { 'lu': 'Lu', 'en-cours': 'En cours', 'a-lire': 'À lire', 'abandonne': 'Abandonné', 'wishlist': 'Wishlist' };
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+  scheduleCloudSync();
+}
+
+// ===== SYNCHRONISATION JSONBin.io =====
+function setSyncStatus(msg, type) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.innerHTML = msg ? `<span class="${type || ''}">${msg}</span>` : '';
+}
+
+function setSyncBtnState(state) {
+  const btn = document.getElementById('sync-btn');
+  if (!btn) return;
+  btn.classList.remove('syncing', 'synced', 'error');
+  if (state) btn.classList.add(state);
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 5) return 'à l\'instant';
+  if (s < 60) return `il y a ${s} s`;
+  if (s < 3600) return `il y a ${Math.floor(s / 60)} min`;
+  if (s < 86400) return `il y a ${Math.floor(s / 3600)} h`;
+  return `il y a ${Math.floor(s / 86400)} j`;
+}
+
+function scheduleCloudSync() {
+  if (!syncConfig || !syncConfig.binId || !syncConfig.key) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushToCloud, 600);
+}
+
+async function pushToCloud() {
+  if (!syncConfig || isSyncing) return;
+  isSyncing = true;
+  setSyncBtnState('syncing');
+  setSyncStatus('Synchronisation en cours…');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${syncConfig.binId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': syncConfig.key,
+      },
+      body: JSON.stringify({ books, updatedAt: Date.now() }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    syncConfig.lastSync = Date.now();
+    localStorage.setItem(SYNC_KEY, JSON.stringify(syncConfig));
+    setSyncBtnState('synced');
+    setSyncStatus(`✓ Synchronisé ${timeAgo(syncConfig.lastSync)}`, 'ok');
+    setTimeout(() => setSyncBtnState(null), 2000);
+  } catch (e) {
+    setSyncBtnState('error');
+    setSyncStatus(`Erreur de synchro : ${e.message}`, 'err');
+  } finally {
+    isSyncing = false;
+  }
+}
+
+async function pullFromCloud() {
+  if (!syncConfig || isSyncing) return;
+  isSyncing = true;
+  setSyncBtnState('syncing');
+  setSyncStatus('Récupération depuis le cloud…');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${syncConfig.binId}/latest`, {
+      headers: { 'X-Master-Key': syncConfig.key },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const cloudBooks = (data.record && data.record.books) || [];
+    if (Array.isArray(cloudBooks)) {
+      books = cloudBooks;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+      syncConfig.lastSync = Date.now();
+      localStorage.setItem(SYNC_KEY, JSON.stringify(syncConfig));
+      setSyncBtnState('synced');
+      setSyncStatus(`✓ ${books.length} livre(s) chargés depuis le cloud`, 'ok');
+      render();
+      setTimeout(() => setSyncBtnState(null), 2500);
+    }
+  } catch (e) {
+    setSyncBtnState('error');
+    setSyncStatus(`Erreur : ${e.message}`, 'err');
+  } finally {
+    isSyncing = false;
+  }
+}
+
+function openSyncModal() {
+  document.getElementById('f-bin-id').value = syncConfig ? (syncConfig.binId || '') : '';
+  document.getElementById('f-bin-key').value = syncConfig ? (syncConfig.key || '') : '';
+  document.getElementById('sync-test-result').innerHTML = syncConfig && syncConfig.lastSync
+    ? `<span style="color: #6dbfa8;">✓ Dernière synchro : ${timeAgo(syncConfig.lastSync)}</span>`
+    : '';
+  document.getElementById('sync-modal').classList.add('active');
+}
+
+function closeSyncModal() {
+  document.getElementById('sync-modal').classList.remove('active');
+}
+
+async function saveSyncConfig() {
+  const binId = document.getElementById('f-bin-id').value.trim();
+  const key = document.getElementById('f-bin-key').value.trim();
+  const result = document.getElementById('sync-test-result');
+  if (!binId || !key) {
+    result.innerHTML = '<span style="color: var(--danger);">Remplis les deux champs.</span>';
+    return;
+  }
+  result.innerHTML = '<span style="color: var(--text-dim);">Test de connexion…</span>';
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': key },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} — vérifie le Bin ID et la clé.`);
+    const data = await res.json();
+    syncConfig = { binId, key, lastSync: 0 };
+    localStorage.setItem(SYNC_KEY, JSON.stringify(syncConfig));
+    const cloudBooks = (data.record && data.record.books) || [];
+    // Fusion intelligente : si le cloud est vide et qu'on a des livres locaux, on push. Sinon on pull.
+    if (cloudBooks.length === 0 && books.length > 0) {
+      result.innerHTML = '<span style="color: var(--accent);">Bin vide — envoi de tes livres locaux…</span>';
+      await pushToCloud();
+    } else {
+      result.innerHTML = `<span style="color: #6dbfa8;">✓ Connecté — ${cloudBooks.length} livre(s) dans le cloud</span>`;
+      if (cloudBooks.length > 0) {
+        const replace = books.length === 0 || confirm(`Le cloud contient ${cloudBooks.length} livre(s). Remplacer tes ${books.length} livre(s) locaux par ceux du cloud ?`);
+        if (replace) await pullFromCloud();
+      }
+    }
+    setTimeout(closeSyncModal, 1200);
+  } catch (e) {
+    result.innerHTML = `<span style="color: var(--danger);">${e.message}</span>`;
+  }
+}
+
+// Export / Import JSON manuel (backup)
+function exportBooks() {
+  const blob = new Blob([JSON.stringify({ books, exportedAt: Date.now() }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mes-livres-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importBooks(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const imported = Array.isArray(data) ? data : data.books;
+      if (!Array.isArray(imported)) throw new Error('Format invalide');
+      if (confirm(`Importer ${imported.length} livre(s) ? (Remplacera ta liste actuelle de ${books.length} livre(s))`)) {
+        books = imported;
+        save();
+        render();
+        closeSyncModal();
+      }
+    } catch (err) {
+      alert('Erreur d\'import : ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  // Filtre recherche (cross-catégorie) — les indicateurs reflètent ce filtre
+  const matchesSearch = b => !currentSearch
+    || b.titre.toLowerCase().includes(currentSearch)
+    || (b.auteur || '').toLowerCase().includes(currentSearch)
+    || (b.tags || []).some(t => t.toLowerCase().includes(currentSearch));
+
+  const matchesTagFilter = b => activeTagFilters.length === 0 || activeTagFilters.every(t => (b.tags || []).includes(t));
+  const counts = { 'lu': 0, 'en-cours': 0, 'a-lire': 0, 'abandonne': 0, 'wishlist': 0 };
+  books.filter(b => matchesSearch(b) && matchesTagFilter(b)).forEach(b => counts[b.categorie]++);
+  const someFilterActive = currentSearch || activeTagFilters.length > 0;
+  Object.keys(counts).forEach(k => {
+    const el = document.getElementById('count-' + k);
+    el.textContent = counts[k];
+    el.closest('.stat-card').style.opacity = (someFilterActive && counts[k] === 0) ? '0.4' : '1';
+  });
+
+  renderTagFilterBar();
+
+  const filtered = books.filter(b =>
+    b.categorie === currentCat
+    && matchesSearch(b)
+    && (activeTagFilters.length === 0 || activeTagFilters.every(t => (b.tags || []).includes(t)))
+  ).sort((a, b) => (b.dateAdded || 0) - (a.dateAdded || 0));
+
+  if (filtered.length === 0) {
+    const msg = currentSearch ? 'Aucun résultat' : 'Rien ici pour l\'instant';
+    const sub = currentSearch ? 'Essaie un autre terme.' : 'Clique sur « Ajouter » pour commencer ta collection.';
+    grid.innerHTML = `<div class="empty-state"><div class="icon">📖</div><h3>${msg}</h3><p>${sub}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(b => {
+    const stars = b.note ? renderStars(b.note) : '';
+    const reco = b.recoBy ? `<div class="reco-by">✨ ${escapeHtml(b.recoBy)}</div>` : '';
+    const note = b.avis ? `<div class="note">${escapeHtml(b.avis)}</div>` : '';
+    const tags = (b.tags && b.tags.length)
+      ? `<div class="tags">${b.tags.map(t => `<span class="tag" onclick="filterByTag('${escapeAttr(t)}')">${escapeHtml(t)}</span>`).join('')}</div>`
+      : '';
+    return `
+      <div class="card" data-cat="${b.categorie}">
+        <div class="card-header">
+          <div class="card-title">${escapeHtml(b.titre)}</div>
+        </div>
+        ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
+        ${stars}
+        ${reco}
+        ${tags}
+        ${note}
+        <div class="actions">
+          ${renderMoveButtons(b)}
+          <button onclick="editBook('${b.id}')">Modifier</button>
+          <button class="delete" onclick="deleteBook('${b.id}')">Supprimer</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTagFilterBar() {
+  const bar = document.getElementById('tag-filter-bar');
+  // Tags GLOBAUX (cross-catégorie) avec compteurs (en respectant la recherche)
+  const matchesSearch = b => !currentSearch
+    || b.titre.toLowerCase().includes(currentSearch)
+    || (b.auteur || '').toLowerCase().includes(currentSearch)
+    || (b.tags || []).some(t => t.toLowerCase().includes(currentSearch));
+  const tagCounts = {};
+  books.filter(matchesSearch).forEach(b => (b.tags || []).forEach(t => {
+    tagCounts[t] = (tagCounts[t] || 0) + 1;
+  }));
+  const tags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a] || a.localeCompare(b));
+  if (tags.length === 0) { bar.innerHTML = ''; bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML =
+    '<span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Tags</span>'
+    + tags.map(t => `<span class="tag ${activeTagFilters.includes(t) ? 'active' : ''}" onclick="toggleTagFilter('${escapeAttr(t)}')">${escapeHtml(t)}<span class="count">${tagCounts[t]}</span></span>`).join('')
+    + (activeTagFilters.length ? '<button class="clear" onclick="clearTagFilter()">✕ tout effacer</button>' : '');
+}
+
+function toggleTagFilter(tag) {
+  const i = activeTagFilters.indexOf(tag);
+  if (i >= 0) activeTagFilters.splice(i, 1);
+  else activeTagFilters.push(tag);
+  render();
+}
+
+// Compatibilité : appelé depuis les chips de tag sur les cards
+function filterByTag(tag) { toggleTagFilter(tag); }
+
+function clearTagFilter() { activeTagFilters = []; render(); }
+
+function renderStars(n) {
+  let s = '<div class="stars">';
+  for (let i = 1; i <= 5; i++) {
+    s += i <= n
+      ? '<svg class="filled" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+      : '<svg class="empty" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+  }
+  return s + '</div>';
+}
+
+function renderMoveButtons(b) {
+  return Object.keys(CAT_LABELS)
+    .filter(k => k !== b.categorie)
+    .map(k => `<button onclick="moveBook('${b.id}','${k}')">→ ${CAT_LABELS[k]}</button>`)
+    .join('');
+}
+
+function moveBook(id, cat) {
+  const b = books.find(x => x.id === id);
+  if (b) { b.categorie = cat; save(); render(); }
+}
+
+function deleteBook(id) {
+  if (!confirm('Supprimer ce livre ?')) return;
+  books = books.filter(b => b.id !== id);
+  save(); render();
+}
+
+function openModal(book) {
+  document.getElementById('modal-title').textContent = book ? 'Modifier le livre' : 'Ajouter un livre';
+  document.getElementById('edit-id').value = book ? book.id : '';
+  document.getElementById('f-titre').value = book ? book.titre : '';
+  document.getElementById('f-auteur').value = book ? (book.auteur || '') : '';
+  document.getElementById('f-categorie').value = book ? book.categorie : currentCat;
+  document.getElementById('f-avis').value = book ? (book.avis || '') : '';
+  document.getElementById('f-reco').value = book ? (book.recoBy || '') : '';
+  setRating(book ? (book.note || 0) : 0);
+  currentTags = book && book.tags ? [...book.tags] : [];
+  renderTagEditor();
+  updateModalFields();
+  document.getElementById('modal').classList.add('active');
+  setTimeout(() => document.getElementById('f-titre').focus(), 50);
+}
+
+function renderTagEditor() {
+  const editor = document.getElementById('tag-editor');
+  // Conserver l'input et reconstruire les chips devant
+  const input = document.getElementById('f-tag-input');
+  editor.innerHTML = currentTags.map((t, i) =>
+    `<span class="chip">${escapeHtml(t)}<button type="button" onclick="removeTag(${i})" aria-label="retirer">×</button></span>`
+  ).join('') + '<input type="text" id="f-tag-input" placeholder="Ajouter un tag…" autocomplete="off">';
+  bindTagInput();
+}
+
+function addTag(raw) {
+  const t = raw.trim().toLowerCase();
+  if (!t) return;
+  if (!currentTags.includes(t)) currentTags.push(t);
+  renderTagEditor();
+  const inp = document.getElementById('f-tag-input');
+  inp.focus();
+  suggestionIndex = -1;
+  renderSuggestions('');
+}
+
+function removeTag(i) {
+  currentTags.splice(i, 1);
+  renderTagEditor();
+  const inp = document.getElementById('f-tag-input');
+  inp.focus();
+  renderSuggestions(inp.value);
+}
+
+function bindTagInput() {
+  const inp = document.getElementById('f-tag-input');
+  if (!inp) return;
+  inp.addEventListener('input', () => { suggestionIndex = -1; renderSuggestions(inp.value); });
+  inp.addEventListener('focus', () => renderSuggestions(inp.value));
+  inp.addEventListener('keydown', e => {
+    const sugBox = document.getElementById('tag-suggestions');
+    const items = sugBox.querySelectorAll('.tag-suggestion[data-tag]');
+    if (e.key === 'ArrowDown') {
+      if (items.length) { e.preventDefault(); suggestionIndex = (suggestionIndex + 1) % items.length; highlightSuggestion(items); }
+    } else if (e.key === 'ArrowUp') {
+      if (items.length) { e.preventDefault(); suggestionIndex = (suggestionIndex - 1 + items.length) % items.length; highlightSuggestion(items); }
+    } else if (e.key === 'Tab' && items.length && inp.value.trim()) {
+      e.preventDefault();
+      const pick = items[suggestionIndex >= 0 ? suggestionIndex : 0];
+      addTag(pick.dataset.tag);
+      inp.value = '';
+    } else if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      if (suggestionIndex >= 0 && items[suggestionIndex]) {
+        addTag(items[suggestionIndex].dataset.tag);
+      } else {
+        addTag(inp.value);
+      }
+      inp.value = '';
+    } else if (e.key === 'Escape' && sugBox.classList.contains('active')) {
+      e.preventDefault();
+      sugBox.classList.remove('active');
+    } else if (e.key === 'Backspace' && !inp.value && currentTags.length) {
+      removeTag(currentTags.length - 1);
+    }
+  });
+  inp.addEventListener('blur', () => {
+    setTimeout(() => {
+      const sugBox = document.getElementById('tag-suggestions');
+      if (sugBox) sugBox.classList.remove('active');
+      if (inp.value.trim()) { addTag(inp.value); inp.value = ''; }
+    }, 150);
+  });
+}
+
+function highlightSuggestion(items) {
+  items.forEach((it, i) => it.classList.toggle('highlight', i === suggestionIndex));
+  if (items[suggestionIndex]) items[suggestionIndex].scrollIntoView({ block: 'nearest' });
+}
+
+function getAllTags() {
+  const counts = {};
+  books.forEach(b => (b.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+  return Object.keys(counts).map(t => ({ tag: t, count: counts[t] }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}
+
+function renderSuggestions(query) {
+  const box = document.getElementById('tag-suggestions');
+  if (!box) return;
+  const q = (query || '').trim().toLowerCase();
+  let all = getAllTags().filter(t => !currentTags.includes(t.tag));
+  if (q) all = all.filter(t => t.tag.includes(q));
+  all = all.slice(0, 8);
+
+  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${t.count} livre${t.count > 1 ? 's' : ''}</span></div>`).join('');
+
+  // Si pas de match exact, proposer de créer
+  if (q && !getAllTags().some(t => t.tag === q) && !currentTags.includes(q)) {
+    html += `<div class="tag-suggestion" data-tag="${escapeAttr(q)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(q)}')"><span>+ Créer « ${escapeHtml(q)} »</span><span class="new">nouveau</span></div>`;
+  }
+
+  if (!html) { box.classList.remove('active'); return; }
+  box.innerHTML = html;
+  box.classList.add('active');
+}
+
+function pickSuggestion(tag) {
+  addTag(tag);
+  const inp = document.getElementById('f-tag-input');
+  if (inp) inp.value = '';
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+
+function editBook(id) {
+  const b = books.find(x => x.id === id);
+  if (b) openModal(b);
+}
+
+function saveBook() {
+  const titre = document.getElementById('f-titre').value.trim();
+  if (!titre) { document.getElementById('f-titre').focus(); return; }
+  const id = document.getElementById('edit-id').value;
+  // Capter un tag en cours de saisie non encore validé
+  const pendingTag = document.getElementById('f-tag-input');
+  if (pendingTag && pendingTag.value.trim()) addTag(pendingTag.value);
+  const data = {
+    titre,
+    auteur: document.getElementById('f-auteur').value.trim(),
+    categorie: document.getElementById('f-categorie').value,
+    note: currentRating,
+    avis: document.getElementById('f-avis').value.trim(),
+    recoBy: document.getElementById('f-reco').value.trim(),
+    tags: [...currentTags],
+  };
+  if (id) {
+    Object.assign(books.find(b => b.id === id), data);
+  } else {
+    books.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), dateAdded: Date.now(), ...data });
+  }
+  save();
+  closeModal();
+  setActiveCat(data.categorie);
+}
+
+function setRating(n) {
+  currentRating = n;
+  document.querySelectorAll('#star-input span').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= n);
+  });
+}
+
+function setActiveCat(cat) {
+  currentCat = cat;
+  // Les filtres tag sont globaux : on ne les reset plus en changeant de catégorie
+  document.querySelectorAll('.stat-card').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+  render();
+}
+
+function updateModalFields() {
+  const cat = document.getElementById('f-categorie').value;
+  // Note : pertinent pour Lu et Abandonné (note du ressenti)
+  document.getElementById('field-note').style.display = (cat === 'lu' || cat === 'abandonne') ? 'block' : 'none';
+  // Avis : pertinent pour Lu, En cours et Abandonné
+  document.getElementById('field-avis').style.display = (cat === 'lu' || cat === 'en-cours' || cat === 'abandonne') ? 'block' : 'none';
+  // Reco : pour Wishlist
+  document.getElementById('field-reco').style.display = cat === 'wishlist' ? 'block' : 'none';
+  // Adapter le placeholder de l'avis selon la catégorie
+  const avis = document.getElementById('f-avis');
+  if (cat === 'en-cours') avis.placeholder = 'Tes impressions en cours de lecture…';
+  else if (cat === 'abandonne') avis.placeholder = 'Pourquoi l\'as-tu abandonné ?';
+  else avis.placeholder = 'Ce que tu en as pensé…';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) {
+  return String(s).replace(/['"\\]/g, '\\$&');
+}
+
+// Events
+document.querySelectorAll('.stat-card').forEach(c => {
+  c.addEventListener('click', () => setActiveCat(c.dataset.cat));
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  currentSearch = e.target.value.toLowerCase().trim();
+  render();
+});
+
+document.getElementById('star-input').addEventListener('click', e => {
+  if (e.target.dataset.v) setRating(parseInt(e.target.dataset.v));
+});
+
+document.getElementById('f-categorie').addEventListener('change', updateModalFields);
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target.id === 'modal') closeModal();
+});
+
+document.getElementById('sync-modal').addEventListener('click', e => {
+  if (e.target.id === 'sync-modal') closeSyncModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeSyncModal(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
+});
+
+render();
+
+// Au démarrage : si la sync est configurée, on pull depuis le cloud
+if (syncConfig && syncConfig.binId && syncConfig.key) {
+  pullFromCloud();
+} else {
+  setSyncStatus('Synchro non configurée — clique sur ↻ pour activer la sync entre appareils', '');
+}
+
+// Pull à chaque retour sur l'onglet (au cas où l'autre appareil aurait modifié)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && syncConfig && syncConfig.binId) pullFromCloud();
+});
+</script>
+</body>
+</html>
