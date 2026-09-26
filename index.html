@@ -330,6 +330,8 @@
   .profile-action:hover { background: var(--surface-hover); color: var(--text); }
   .profile-action svg { width: 14px; height: 14px; }
   .profile-action.danger:hover { color: var(--danger); }
+  .profile-action.mobile-only { display: none; }
+  @media (max-width: 700px) { .profile-action.mobile-only { display: flex; } }
   /* Profile manager modal */
   .profile-row {
     display: flex;
@@ -685,29 +687,6 @@
     padding-top: 12px;
     border-top: 1px solid var(--border);
   }
-  .actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  .actions button {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 6px 11px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    color: var(--text-dim);
-    font-family: inherit;
-    transition: all 0.15s;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .actions button:hover { background: var(--surface-hover); color: var(--text); border-color: var(--border-strong); }
-  .actions .delete:hover { color: var(--danger); border-color: var(--danger); }
-
   /* Empty state */
   .empty-state {
     text-align: center;
@@ -839,6 +818,181 @@
   }
   .star-input span:hover, .star-input span.on { color: var(--accent); transform: scale(1.1); }
 
+  /* Covers */
+  .card-top { display: flex; gap: 14px; align-items: flex-start; }
+  .card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .cover {
+    width: 62px;
+    height: 92px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--bg-soft);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .cover.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.55);
+    background: linear-gradient(160deg, var(--cat-color, var(--accent)) -60%, #1a1822 70%);
+  }
+  .card-meta { font-size: 12px; color: var(--text-faint); }
+
+  /* Reading progress */
+  .progress { margin-top: 12px; cursor: pointer; }
+  .progress-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  .progress-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--cat-color, var(--accent));
+    transition: width 0.3s;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .progress:hover .progress-label { color: var(--text); }
+
+  /* Card menu */
+  .card-popover {
+    position: fixed;
+    min-width: 200px;
+    background: #1a1822;
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    padding: 6px;
+    display: none;
+    z-index: 60;
+  }
+  .card-popover.active { display: block; }
+  .card-popover .menu-label {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+    padding: 8px 12px 4px;
+  }
+  .card-popover .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* List toolbar (count + sort) */
+  .list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--text-faint);
+  }
+  .sort-select {
+    appearance: none;
+    background: var(--surface) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a09bb0' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e") no-repeat right 10px center;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 10px;
+    padding: 7px 30px 7px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .sort-select:focus { outline: none; border-color: var(--accent); }
+
+  /* Book lookup */
+  .lookup-wrap { position: relative; }
+  .lookup-wrap svg.lookup-icon {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; color: var(--accent); pointer-events: none;
+  }
+  .field input.lookup-input { padding-left: 38px; border-color: rgba(201, 169, 97, 0.35); background: var(--accent-soft); }
+  .lookup-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #1a1822;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+  }
+  .lookup-results.active { display: block; }
+  .lookup-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .lookup-item:hover, .lookup-item.highlight { background: var(--accent-soft); }
+  .lookup-item img, .lookup-item .noimg {
+    width: 34px; height: 50px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: var(--surface);
+  }
+  .lookup-item .t { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .lookup-item .a { font-size: 12px; color: var(--text-dim); }
+  .lookup-empty { padding: 14px; font-size: 13px; color: var(--text-faint); text-align: center; }
+
+  /* Cover field in modal */
+  .cover-field { display: flex; gap: 12px; align-items: center; }
+  .cover-field .cover { width: 44px; height: 66px; font-size: 18px; }
+  .cover-field input { flex: 1; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row .field { flex: 1; min-width: 0; }
+
+  /* Stats modal */
+  .stats-modal { max-width: 520px; }
+  .goal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .goal-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .goal-count { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 600; letter-spacing: -1px; }
+  .goal-count small { font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-dim); font-weight: 400; letter-spacing: 0; }
+  .goal-input { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-faint); }
+  .goal-input input {
+    width: 56px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: inherit; font-size: 13px; text-align: center;
+  }
+  .goal-input input:focus { outline: none; border-color: var(--accent); }
+  .goal-card .progress-bar { height: 8px; margin-top: 12px; }
+  .goal-card .progress-bar span { background: var(--accent); }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+  .kpi .v { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; }
+  .kpi .l { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .stats-section h3 {
+    font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+    font-weight: 600; margin: 0 0 10px;
+  }
+  .stats-section { margin-bottom: 22px; }
+  .bar-row { display: grid; grid-template-columns: 110px 1fr 28px; gap: 10px; align-items: center; font-size: 13px; margin-bottom: 7px; }
+  .bar-row .name { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-row .track { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+  .bar-row .track span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+  .bar-row .n { text-align: right; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stats-hint { font-size: 12px; color: var(--text-faint); }
+
   @media (max-width: 700px) {
     body { padding: 16px 14px 80px; }
     .brand h1 { font-size: 26px; letter-spacing: -0.8px; }
@@ -850,6 +1004,8 @@
     .add-btn { padding: 9px 14px; font-size: 13px; }
     .add-btn span, .add-btn-text { display: none; }
     .icon-btn { padding: 9px; }
+    #sync-btn { display: none; }
+    .add-btn { padding: 9px 11px; }
     .profile-pill { padding: 7px 10px 7px 8px; font-size: 13px; }
     .profile-pill .avatar { width: 20px; height: 20px; font-size: 10px; }
     .stats {
@@ -915,6 +1071,15 @@
     }
     .auth-card { padding: 28px 22px; }
     .auth-brand h1 { font-size: 28px; }
+    .card-top { gap: 12px; }
+    .card-top > .cover { width: 52px; height: 78px; font-size: 22px; }
+    .bar-row { grid-template-columns: 88px 1fr 24px; }
+    .kpi { padding: 10px 12px; }
+    .kpi .v { font-size: 19px; }
+  }
+  @media (max-width: 480px) {
+    #profile-pill-name { display: none; }
+    .profile-pill { gap: 6px; padding: 7px 8px; }
   }
   @media (max-width: 380px) {
     .brand h1 { font-size: 22px; }
@@ -971,7 +1136,7 @@
       </div>
       <button class="add-btn" onclick="openModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Ajouter
+        <span class="add-btn-text">Ajouter</span>
       </button>
       <div class="profile-selector">
         <button class="profile-pill" id="profile-pill" onclick="toggleProfileDropdown(event)">
@@ -981,6 +1146,9 @@
         </button>
         <div class="profile-dropdown" id="profile-dropdown"></div>
       </div>
+      <button class="icon-btn" onclick="openStatsModal()" title="Statistiques">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </button>
       <button class="icon-btn" id="sync-btn" onclick="manualSync()" title="Synchroniser">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
       </button>
@@ -1017,7 +1185,32 @@
   </div>
 
   <div class="tag-filter-bar" id="tag-filter-bar"></div>
+  <div class="list-toolbar">
+    <span id="list-count"></span>
+    <select class="sort-select" id="sort-select" aria-label="Trier">
+      <option value="recent">Ajout récent</option>
+      <option value="finished">Date de lecture</option>
+      <option value="title">Titre A → Z</option>
+      <option value="author">Auteur A → Z</option>
+      <option value="rating">Mieux notés</option>
+      <option value="progress">Progression</option>
+    </select>
+  </div>
   <div class="grid" id="grid"></div>
+</div>
+
+<!-- Card menu -->
+<div class="card-popover" id="card-popover"></div>
+
+<!-- Stats modal -->
+<div class="modal-overlay" id="stats-modal">
+  <div class="modal stats-modal">
+    <h2>Statistiques</h2>
+    <div id="stats-content"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeStatsModal()">Fermer</button>
+    </div>
+  </div>
 </div>
 
 <!-- Profile manager modal -->
@@ -1059,6 +1252,15 @@
     <h2 id="modal-title">Ajouter un livre</h2>
     <input type="hidden" id="edit-id">
     <div class="field">
+      <label>Remplir automatiquement</label>
+      <div class="lookup-wrap">
+        <svg class="lookup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="lookup-input" id="f-lookup" placeholder="Titre, auteur ou ISBN&hellip;" autocomplete="off">
+        <div class="lookup-results" id="lookup-results"></div>
+      </div>
+      <div class="field-hint">Choisis un r&eacute;sultat pour remplir le titre, l'auteur, la couverture et le nombre de pages</div>
+    </div>
+    <div class="field">
       <label>Titre</label>
       <input type="text" id="f-titre" placeholder="Le nom du livre">
     </div>
@@ -1075,6 +1277,27 @@
         <option value="abandonne">Abandonn&eacute;</option>
         <option value="wishlist">Wishlist</option>
       </select>
+    </div>
+    <div class="field">
+      <label>Couverture</label>
+      <div class="cover-field">
+        <div id="cover-preview"></div>
+        <input type="url" id="f-cover" placeholder="URL de l'image (remplie automatiquement)">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Pages</label>
+        <input type="number" id="f-pages" min="1" inputmode="numeric" placeholder="ex: 320">
+      </div>
+      <div class="field" id="field-current-page">
+        <label>Page actuelle</label>
+        <input type="number" id="f-current-page" min="0" inputmode="numeric" placeholder="ex: 120">
+      </div>
+      <div class="field" id="field-finished">
+        <label>Termin&eacute; le</label>
+        <input type="date" id="f-finished">
+      </div>
     </div>
     <div class="field" id="field-note">
       <label>Note</label>
@@ -1422,6 +1645,10 @@ function renderProfileSelector() {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       Nouveau profil / gérer
     </button>
+    <button class="profile-action mobile-only" onclick="toggleProfileDropdown(); manualSync()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      Synchroniser
+    </button>
     <button class="profile-action danger" onclick="logoutUser()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Déconnexion
@@ -1606,11 +1833,15 @@ function render() {
 
   renderTagFilterBar();
 
-  const filtered = books.filter(b =>
+  const filtered = sortBooks(books.filter(b =>
     b.categorie === currentCat
     && matchesSearch(b)
     && (activeTagFilters.length === 0 || activeTagFilters.every(t => (b.tags || []).includes(t)))
-  ).sort((a, b) => (b.dateAdded || 0) - (a.dateAdded || 0));
+  ));
+
+  document.getElementById('list-count').textContent = filtered.length
+    ? `${filtered.length} livre${filtered.length > 1 ? 's' : ''}`
+    : '';
 
   if (filtered.length === 0) {
     const msg = currentSearch ? 'Aucun résultat' : 'Rien ici pour l\'instant';
@@ -1626,24 +1857,350 @@ function render() {
     const tags = (b.tags && b.tags.length)
       ? `<div class="tags">${b.tags.map(t => `<span class="tag" onclick="filterByTag('${escapeAttr(t)}')">${escapeHtml(t)}</span>`).join('')}</div>`
       : '';
+    const meta = [];
+    if (b.categorie === 'lu' && b.dateFinished) meta.push('Lu en ' + formatMonthYear(b.dateFinished));
+    if (b.pages) meta.push(b.pages + ' p.');
     return `
       <div class="card" data-cat="${b.categorie}">
-        <div class="card-header">
-          <div class="card-title">${escapeHtml(b.titre)}</div>
+        <div class="card-top">
+          ${renderCover(b)}
+          <div class="card-info">
+            <div class="card-header">
+              <div class="card-title">${escapeHtml(b.titre)}</div>
+              <button class="card-menu" onclick="openCardMenu(event, '${b.id}')" aria-label="Actions" title="Actions">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+              </button>
+            </div>
+            ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
+            ${meta.length ? `<div class="card-meta">${meta.join(' · ')}</div>` : ''}
+            ${stars}
+            ${reco}
+          </div>
         </div>
-        ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
-        ${stars}
-        ${reco}
+        ${b.categorie === 'en-cours' ? renderProgress(b) : ''}
         ${tags}
         ${note}
-        <div class="actions">
-          ${renderMoveButtons(b)}
-          <button onclick="editBook('${b.id}')">Modifier</button>
-          <button class="delete" onclick="deleteBook('${b.id}')">Supprimer</button>
-        </div>
       </div>
     `;
   }).join('');
+}
+
+// ===== TRI =====
+const SORT_KEY = 'mes-livres-sort';
+let currentSort = 'recent';
+try { currentSort = localStorage.getItem(SORT_KEY) || 'recent'; } catch (e) {}
+
+function lastName(author) {
+  return (author || '').split(',')[0].trim().split(/\s+/).pop() || '';
+}
+
+function progressRatio(b) {
+  return b.pages ? Math.min(1, (b.currentPage || 0) / b.pages) : -1;
+}
+
+function sortBooks(list) {
+  const byTitle = (a, b) => a.titre.localeCompare(b.titre, 'fr', { sensitivity: 'base' });
+  const byRecent = (a, b) => (b.dateAdded || 0) - (a.dateAdded || 0);
+  const sorters = {
+    recent: byRecent,
+    title: byTitle,
+    author: (a, b) => {
+      if (!a.auteur !== !b.auteur) return a.auteur ? -1 : 1;
+      return lastName(a.auteur).localeCompare(lastName(b.auteur), 'fr', { sensitivity: 'base' }) || byTitle(a, b);
+    },
+    rating: (a, b) => (b.note || 0) - (a.note || 0) || byTitle(a, b),
+    finished: (a, b) => (b.dateFinished || '').localeCompare(a.dateFinished || '') || byRecent(a, b),
+    progress: (a, b) => progressRatio(b) - progressRatio(a) || byRecent(a, b),
+  };
+  return list.sort(sorters[currentSort] || byRecent);
+}
+
+// ===== COUVERTURES & PROGRESSION =====
+function coverPlaceholder(titre) {
+  const letter = escapeHtml(((titre || '?').trim()[0] || '?').toUpperCase());
+  return `<div class="cover placeholder">${letter}</div>`;
+}
+
+function renderCover(b) {
+  if (!b.cover) return coverPlaceholder(b.titre);
+  return `<img class="cover" src="${escapeHtml(b.cover)}" alt="" loading="lazy" data-letter="${escapeHtml(b.titre)}" onerror="coverFallback(this)">`;
+}
+
+function coverFallback(img) {
+  img.outerHTML = coverPlaceholder(img.dataset.letter);
+}
+
+function renderProgress(b) {
+  if (!b.pages) {
+    return `<div class="progress" onclick="updateProgress('${b.id}')"><div class="progress-label"><span>Ajouter le nombre de pages pour suivre ta progression</span></div></div>`;
+  }
+  const cur = Math.min(b.currentPage || 0, b.pages);
+  const pct = Math.round(cur / b.pages * 100);
+  return `
+    <div class="progress" onclick="updateProgress('${b.id}')" title="Mettre à jour la page">
+      <div class="progress-bar"><span style="width:${pct}%"></span></div>
+      <div class="progress-label"><span>p. ${cur} / ${b.pages}</span><span>${pct} %</span></div>
+    </div>`;
+}
+
+function updateProgress(id) {
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  if (!b.pages) {
+    const pages = parseInt(prompt(`Nombre de pages de « ${b.titre} » :`, ''), 10);
+    if (!pages || pages < 1) return;
+    b.pages = pages;
+  }
+  const input = prompt(`Tu en es à quelle page ? (sur ${b.pages})`, b.currentPage || '');
+  if (input === null) { save(); render(); return; }
+  const page = parseInt(input, 10);
+  if (isNaN(page) || page < 0) return;
+  b.currentPage = Math.min(page, b.pages);
+  if (b.currentPage >= b.pages && confirm(`Bravo, tu as terminé « ${b.titre} » ! Le passer dans « Lu » ?`)) {
+    moveBook(id, 'lu');
+    return;
+  }
+  save();
+  render();
+}
+
+// ===== DATES =====
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function formatMonthYear(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return isNaN(d) ? '' : d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+}
+
+// ===== MENU DES CARTES =====
+let cardMenuId = null;
+let cardMenuScrollY = 0;
+
+function openCardMenu(e, id) {
+  e.stopPropagation();
+  const pop = document.getElementById('card-popover');
+  if (cardMenuId === id && pop.classList.contains('active')) { closeCardMenu(); return; }
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  cardMenuId = id;
+  cardMenuScrollY = window.scrollY;
+  const catColors = { 'lu': '#6dbfa8', 'en-cours': '#6a9bd4', 'a-lire': '#d4936a', 'abandonne': '#c97070', 'wishlist': '#b899d8' };
+  const icon = path => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  pop.innerHTML = `
+    <button class="profile-action" onclick="closeCardMenu(); editBook('${id}')">${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}Modifier</button>
+    ${b.categorie === 'en-cours' ? `<button class="profile-action" onclick="closeCardMenu(); updateProgress('${id}')">${icon('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>')}Mettre à jour la page</button>` : ''}
+    <div class="profile-divider"></div>
+    <div class="menu-label">Déplacer vers</div>
+    ${Object.keys(CAT_LABELS).filter(k => k !== b.categorie).map(k =>
+      `<button class="profile-action" onclick="closeCardMenu(); moveBook('${id}', '${k}')"><span class="dot" style="background:${catColors[k]}"></span>${CAT_LABELS[k]}</button>`
+    ).join('')}
+    <div class="profile-divider"></div>
+    <button class="profile-action danger" onclick="closeCardMenu(); deleteBook('${id}')">${icon('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>')}Supprimer</button>
+  `;
+  pop.classList.add('active');
+  const r = e.currentTarget.getBoundingClientRect();
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  const left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8));
+  const top = r.bottom + 6 + h > window.innerHeight - 8 ? Math.max(8, r.top - h - 6) : r.bottom + 6;
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+}
+
+function closeCardMenu() {
+  document.getElementById('card-popover').classList.remove('active');
+  cardMenuId = null;
+}
+
+// ===== STATISTIQUES =====
+function openStatsModal() {
+  renderStats();
+  document.getElementById('stats-modal').classList.add('active');
+}
+
+function closeStatsModal() {
+  document.getElementById('stats-modal').classList.remove('active');
+}
+
+function setGoal(value) {
+  const p = getCurrentProfile();
+  if (!p) return;
+  const n = parseInt(value, 10);
+  p.goal = n > 0 ? n : null;
+  save();
+  renderStats();
+}
+
+function barRows(entries) {
+  const max = Math.max(...entries.map(e => e[1]), 1);
+  return entries.map(([name, n]) => `
+    <div class="bar-row">
+      <span class="name" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+      <span class="track"><span style="width:${(n / max * 100).toFixed(0)}%"></span></span>
+      <span class="n">${n}</span>
+    </div>`).join('');
+}
+
+function topCounts(values, limit) {
+  const counts = {};
+  values.forEach(v => { if (v) counts[v] = (counts[v] || 0) + 1; });
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'fr')).slice(0, limit);
+}
+
+function renderStats() {
+  const p = getCurrentProfile();
+  const read = books.filter(b => b.categorie === 'lu');
+  const year = String(new Date().getFullYear());
+  const readThisYear = read.filter(b => (b.dateFinished || '').startsWith(year));
+  const goal = (p && p.goal) || 0;
+  const pagesThisYear = readThisYear.reduce((n, b) => n + (b.pages || 0), 0);
+  const rated = read.filter(b => b.note);
+  const avg = rated.length ? (rated.reduce((n, b) => n + b.note, 0) / rated.length).toFixed(1).replace('.', ',') : '–';
+  const undated = read.filter(b => !b.dateFinished).length;
+
+  const byYear = topCounts(read.map(b => (b.dateFinished || '').slice(0, 4)), 100)
+    .sort((a, b) => b[0].localeCompare(a[0])).slice(0, 6);
+  const authors = topCounts(read.map(b => (b.auteur || '').trim()), 5);
+  const tags = topCounts(read.flatMap(b => b.tags || []), 5);
+
+  const pct = goal ? Math.min(100, Math.round(readThisYear.length / goal * 100)) : 0;
+  document.getElementById('stats-content').innerHTML = `
+    <div class="goal-card">
+      <div class="goal-head">
+        <div class="goal-count">${readThisYear.length}${goal ? ` <small>/ ${goal} livres en ${year}</small>` : ` <small>livre${readThisYear.length > 1 ? 's' : ''} lu${readThisYear.length > 1 ? 's' : ''} en ${year}</small>`}</div>
+        <label class="goal-input">Objectif <input type="number" min="1" value="${goal || ''}" placeholder="–" onchange="setGoal(this.value)"></label>
+      </div>
+      ${goal ? `<div class="progress-bar"><span style="width:${pct}%"></span></div>` : ''}
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${read.length}</div><div class="l">Lus au total</div></div>
+      <div class="kpi"><div class="v">${pagesThisYear.toLocaleString('fr-FR')}</div><div class="l">Pages en ${year}</div></div>
+      <div class="kpi"><div class="v">${avg}${rated.length ? ' ★' : ''}</div><div class="l">Note moyenne</div></div>
+    </div>
+    ${byYear.length ? `<div class="stats-section"><h3>Livres lus par année</h3>${barRows(byYear)}</div>` : ''}
+    ${authors.length ? `<div class="stats-section"><h3>Auteurs les plus lus</h3>${barRows(authors)}</div>` : ''}
+    ${tags.length ? `<div class="stats-section"><h3>Tags favoris</h3>${barRows(tags)}</div>` : ''}
+    ${undated ? `<p class="stats-hint">${undated} livre${undated > 1 ? 's' : ''} lu${undated > 1 ? 's' : ''} sans date de fin : ajoute-la via « Modifier » pour les compter par année.</p>` : ''}
+    ${read.length === 0 ? `<p class="stats-hint">Pas encore de livre lu dans ce profil.</p>` : ''}
+  `;
+}
+
+// ===== RECHERCHE DE LIVRES (Google Books + Open Library) =====
+let lookupTimer = null;
+let lookupSeq = 0;
+let lookupResults = [];
+let lookupIndex = -1;
+
+function normalize(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+async function searchGoogleBooks(q, isbn) {
+  const query = isbn ? 'isbn:' + isbn : q;
+  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&printType=books`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.items || []).map(it => {
+    const v = it.volumeInfo || {};
+    const img = (v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || '';
+    return {
+      titre: v.title || '',
+      auteur: (v.authors || []).slice(0, 2).join(', '),
+      pages: v.pageCount || null,
+      cover: img.replace(/^http:/, 'https:').replace('&edge=curl', ''),
+    };
+  }).filter(r => r.titre);
+}
+
+async function searchOpenLibrary(q, isbn) {
+  const params = isbn ? 'isbn=' + isbn : 'q=' + encodeURIComponent(q);
+  const res = await fetch(`https://openlibrary.org/search.json?${params}&limit=6&lang=fr&fields=title,author_name,cover_i,number_of_pages_median`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.docs || []).map(d => ({
+    titre: d.title || '',
+    auteur: (d.author_name || []).slice(0, 2).join(', '),
+    pages: d.number_of_pages_median || null,
+    cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
+  })).filter(r => r.titre);
+}
+
+function onLookupInput() {
+  clearTimeout(lookupTimer);
+  const q = document.getElementById('f-lookup').value.trim();
+  if (q.length < 3) { hideLookup(); return; }
+  lookupTimer = setTimeout(() => runLookup(q), 350);
+}
+
+async function runLookup(q) {
+  const seq = ++lookupSeq;
+  const box = document.getElementById('lookup-results');
+  box.innerHTML = '<div class="lookup-empty">Recherche…</div>';
+  box.classList.add('active');
+  const compact = q.replace(/[-\s]/g, '');
+  const isbn = /^(97[89])?\d{9}[\dXx]$/.test(compact) ? compact : null;
+  const [gb, ol] = await Promise.all([
+    searchGoogleBooks(q, isbn).catch(() => []),
+    searchOpenLibrary(q, isbn).catch(() => []),
+  ]);
+  if (seq !== lookupSeq) return;
+  // Fusionne en gardant la version la plus complète de chaque livre
+  const merged = new Map();
+  [...gb, ...ol].forEach(r => {
+    const key = normalize(r.titre) + '|' + normalize(r.auteur.split(',')[0]);
+    const prev = merged.get(key);
+    if (!prev) merged.set(key, r);
+    else merged.set(key, { ...prev, cover: prev.cover || r.cover, pages: prev.pages || r.pages });
+  });
+  // Classe par pertinence : les mots tapés présents dans le titre/auteur (favorise l'édition française)
+  const words = normalize(q).split(' ').filter(Boolean);
+  const score = r => {
+    const hay = ' ' + normalize(r.titre + ' ' + r.auteur) + ' ';
+    return words.filter(w => hay.includes(' ' + w)).length / (words.length || 1) + (r.cover ? 0.01 : 0);
+  };
+  lookupResults = [...merged.values()]
+    .map((r, i) => ({ r, s: score(r), i }))
+    .sort((a, b) => b.s - a.s || a.i - b.i)
+    .map(x => x.r)
+    .slice(0, 8);
+  lookupIndex = -1;
+  if (!lookupResults.length) {
+    box.innerHTML = '<div class="lookup-empty">Aucun livre trouvé. Tu peux remplir la fiche à la main.</div>';
+    return;
+  }
+  box.innerHTML = lookupResults.map((r, i) => `
+    <div class="lookup-item" data-i="${i}" onmousedown="event.preventDefault(); pickLookup(${i})">
+      ${r.cover ? `<img src="${escapeHtml(r.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=noimg></span>'">` : '<span class="noimg"></span>'}
+      <div>
+        <div class="t">${escapeHtml(r.titre)}</div>
+        <div class="a">${escapeHtml([r.auteur, r.pages ? r.pages + ' p.' : ''].filter(Boolean).join(' · '))}</div>
+      </div>
+    </div>`).join('');
+}
+
+function hideLookup() {
+  lookupSeq++;
+  document.getElementById('lookup-results').classList.remove('active');
+}
+
+function pickLookup(i) {
+  const r = lookupResults[i];
+  if (!r) return;
+  document.getElementById('f-titre').value = r.titre;
+  document.getElementById('f-auteur').value = r.auteur;
+  if (r.pages) document.getElementById('f-pages').value = r.pages;
+  if (r.cover) document.getElementById('f-cover').value = r.cover;
+  updateCoverPreview();
+  document.getElementById('f-lookup').value = '';
+  hideLookup();
+}
+
+function updateCoverPreview() {
+  const url = document.getElementById('f-cover').value.trim();
+  const titre = document.getElementById('f-titre').value;
+  document.getElementById('cover-preview').innerHTML = renderCover({ cover: url, titre });
 }
 
 function renderTagFilterBar() {
@@ -1685,16 +2242,16 @@ function renderStars(n) {
   return s + '</div>';
 }
 
-function renderMoveButtons(b) {
-  return Object.keys(CAT_LABELS)
-    .filter(k => k !== b.categorie)
-    .map(k => `<button onclick="moveBook('${b.id}','${k}')">→ ${CAT_LABELS[k]}</button>`)
-    .join('');
-}
-
 function moveBook(id, cat) {
   const b = books.find(x => x.id === id);
-  if (b) { b.categorie = cat; save(); render(); }
+  if (!b) return;
+  b.categorie = cat;
+  if (cat === 'lu') {
+    if (!b.dateFinished) b.dateFinished = todayISO();
+    if (b.pages) b.currentPage = b.pages;
+  }
+  save();
+  render();
 }
 
 function deleteBook(id) {
@@ -1713,12 +2270,19 @@ function openModal(book) {
   document.getElementById('f-categorie').value = book ? book.categorie : currentCat;
   document.getElementById('f-avis').value = book ? (book.avis || '') : '';
   document.getElementById('f-reco').value = book ? (book.recoBy || '') : '';
+  document.getElementById('f-cover').value = book ? (book.cover || '') : '';
+  document.getElementById('f-pages').value = book && book.pages ? book.pages : '';
+  document.getElementById('f-current-page').value = book && book.currentPage ? book.currentPage : '';
+  document.getElementById('f-finished').value = book ? (book.dateFinished || '') : '';
+  document.getElementById('f-lookup').value = '';
+  hideLookup();
+  updateCoverPreview();
   setRating(book ? (book.note || 0) : 0);
   currentTags = book && book.tags ? [...book.tags] : [];
   renderTagEditor();
   updateModalFields();
   document.getElementById('modal').classList.add('active');
-  setTimeout(() => document.getElementById('f-titre').focus(), 50);
+  setTimeout(() => document.getElementById(book ? 'f-titre' : 'f-lookup').focus(), 50);
 }
 
 function renderTagEditor() {
@@ -1839,14 +2403,24 @@ function saveBook() {
   const id = document.getElementById('edit-id').value;
   const pendingTag = document.getElementById('f-tag-input');
   if (pendingTag && pendingTag.value.trim()) addTag(pendingTag.value);
+  const categorie = document.getElementById('f-categorie').value;
+  const pages = parseInt(document.getElementById('f-pages').value, 10) || null;
+  let currentPage = parseInt(document.getElementById('f-current-page').value, 10) || null;
+  if (pages && currentPage) currentPage = Math.min(currentPage, pages);
+  let dateFinished = document.getElementById('f-finished').value || null;
+  if (categorie === 'lu' && !dateFinished && !id) dateFinished = todayISO();
   const data = {
     titre,
     auteur: document.getElementById('f-auteur').value.trim(),
-    categorie: document.getElementById('f-categorie').value,
+    categorie,
     note: currentRating,
     avis: document.getElementById('f-avis').value.trim(),
     recoBy: document.getElementById('f-reco').value.trim(),
     tags: [...currentTags],
+    cover: document.getElementById('f-cover').value.trim(),
+    pages,
+    currentPage,
+    dateFinished,
   };
   if (id) {
     Object.assign(books.find(b => b.id === id), data);
@@ -1877,11 +2451,17 @@ function setActiveCat(cat) {
   render();
 }
 
-function updateModalFields() {
+function updateModalFields(fromChange) {
   const cat = document.getElementById('f-categorie').value;
   document.getElementById('field-note').style.display = (cat === 'lu' || cat === 'abandonne') ? 'block' : 'none';
   document.getElementById('field-avis').style.display = (cat === 'lu' || cat === 'en-cours' || cat === 'abandonne') ? 'block' : 'none';
   document.getElementById('field-reco').style.display = cat === 'wishlist' ? 'block' : 'none';
+  document.getElementById('field-current-page').style.display = cat === 'en-cours' ? 'block' : 'none';
+  document.getElementById('field-finished').style.display = cat === 'lu' ? 'block' : 'none';
+  const finished = document.getElementById('f-finished');
+  // Pas de date automatique sur un ancien livre déjà lu (on ne connaît pas sa vraie date)
+  const isNew = !document.getElementById('edit-id').value;
+  if (cat === 'lu' && !finished.value && (isNew || fromChange)) finished.value = todayISO();
   const avis = document.getElementById('f-avis');
   if (cat === 'en-cours') avis.placeholder = 'Tes impressions en cours de lecture…';
   else if (cat === 'abandonne') avis.placeholder = 'Pourquoi l\'as-tu abandonné ?';
@@ -1906,10 +2486,57 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 document.getElementById('star-input').addEventListener('click', e => {
-  if (e.target.dataset.v) setRating(parseInt(e.target.dataset.v));
+  // Recliquer sur la note actuelle la remet à zéro
+  if (e.target.dataset.v) {
+    const v = parseInt(e.target.dataset.v);
+    setRating(v === currentRating ? 0 : v);
+  }
 });
 
-document.getElementById('f-categorie').addEventListener('change', updateModalFields);
+document.getElementById('f-categorie').addEventListener('change', () => updateModalFields(true));
+
+document.getElementById('f-lookup').addEventListener('input', onLookupInput);
+document.getElementById('f-lookup').addEventListener('keydown', e => {
+  const items = document.querySelectorAll('#lookup-results .lookup-item');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    if (!items.length) return;
+    e.preventDefault();
+    lookupIndex = (lookupIndex + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items.forEach((it, i) => it.classList.toggle('highlight', i === lookupIndex));
+    items[lookupIndex].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (items.length) pickLookup(Math.max(lookupIndex, 0));
+  } else if (e.key === 'Escape' && document.getElementById('lookup-results').classList.contains('active')) {
+    e.stopPropagation();
+    hideLookup();
+  }
+});
+document.getElementById('f-lookup').addEventListener('blur', () => setTimeout(hideLookup, 150));
+document.getElementById('f-cover').addEventListener('input', updateCoverPreview);
+document.getElementById('f-titre').addEventListener('input', () => {
+  if (!document.getElementById('f-cover').value.trim()) updateCoverPreview();
+});
+
+document.getElementById('sort-select').value = currentSort;
+document.getElementById('sort-select').addEventListener('change', e => {
+  currentSort = e.target.value;
+  try { localStorage.setItem(SORT_KEY, currentSort); } catch (err) {}
+  render();
+});
+
+document.getElementById('stats-modal').addEventListener('click', e => {
+  if (e.target.id === 'stats-modal') closeStatsModal();
+});
+
+document.addEventListener('click', e => {
+  const pop = document.getElementById('card-popover');
+  if (pop.classList.contains('active') && !pop.contains(e.target)) closeCardMenu();
+});
+// Ferme le menu seulement sur un vrai défilement (pas sur les micro-mouvements de la barre d'adresse mobile)
+window.addEventListener('scroll', () => {
+  if (cardMenuId && Math.abs(window.scrollY - cardMenuScrollY) > 40) closeCardMenu();
+}, { passive: true });
 
 document.getElementById('modal').addEventListener('click', e => {
   if (e.target.id === 'modal') closeModal();
@@ -1920,7 +2547,7 @@ document.getElementById('profile-modal').addEventListener('click', e => {
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeProfileModal(); }
+  if (e.key === 'Escape') { closeCardMenu(); closeModal(); closeProfileModal(); closeStatsModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
 });
 </script>
