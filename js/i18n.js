@@ -101,6 +101,7 @@ const I18N = {
     'lookupHint__jeu': "Choisis un résultat pour remplir le nom, le studio, l'année et la jaquette",
     credits: "Fiches : Open Library, Google Books, TMDB et RAWG. Cette appli utilise l'API TMDB sans être approuvée ni certifiée par TMDB.",
     viewPosters: 'Affiches', viewCards: 'Cartes',
+    scan: 'Scanner un code-barres', scanHint: 'Vise le code-barres au dos du livre', scanError: "Impossible d'accéder à l'appareil photo.",
   },
   en: {
     locale: 'en-GB', docTitle: 'Collection', langSwitch: 'Français',
@@ -202,6 +203,7 @@ const I18N = {
     'lookupHint__jeu': 'Pick a result to fill in the name, studio, year and box art',
     credits: 'Data: Open Library, Google Books, TMDB and RAWG. This product uses the TMDB API but is not endorsed or certified by TMDB.',
     viewPosters: 'Posters', viewCards: 'Cards',
+    scan: 'Scan a barcode', scanHint: 'Point at the barcode on the back of the book', scanError: 'Unable to access the camera.',
   },
 };
 

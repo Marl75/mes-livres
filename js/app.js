@@ -841,6 +841,7 @@ function updateModalFields(fromChange) {
   document.getElementById('field-lookup').style.display = lookupAvailable(type) ? 'block' : 'none';
   document.getElementById('f-lookup').placeholder = tt('lookupPh', type);
   document.getElementById('lookup-hint').textContent = tt('lookupHint', type);
+  document.getElementById('scan-btn').style.display = type === 'livre' && scannerAvailable() ? 'flex' : 'none';
   document.getElementById('f-titre').placeholder = tt('titlePh', type);
   document.getElementById('label-auteur').textContent = tt('author', type);
   document.getElementById('f-auteur').placeholder = tt('authorPh', type);
@@ -955,6 +956,6 @@ renderTypeUI();
 showActiveCat('instant');
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeCardMenu(); closeModal(); closeProfileModal(); closeStatsModal(); }
+  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeModal(); closeProfileModal(); closeStatsModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
 });

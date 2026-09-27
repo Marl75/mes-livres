@@ -150,6 +150,14 @@
   </footer>
 </div>
 
+<!-- Scanner de code-barres -->
+<div class="scanner" id="scanner">
+  <video id="scanner-video" playsinline muted></video>
+  <div class="scanner-frame"></div>
+  <p class="scanner-status" id="scanner-status"></p>
+  <button class="btn-secondary scanner-close" onclick="closeScanner()" data-i18n="cancel">Annuler</button>
+</div>
+
 <!-- Card menu -->
 <div class="card-popover" id="card-popover"></div>
 
@@ -209,6 +217,9 @@
       <div class="lookup-wrap">
         <svg class="lookup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" class="lookup-input" id="f-lookup" placeholder="Titre, auteur ou ISBN&hellip;" autocomplete="off">
+        <button type="button" class="scan-btn" id="scan-btn" onclick="openScanner()" data-i18n-title="scan">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>
+        </button>
         <div class="lookup-results" id="lookup-results"></div>
       </div>
       <div class="field-hint" id="lookup-hint">Choisis un r&eacute;sultat pour remplir le titre, l'auteur et la couverture</div>
@@ -287,6 +298,7 @@
 <script src="js/types.js?v=4"></script>
 <script src="js/data.js?v=4"></script>
 <script src="js/lookup.js?v=4"></script>
+<script src="js/scanner.js?v=4"></script>
 <script src="js/app.js?v=4"></script>
 </body>
 </html>
