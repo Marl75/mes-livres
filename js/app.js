@@ -384,6 +384,21 @@ function renderTypePicker() {
     </button>`).join('');
 }
 
+// ----- Alerte doublon -----
+function findDuplicate(titre, type, excludeId) {
+  const key = normalize(titre);
+  if (!key) return null;
+  return books.find(b => b.id !== excludeId && typeOf(b) === type && normalize(b.titre) === key) || null;
+}
+
+function checkDuplicate() {
+  const el = document.getElementById('dup-warning');
+  const dup = findDuplicate(document.getElementById('f-titre').value, document.getElementById('f-type').value, document.getElementById('edit-id').value);
+  if (!dup) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.innerHTML = `${t('dupWarning', { cat: catLabel(dup.categorie, typeOf(dup)) })} <button type="button" onclick="editBook('${dup.id}')">${t('dupOpen')}</button>`;
+  el.style.display = 'block';
+}
+
 function pickType(type) {
   document.getElementById('f-type').value = type;
   document.getElementById('f-lookup').value = '';
@@ -391,6 +406,7 @@ function pickType(type) {
   renderTypePicker();
   fillCategorySelect(document.getElementById('f-categorie').value);
   updateModalFields(true);
+  checkDuplicate();
 }
 
 // Liste des catégories du formulaire, limitée à celles qui ont un sens pour le type choisi
@@ -653,6 +669,7 @@ function openModal(book) {
   renderTagEditor();
   updateModalFields();
   document.getElementById('modal').classList.add('active');
+  checkDuplicate();
   const focusLookup = !book && lookupAvailable(document.getElementById('f-type').value);
   setTimeout(() => document.getElementById(focusLookup ? 'f-lookup' : 'f-titre').focus(), 50);
 }
@@ -773,6 +790,8 @@ function saveBook() {
   const titre = document.getElementById('f-titre').value.trim();
   if (!titre) { document.getElementById('f-titre').focus(); return; }
   const id = document.getElementById('edit-id').value;
+  const dup = !id && findDuplicate(titre, document.getElementById('f-type').value);
+  if (dup && !confirm(t('dupConfirm', { title: dup.titre }))) return;
   const pendingTag = document.getElementById('f-tag-input');
   if (pendingTag && pendingTag.value.trim()) addTag(pendingTag.value);
   const categorie = document.getElementById('f-categorie').value;
@@ -912,6 +931,7 @@ document.getElementById('f-lookup').addEventListener('keydown', e => {
 document.getElementById('f-lookup').addEventListener('blur', () => setTimeout(hideLookup, 150));
 document.getElementById('f-cover').addEventListener('input', updateCoverPreview);
 document.getElementById('f-titre').addEventListener('input', () => {
+  checkDuplicate();
   if (!document.getElementById('f-cover').value.trim()) updateCoverPreview();
 });
 

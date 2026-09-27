@@ -490,6 +490,28 @@ header {
 .poster .stars { margin-top: 0; }
 .poster .stars svg { width: 12px; height: 12px; }
 
+/* Alerte doublon */
+.dup-warning {
+  display: none;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(212, 147, 106, 0.14);
+  border: 1px solid rgba(212, 147, 106, 0.35);
+  color: #e8b48f;
+  font-size: 13px;
+}
+.dup-warning button {
+  margin-left: 6px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Scanner de code-barres */
 .scan-btn {
   position: absolute;

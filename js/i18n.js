@@ -102,6 +102,7 @@ const I18N = {
     credits: "Fiches : Open Library, Google Books, TMDB et RAWG. Cette appli utilise l'API TMDB sans être approuvée ni certifiée par TMDB.",
     viewPosters: 'Affiches', viewCards: 'Cartes',
     scan: 'Scanner un code-barres', scanHint: 'Vise le code-barres au dos du livre', scanError: "Impossible d'accéder à l'appareil photo.",
+    dupWarning: 'Déjà dans ta collection ({cat}).', dupOpen: 'Voir la fiche', dupConfirm: '« {title} » est déjà dans ta collection. L\'ajouter quand même ?',
   },
   en: {
     locale: 'en-GB', docTitle: 'Collection', langSwitch: 'Français',
@@ -204,6 +205,7 @@ const I18N = {
     credits: 'Data: Open Library, Google Books, TMDB and RAWG. This product uses the TMDB API but is not endorsed or certified by TMDB.',
     viewPosters: 'Posters', viewCards: 'Cards',
     scan: 'Scan a barcode', scanHint: 'Point at the barcode on the back of the book', scanError: 'Unable to access the camera.',
+    dupWarning: 'Already in your collection ({cat}).', dupOpen: 'Open it', dupConfirm: '“{title}” is already in your collection. Add it anyway?',
   },
 };
 

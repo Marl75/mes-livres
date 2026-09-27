@@ -182,6 +182,7 @@ function pickLookup(i) {
   if (r.cover) document.getElementById('f-cover').value = r.cover;
   if (r.annee) document.getElementById('f-year').value = r.annee;
   updateCoverPreview();
+  checkDuplicate();
   document.getElementById('f-lookup').value = '';
   hideLookup();
   if (r.details) {
