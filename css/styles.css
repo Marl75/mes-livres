@@ -381,10 +381,90 @@ header {
 .sync-status .ok { color: #6dbfa8; }
 .sync-status .err { color: var(--danger); }
 
+/* Type tabs (Tout, Livres, Films, Séries, Jeux) */
+.type-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.type-tab {
+  height: 42px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.type-tab:hover { color: var(--text); background: var(--surface-hover); }
+.type-tab.active { background: var(--accent); color: #1a1426; font-weight: 600; }
+.type-tab-count { font-size: 12px; color: var(--text-faint); }
+.type-tab.active .type-tab-count { color: rgba(26, 20, 38, 0.65); }
+.type-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 500;
+}
+.progress-chip {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(106, 155, 212, 0.16);
+  color: #9fc0ea;
+  font-size: 12px;
+  font-weight: 500;
+}
+/* Choix du type dans le formulaire */
+.type-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.type-option {
+  height: 60px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.type-option:hover { color: var(--text); border-color: var(--border-strong); }
+.type-option.active { border-color: var(--accent); background: var(--accent-soft); color: #e3cf9f; font-weight: 600; }
+
 /* Stats row */
 .stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 12px;
   margin-bottom: 32px;
 }
@@ -989,6 +1069,14 @@ header {
   .add-btn { padding: 9px 11px; }
   .profile-pill { padding: 7px 10px 7px 8px; font-size: 13px; }
   .profile-pill .avatar { width: 20px; height: 20px; font-size: 10px; }
+  .type-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .type-tab { height: 52px; padding: 0; flex-direction: column; justify-content: center; gap: 3px; font-size: 11px; }
+  .type-tab-count { display: none; }
   .stats {
     display: flex;
     overflow-x: auto;

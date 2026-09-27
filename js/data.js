@@ -93,19 +93,18 @@ let books = [];
 let saveTimer = null;
 let newProfileColor = PROFILE_COLORS[0];
 // Catégorie affichée, mémorisée sur l'appareil pour la retrouver au prochain lancement
+// (par onglet de type, cf. types.js ; l'ancienne mémoire unique sert de valeur par défaut)
 const CAT_KEY = 'mes-livres-cat';
 let currentCat = 'lu';
 try {
-  const savedCat = localStorage.getItem(CAT_KEY);
-  if (['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'].includes(savedCat)) currentCat = savedCat;
+  const wanted = catByType[currentType] || localStorage.getItem(CAT_KEY);
+  if (catsFor(currentType).includes(wanted)) currentCat = wanted;
 } catch (e) {}
 let currentSearch = '';
 let currentRating = 0;
 let currentTags = [];
 let activeTagFilters = [];
 let suggestionIndex = -1;
-
-const CATEGORIES = ['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'];
 
 function newId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
 

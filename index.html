@@ -19,7 +19,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=1">
+<link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 <body>
 
@@ -90,31 +90,33 @@
   </header>
   <div class="sync-status" id="sync-status"></div>
 
+  <nav class="type-tabs" id="type-tabs" aria-label="Types"></nav>
+
   <div class="stats">
     <div class="stat-card active" data-cat="lu">
-      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_lu">Lu</span></div>
+      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
       <div class="stat-value" id="count-lu">0</div>
-      <div class="stat-sub" data-i18n="sub_lu">livres termin&eacute;s</div>
+      <div class="stat-sub"></div>
     </div>
     <div class="stat-card" data-cat="en-cours">
-      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_en-cours">En cours</span></div>
+      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
       <div class="stat-value" id="count-en-cours">0</div>
-      <div class="stat-sub" data-i18n="sub_en-cours">lectures en cours</div>
+      <div class="stat-sub"></div>
     </div>
     <div class="stat-card" data-cat="a-lire">
-      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_a-lire">&Agrave; lire</span></div>
+      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
       <div class="stat-value" id="count-a-lire">0</div>
-      <div class="stat-sub" data-i18n="sub_a-lire">en attente sur l'&eacute;tag&egrave;re</div>
+      <div class="stat-sub"></div>
     </div>
     <div class="stat-card" data-cat="abandonne">
-      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_abandonne">Abandonn&eacute;</span></div>
+      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
       <div class="stat-value" id="count-abandonne">0</div>
-      <div class="stat-sub" data-i18n="sub_abandonne">commenc&eacute;s, non termin&eacute;s</div>
+      <div class="stat-sub"></div>
     </div>
     <div class="stat-card" data-cat="wishlist">
-      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_wishlist">Wishlist</span></div>
+      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
       <div class="stat-value" id="count-wishlist">0</div>
-      <div class="stat-sub" data-i18n="sub_wishlist">recommandations &agrave; d&eacute;couvrir</div>
+      <div class="stat-sub"></div>
     </div>
   </div>
 
@@ -125,7 +127,7 @@
       <option value="recent" data-i18n="sort_recent">Ajout récent</option>
       <option value="finished" data-i18n="sort_finished">Date de lecture</option>
       <option value="title" data-i18n="sort_title">Titre A → Z</option>
-      <option value="author" data-i18n="sort_author">Auteur A → Z</option>
+      <option value="author" id="sort-author">Auteur A → Z</option>
       <option value="rating" data-i18n="sort_rating">Mieux notés</option>
     </select>
   </div>
@@ -184,7 +186,9 @@
   <div class="modal">
     <h2 id="modal-title">Ajouter un livre</h2>
     <input type="hidden" id="edit-id">
-    <div class="field">
+    <input type="hidden" id="f-type" value="livre">
+    <div class="type-picker" id="type-picker" role="radiogroup" data-i18n-title="typeLabel"></div>
+    <div class="field" id="field-lookup">
       <label data-i18n="autofill">Remplir automatiquement</label>
       <div class="lookup-wrap">
         <svg class="lookup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -195,24 +199,18 @@
     </div>
     <div class="field">
       <label data-i18n="title">Titre</label>
-      <input type="text" id="f-titre" placeholder="Le nom du livre" data-i18n-ph="titlePh">
+      <input type="text" id="f-titre" placeholder="Le nom du livre">
     </div>
     <div class="field">
-      <label data-i18n="author">Auteur</label>
-      <input type="text" id="f-auteur" placeholder="Qui l'a &eacute;crit ?" data-i18n-ph="authorPh">
+      <label id="label-auteur">Auteur</label>
+      <input type="text" id="f-auteur" placeholder="Qui l'a &eacute;crit ?">
     </div>
     <div class="field">
       <label data-i18n="category">Cat&eacute;gorie</label>
-      <select id="f-categorie">
-        <option value="lu" data-i18n="cat_lu">Lu</option>
-        <option value="en-cours" data-i18n="cat_en-cours">En cours</option>
-        <option value="a-lire" data-i18n="cat_a-lire">&Agrave; lire</option>
-        <option value="abandonne" data-i18n="cat_abandonne">Abandonn&eacute;</option>
-        <option value="wishlist" data-i18n="cat_wishlist">Wishlist</option>
-      </select>
+      <select id="f-categorie"></select>
     </div>
     <div class="field">
-      <label data-i18n="cover">Couverture</label>
+      <label id="label-cover">Couverture</label>
       <div class="cover-field">
         <div id="cover-preview"></div>
         <input type="url" id="f-cover" placeholder="URL de l'image (remplie automatiquement)" data-i18n-ph="coverPh">
@@ -220,9 +218,23 @@
     </div>
     <div class="field-row">
       <div class="field" id="field-finished">
-        <label data-i18n="finishedOn">Termin&eacute; le</label>
+        <label id="label-finished">Termin&eacute; le</label>
         <input type="date" id="f-finished">
       </div>
+      <div class="field" id="field-year">
+        <label data-i18n="year">Ann&eacute;e</label>
+        <input type="number" id="f-year" min="1850" max="2100" inputmode="numeric" data-i18n-ph="yearPh">
+      </div>
+      <div class="field" id="field-platform">
+        <label data-i18n="platform">Plateforme</label>
+        <input type="text" id="f-platform" list="platform-list" autocomplete="off" data-i18n-ph="platformPh">
+        <datalist id="platform-list"></datalist>
+      </div>
+    </div>
+    <div class="field" id="field-progress">
+      <label data-i18n="progress">O&ugrave; j'en suis</label>
+      <input type="text" id="f-progress" maxlength="80" data-i18n-ph="progressPh">
+      <div class="field-hint" data-i18n="progressHint">Texte libre, affich&eacute; sur la carte</div>
     </div>
     <div class="field" id="field-note">
       <label data-i18n="rating">Note</label>
@@ -255,8 +267,9 @@
   </div>
 </div>
 
-<script src="js/i18n.js?v=1"></script>
-<script src="js/data.js?v=1"></script>
-<script src="js/app.js?v=1"></script>
+<script src="js/i18n.js?v=2"></script>
+<script src="js/types.js?v=2"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/app.js?v=2"></script>
 </body>
 </html>

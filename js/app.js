@@ -19,7 +19,7 @@ function renderProfileSelector() {
     <div class="profile-item ${p.id === state.currentId ? 'current' : ''}" onclick="switchProfile('${p.id}')">
       <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
       <span>${escapeHtml(p.name)}</span>
-      <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${tn('books', (p.books || []).length)}</span>
+      <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${ttn('items', 'tout', (p.books || []).length)}</span>
     </div>
   `).join('') + `
     <div class="profile-divider"></div>
@@ -92,7 +92,7 @@ function renderProfileList() {
       <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
       <div class="info">
         <div class="name">${escapeHtml(p.name)}${p.id === state.currentId ? ` <span style="color:var(--accent); font-size:11px;">${t('active')}</span>` : ''}</div>
-        <div class="meta">${tn('books', (p.books || []).length)}</div>
+        <div class="meta">${ttn('items', 'tout', (p.books || []).length)}</div>
       </div>
       <div class="row-actions">
         <button onclick="renameProfile('${p.id}')">${t('rename')}</button>
@@ -205,6 +205,8 @@ document.addEventListener('click', e => {
 // ===== RENDER =====
 function render() {
   const grid = document.getElementById('grid');
+  const items = scopedItems();
+  renderTypeUI();
   const matchesSearch = b => !currentSearch
     || b.titre.toLowerCase().includes(currentSearch)
     || (b.auteur || '').toLowerCase().includes(currentSearch)
@@ -212,7 +214,7 @@ function render() {
 
   const matchesTagFilter = b => activeTagFilters.length === 0 || activeTagFilters.every(t => (b.tags || []).includes(t));
   const counts = { 'lu': 0, 'en-cours': 0, 'a-lire': 0, 'abandonne': 0, 'wishlist': 0 };
-  books.filter(b => matchesSearch(b) && matchesTagFilter(b)).forEach(b => counts[b.categorie]++);
+  items.filter(b => matchesSearch(b) && matchesTagFilter(b)).forEach(b => { if (b.categorie in counts) counts[b.categorie]++; });
   const someFilterActive = currentSearch || activeTagFilters.length > 0;
   Object.keys(counts).forEach(k => {
     const el = document.getElementById('count-' + k);
@@ -222,20 +224,20 @@ function render() {
 
   renderTagFilterBar();
 
-  const filtered = sortBooks(books.filter(b =>
+  const filtered = sortBooks(items.filter(b =>
     b.categorie === currentCat
     && matchesSearch(b)
     && (activeTagFilters.length === 0 || activeTagFilters.every(t => (b.tags || []).includes(t)))
   ));
 
   document.getElementById('list-count').textContent = filtered.length
-    ? tn('books', filtered.length)
+    ? ttn('items', currentType, filtered.length)
     : '';
 
   if (filtered.length === 0) {
     const msg = currentSearch ? t('noResults') : t('emptyTitle');
-    const sub = currentSearch ? t('tryAnother') : t('emptyHint');
-    grid.innerHTML = `<div class="empty-state"><div class="icon">📖</div><h3>${msg}</h3><p>${sub}</p></div>`;
+    const sub = currentSearch ? t('tryAnother') : tt('emptyHint', currentType);
+    grid.innerHTML = `<div class="empty-state"><div class="icon">${TYPE_EMOJI[currentType]}</div><h3>${msg}</h3><p>${sub}</p></div>`;
     return;
   }
 
@@ -246,8 +248,15 @@ function render() {
     const tags = (b.tags && b.tags.length)
       ? `<div class="tags">${b.tags.map(t => `<span class="tag" onclick="filterByTag('${escapeAttr(t)}')">${escapeHtml(t)}</span>`).join('')}</div>`
       : '';
+    const type = typeOf(b);
     const meta = [];
-    if (b.categorie === 'lu' && b.dateFinished) meta.push(t('readIn', { date: formatMonthYear(b.dateFinished) }));
+    if (b.categorie === 'lu' && b.dateFinished) meta.push(tt('readIn', type, { date: formatMonthYear(b.dateFinished) }));
+    if (b.annee) meta.push(b.annee);
+    const chip = currentType === 'tout'
+      ? `<span class="type-chip">${typeIcon(type, 12)}${t('typeOne_' + type)}${b.plateforme ? ' · ' + escapeHtml(b.plateforme) : ''}</span>`
+      : (b.plateforme ? `<span class="type-chip">${typeIcon(type, 12)}${escapeHtml(b.plateforme)}</span>` : '');
+    const progress = type === 'serie' && b.progression && b.categorie !== 'lu'
+      ? `<div class="progress-chip">${escapeHtml(b.progression)}</div>` : '';
     return `
       <div class="card" data-cat="${b.categorie}">
         <div class="card-top">
@@ -259,8 +268,10 @@ function render() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
               </button>
             </div>
+            ${chip}
             ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
             ${meta.length ? `<div class="card-meta">${meta.join(' · ')}</div>` : ''}
+            ${progress}
             ${stars}
             ${reco}
           </div>
@@ -270,6 +281,76 @@ function render() {
       </div>
     `;
   }).join('');
+}
+
+// ===== TYPES (interface) =====
+const LAST_TYPE_KEY = 'mes-livres-last-type';
+
+// Onglets de type, cartes de catégories et libellés qui dépendent du type affiché
+function renderTypeUI() {
+  const counts = { tout: books.length, livre: 0, film: 0, serie: 0, jeu: 0 };
+  books.forEach(b => counts[typeOf(b)]++);
+  document.getElementById('type-tabs').innerHTML = ['tout', ...TYPES].map(ty => `
+    <button class="type-tab ${ty === currentType ? 'active' : ''}" onclick="setActiveType('${ty}')" aria-pressed="${ty === currentType}">
+      ${typeIcon(ty, 17)}<span class="type-tab-label">${t('type_' + ty)}</span><span class="type-tab-count">${counts[ty]}</span>
+    </button>`).join('');
+  const cats = catsFor(currentType);
+  document.querySelectorAll('.stat-card').forEach(c => {
+    const cat = c.dataset.cat;
+    c.style.display = cats.includes(cat) ? '' : 'none';
+    c.querySelector('.cat-name').textContent = catLabel(cat, currentType);
+    c.querySelector('.stat-sub').textContent = tt('sub_' + cat, currentType);
+  });
+  document.getElementById('sort-author').textContent = tt('sort_author', currentType);
+}
+
+function setActiveType(type, cat) {
+  if (type === currentType && !cat) return;
+  currentType = type;
+  const cats = catsFor(type);
+  const wanted = cat || catByType[type] || currentCat;
+  currentCat = cats.includes(wanted) ? wanted : cats[0];
+  catByType[type] = currentCat;
+  rememberView();
+  activeTagFilters = activeTagFilters.filter(tag => scopedItems().some(b => (b.tags || []).includes(tag)));
+  closeCardMenu();
+  render();
+  showActiveCat('instant');
+  if (document.getElementById('stats-modal').classList.contains('active')) renderStats();
+}
+
+// Type proposé par défaut dans le formulaire : l'onglet ouvert, sinon le dernier type ajouté
+function defaultAddType() {
+  if (TYPES.includes(currentType)) return currentType;
+  try {
+    const last = localStorage.getItem(LAST_TYPE_KEY);
+    if (TYPES.includes(last)) return last;
+  } catch (e) {}
+  return 'livre';
+}
+
+function renderTypePicker() {
+  const current = document.getElementById('f-type').value;
+  document.getElementById('type-picker').innerHTML = TYPES.map(ty => `
+    <button type="button" role="radio" aria-checked="${ty === current}" class="type-option ${ty === current ? 'active' : ''}" onclick="pickType('${ty}')">
+      ${typeIcon(ty, 18)}<span>${t('typeOne_' + ty)}</span>
+    </button>`).join('');
+}
+
+function pickType(type) {
+  document.getElementById('f-type').value = type;
+  renderTypePicker();
+  fillCategorySelect(document.getElementById('f-categorie').value);
+  updateModalFields(true);
+}
+
+// Liste des catégories du formulaire, limitée à celles qui ont un sens pour le type choisi
+function fillCategorySelect(selected) {
+  const type = document.getElementById('f-type').value || 'livre';
+  const cats = catsFor(type);
+  const select = document.getElementById('f-categorie');
+  select.innerHTML = cats.map(c => `<option value="${c}">${tt('catOne_' + c, type) !== 'catOne_' + c ? tt('catOne_' + c, type) : catLabel(c, type)}</option>`).join('');
+  select.value = cats.includes(selected) ? selected : cats[0];
 }
 
 // ===== TRI =====
@@ -342,8 +423,8 @@ function openCardMenu(e, id) {
     <button class="profile-action" onclick="closeCardMenu(); editBook('${id}')">${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}${t('edit')}</button>
     <div class="profile-divider"></div>
     <div class="menu-label">${t('moveTo')}</div>
-    ${CATEGORIES.filter(k => k !== b.categorie).map(k =>
-      `<button class="profile-action" onclick="closeCardMenu(); moveBook('${id}', '${k}')"><span class="dot" style="background:${catColors[k]}"></span>${catLabel(k)}</button>`
+    ${catsFor(typeOf(b)).filter(k => k !== b.categorie).map(k =>
+      `<button class="profile-action" onclick="closeCardMenu(); moveBook('${id}', '${k}')"><span class="dot" style="background:${catColors[k]}"></span>${catLabel(k, typeOf(b))}</button>`
     ).join('')}
     <div class="profile-divider"></div>
     <button class="profile-action danger" onclick="closeCardMenu(); deleteBook('${id}')">${icon('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>')}${t('delete')}</button>
@@ -376,7 +457,7 @@ function setGoal(value) {
   const p = getCurrentProfile();
   if (!p) return;
   const n = parseInt(value, 10);
-  p.goal = n > 0 ? n : null;
+  p.goals = { ...(p.goals || {}), [currentType]: n > 0 ? n : null };
   touch(p);
   save();
   renderStats();
@@ -400,10 +481,12 @@ function topCounts(values, limit) {
 
 function renderStats() {
   const p = getCurrentProfile();
-  const read = books.filter(b => b.categorie === 'lu');
+  const ty = currentType;
+  const read = scopedItems().filter(b => b.categorie === 'lu');
   const year = String(new Date().getFullYear());
   const readThisYear = read.filter(b => (b.dateFinished || '').startsWith(year));
-  const goal = (p && p.goal) || 0;
+  // Objectif par type ; l'ancien objectif unique était celui des livres
+  const goal = (p && ((p.goals && p.goals[ty]) || (ty === 'livre' && !(p.goals && 'livre' in p.goals) ? p.goal : 0))) || 0;
   const authorCount = new Set(read.map(b => (b.auteur || '').trim().toLowerCase()).filter(Boolean)).size;
   const rated = read.filter(b => b.note);
   const avg = rated.length ? (rated.reduce((n, b) => n + b.note, 0) / rated.length).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '–';
@@ -418,21 +501,21 @@ function renderStats() {
   document.getElementById('stats-content').innerHTML = `
     <div class="goal-card">
       <div class="goal-head">
-        <div class="goal-count">${readThisYear.length} <small>${goal ? t('goalOf', { goal, year }) : tn('readYear', readThisYear.length, { year })}</small></div>
+        <div class="goal-count">${readThisYear.length} <small>${goal ? tt('goalOf', ty, { goal, year }) : ttn('readYear', ty, readThisYear.length, { year })}</small></div>
         <label class="goal-input">${t('goal')} <input type="number" min="1" value="${goal || ''}" placeholder="–" onchange="setGoal(this.value)"></label>
       </div>
       ${goal ? `<div class="progress-bar"><span style="width:${pct}%"></span></div>` : ''}
     </div>
     <div class="kpis">
-      <div class="kpi"><div class="v">${read.length}</div><div class="l">${t('totalRead')}</div></div>
-      <div class="kpi"><div class="v">${authorCount}</div><div class="l">${t('authorsRead')}</div></div>
+      <div class="kpi"><div class="v">${read.length}</div><div class="l">${tt('totalRead', ty)}</div></div>
+      <div class="kpi"><div class="v">${authorCount}</div><div class="l">${tt('authorsRead', ty)}</div></div>
       <div class="kpi"><div class="v">${avg}${rated.length ? ' ★' : ''}</div><div class="l">${t('avgRating')}</div></div>
     </div>
-    ${byYear.length ? `<div class="stats-section"><h3>${t('byYear')}</h3>${barRows(byYear)}</div>` : ''}
-    ${authors.length ? `<div class="stats-section"><h3>${t('topAuthors')}</h3>${barRows(authors)}</div>` : ''}
+    ${byYear.length ? `<div class="stats-section"><h3>${tt('byYear', ty)}</h3>${barRows(byYear)}</div>` : ''}
+    ${authors.length ? `<div class="stats-section"><h3>${tt('topAuthors', ty)}</h3>${barRows(authors)}</div>` : ''}
     ${tags.length ? `<div class="stats-section"><h3>${t('topTags')}</h3>${barRows(tags)}</div>` : ''}
-    ${undated ? `<p class="stats-hint">${tn('undated', undated)}</p>` : ''}
-    ${read.length === 0 ? `<p class="stats-hint">${t('noneRead')}</p>` : ''}
+    ${undated ? `<p class="stats-hint">${ttn('undated', ty === 'livre' ? 'livre' : 'tout', undated)}</p>` : ''}
+    ${read.length === 0 ? `<p class="stats-hint">${tt('noneRead', ty)}</p>` : ''}
   `;
 }
 
@@ -556,7 +639,7 @@ function renderTagFilterBar() {
     || (b.auteur || '').toLowerCase().includes(currentSearch)
     || (b.tags || []).some(t => t.toLowerCase().includes(currentSearch));
   const tagCounts = {};
-  books.filter(matchesSearch).forEach(b => (b.tags || []).forEach(t => {
+  scopedItems().filter(matchesSearch).forEach(b => (b.tags || []).forEach(t => {
     tagCounts[t] = (tagCounts[t] || 0) + 1;
   }));
   const tags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a] || a.localeCompare(b));
@@ -599,22 +682,27 @@ function moveBook(id, cat) {
 }
 
 function deleteBook(id) {
-  if (!confirm(t('confirmDeleteBook'))) return;
+  const item = books.find(b => b.id === id);
+  if (!item || !confirm(t('confirmDeleteItem', { title: item.titre }))) return;
   removeBook(id);
   save();
   render();
 }
 
 function openModal(book) {
-  document.getElementById('modal-title').textContent = book ? t('editBook') : t('addBook');
   document.getElementById('edit-id').value = book ? book.id : '';
+  document.getElementById('f-type').value = book ? typeOf(book) : defaultAddType();
+  renderTypePicker();
+  fillCategorySelect(book ? book.categorie : currentCat);
   document.getElementById('f-titre').value = book ? book.titre : '';
   document.getElementById('f-auteur').value = book ? (book.auteur || '') : '';
-  document.getElementById('f-categorie').value = book ? book.categorie : currentCat;
   document.getElementById('f-avis').value = book ? (book.avis || '') : '';
   document.getElementById('f-reco').value = book ? (book.recoBy || '') : '';
   document.getElementById('f-cover').value = book ? (book.cover || '') : '';
   document.getElementById('f-finished').value = book ? (book.dateFinished || '') : '';
+  document.getElementById('f-year').value = book && book.annee ? book.annee : '';
+  document.getElementById('f-platform').value = book ? (book.plateforme || '') : '';
+  document.getElementById('f-progress').value = book ? (book.progression || '') : '';
   document.getElementById('f-lookup').value = '';
   hideLookup();
   updateCoverPreview();
@@ -623,7 +711,8 @@ function openModal(book) {
   renderTagEditor();
   updateModalFields();
   document.getElementById('modal').classList.add('active');
-  setTimeout(() => document.getElementById(book ? 'f-titre' : 'f-lookup').focus(), 50);
+  const focusLookup = !book && document.getElementById('f-type').value === 'livre';
+  setTimeout(() => document.getElementById(focusLookup ? 'f-lookup' : 'f-titre').focus(), 50);
 }
 
 function renderTagEditor() {
@@ -714,7 +803,7 @@ function renderSuggestions(query) {
   if (q) all = all.filter(t => t.tag.includes(q));
   all = all.slice(0, 8);
 
-  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${tn('books', t.count)}</span></div>`).join('');
+  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${ttn('items', 'tout', t.count)}</span></div>`).join('');
 
   if (q && !getAllTags().some(t => t.tag === q) && !currentTags.includes(q)) {
     html += `<div class="tag-suggestion" data-tag="${escapeAttr(q)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(q)}')"><span>${t('createTag', { q: escapeHtml(q) })}</span><span class="new">${t('newTag')}</span></div>`;
@@ -745,6 +834,8 @@ function saveBook() {
   const pendingTag = document.getElementById('f-tag-input');
   if (pendingTag && pendingTag.value.trim()) addTag(pendingTag.value);
   const categorie = document.getElementById('f-categorie').value;
+  const type = document.getElementById('f-type').value;
+  const annee = parseInt(document.getElementById('f-year').value, 10);
   let dateFinished = document.getElementById('f-finished').value || null;
   if (categorie === 'lu' && !dateFinished && !id) dateFinished = todayISO();
   const data = {
@@ -757,6 +848,10 @@ function saveBook() {
     tags: [...currentTags],
     cover: document.getElementById('f-cover').value.trim(),
     dateFinished,
+    type,
+    annee: type !== 'livre' && annee > 0 ? annee : null,
+    plateforme: type === 'jeu' ? document.getElementById('f-platform').value.trim() : '',
+    progression: type === 'serie' ? document.getElementById('f-progress').value.trim() : '',
   };
   if (id) {
     touch(Object.assign(books.find(b => b.id === id), data));
@@ -765,7 +860,9 @@ function saveBook() {
   }
   save();
   closeModal();
-  setActiveCat(data.categorie);
+  try { localStorage.setItem(LAST_TYPE_KEY, type); } catch (e) {}
+  if (currentType !== 'tout' && currentType !== type) setActiveType(type, data.categorie);
+  else setActiveCat(data.categorie);
 }
 
 function setRating(n) {
@@ -777,7 +874,8 @@ function setRating(n) {
 
 function setActiveCat(cat) {
   currentCat = cat;
-  try { localStorage.setItem(CAT_KEY, cat); } catch (e) {}
+  catByType[currentType] = cat;
+  rememberView();
   showActiveCat('smooth');
   render();
 }
@@ -787,14 +885,26 @@ function showActiveCat(behavior) {
   document.querySelectorAll('.stat-card').forEach(c => {
     const isActive = c.dataset.cat === currentCat;
     c.classList.toggle('active', isActive);
-    if (isActive && window.matchMedia('(max-width: 700px)').matches) {
+    if (isActive && c.offsetParent && window.matchMedia('(max-width: 700px)').matches) {
       c.scrollIntoView({ behavior, inline: 'center', block: 'nearest' });
     }
   });
 }
 
 function updateModalFields(fromChange) {
+  const type = document.getElementById('f-type').value || 'livre';
   const cat = document.getElementById('f-categorie').value;
+  const isEdit = !!document.getElementById('edit-id').value;
+  document.getElementById('modal-title').textContent = tt(isEdit ? 'editBook' : 'addBook', type);
+  document.getElementById('field-lookup').style.display = type === 'livre' ? 'block' : 'none';
+  document.getElementById('f-titre').placeholder = tt('titlePh', type);
+  document.getElementById('label-auteur').textContent = tt('author', type);
+  document.getElementById('f-auteur').placeholder = tt('authorPh', type);
+  document.getElementById('label-cover').textContent = tt('cover', type);
+  document.getElementById('label-finished').textContent = tt('finishedOn', type);
+  document.getElementById('field-year').style.display = type === 'livre' ? 'none' : 'block';
+  document.getElementById('field-platform').style.display = type === 'jeu' ? 'block' : 'none';
+  document.getElementById('field-progress').style.display = type === 'serie' && cat !== 'lu' ? 'block' : 'none';
   document.getElementById('field-note').style.display = (cat === 'lu' || cat === 'abandonne') ? 'block' : 'none';
   document.getElementById('field-avis').style.display = (cat === 'lu' || cat === 'en-cours' || cat === 'abandonne') ? 'block' : 'none';
   document.getElementById('field-reco').style.display = cat === 'wishlist' ? 'block' : 'none';
@@ -835,6 +945,7 @@ document.getElementById('star-input').addEventListener('click', e => {
 });
 
 document.getElementById('f-categorie').addEventListener('change', () => updateModalFields(true));
+document.getElementById('platform-list').innerHTML = PLATFORMS.map(p => `<option value="${p}">`).join('');
 
 document.getElementById('f-lookup').addEventListener('input', onLookupInput);
 document.getElementById('f-lookup').addEventListener('keydown', e => {
@@ -888,7 +999,10 @@ document.getElementById('profile-modal').addEventListener('click', e => {
 });
 
 applyTranslations();
+renderTypePicker();
+fillCategorySelect(currentCat);
 updateModalFields();
+renderTypeUI();
 showActiveCat('instant');
 
 document.addEventListener('keydown', e => {
