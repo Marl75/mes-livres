@@ -19,6 +19,14 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
     }
 
+    // Statistiques d'utilisation : chaque compte écrit les siennes ; seule l'administratrice
+    // (son identifiant remplace ADMIN_UID, cf. admin.html) peut toutes les lire
+    match /usage/{userId} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == userId || request.auth.uid == 'ADMIN_UID');
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+
     // Tout le reste est interdit
     match /{document=**} {
       allow read, write: if false;
