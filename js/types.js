@@ -50,6 +50,13 @@ function catLabel(cat, type) {
   return tt('cat_' + cat, type || 'livre');
 }
 
+// Libellé d'une catégorie au singulier (« Vu », « À lire »…) pour un type donné
+function catOneLabel(cat, type) {
+  const key = 'catOne_' + cat;
+  const label = tt(key, type);
+  return label !== key ? label : catLabel(cat, type);
+}
+
 // ----- Onglet de type et catégorie, mémorisés sur l'appareil -----
 const TYPE_KEY = 'mes-livres-type';
 const CATS_KEY = 'mes-livres-cats';

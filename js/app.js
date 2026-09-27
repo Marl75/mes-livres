@@ -423,7 +423,7 @@ function fillCategorySelect(selected) {
   const type = document.getElementById('f-type').value || 'livre';
   const cats = catsFor(type);
   const select = document.getElementById('f-categorie');
-  select.innerHTML = cats.map(c => `<option value="${c}">${tt('catOne_' + c, type) !== 'catOne_' + c ? tt('catOne_' + c, type) : catLabel(c, type)}</option>`).join('');
+  select.innerHTML = cats.map(c => `<option value="${c}">${catOneLabel(c, type)}</option>`).join('');
   select.value = cats.includes(selected) ? selected : cats[0];
 }
 
