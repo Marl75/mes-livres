@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Règles de sécurité de la base Firestore de Collection (projet mes-livres-dafce).
+// Ce fichier est une référence : les règles actives se règlent dans la console Firebase
+// (Firestore Database > Règles). Chaque compte ne peut lire et modifier que son propre document.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Tout le reste est interdit
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
