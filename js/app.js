@@ -245,6 +245,7 @@ function render() {
   grid.classList.toggle('posters', posters);
   if (posters) {
     grid.innerHTML = filtered.map(renderPoster).join('');
+    hydrateProviders();
     return;
   }
 
@@ -279,6 +280,7 @@ function render() {
             ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
             ${meta.length ? `<div class="card-meta">${meta.join(' · ')}</div>` : ''}
             ${progress}
+            ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${b.id}"></div>` : ''}
             ${stars}
             ${reco}
           </div>
@@ -288,6 +290,7 @@ function render() {
       </div>
     `;
   }).join('');
+  hydrateProviders();
 }
 
 // ===== VUE AFFICHES =====
@@ -307,6 +310,7 @@ function renderPoster(b) {
       </button>
       <div class="poster-title">${escapeHtml(b.titre)}</div>
       ${sub ? `<div class="poster-sub">${sub}</div>` : ''}
+      ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${b.id}"></div>` : ''}
       ${b.note ? renderStars(b.note) : ''}
     </div>`;
 }
@@ -649,6 +653,7 @@ function deleteBook(id) {
 
 function openModal(book) {
   document.getElementById('edit-id').value = book ? book.id : '';
+  pickedTmdb = null;
   document.getElementById('f-type').value = book ? typeOf(book) : defaultAddType();
   renderTypePicker();
   fillCategorySelect(book ? book.categorie : currentCat);
@@ -814,6 +819,8 @@ function saveBook() {
     plateforme: type === 'jeu' ? document.getElementById('f-platform').value.trim() : '',
     progression: type === 'serie' ? document.getElementById('f-progress').value.trim() : '',
   };
+  // Identifiant TMDB du résultat choisi, pour retrouver les plateformes de streaming
+  if (pickedTmdb && pickedTmdb.kind === (type === 'film' ? 'movie' : type === 'serie' ? 'tv' : '')) data.tmdbId = pickedTmdb.id;
   if (id) {
     touch(Object.assign(books.find(b => b.id === id), data));
   } else {
