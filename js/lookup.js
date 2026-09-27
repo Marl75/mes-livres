@@ -3,7 +3,7 @@
 // Ces clés ne donnent accès qu'à des fiches publiques, en lecture seule : comme la
 // configuration Firebase, elles peuvent figurer dans le code de l'appli.
 const TMDB_KEY = '580753634de21f5801eed720e022c2b5';
-const RAWG_KEY = '';
+const RAWG_KEY = '0ee3d95391e3443487b5386446eb2621';
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w342';
 
 let lookupTimer = null;
