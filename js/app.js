@@ -573,6 +573,7 @@ function renderStats() {
 
   const pct = goal ? Math.min(100, Math.round(readThisYear.length / goal * 100)) : 0;
   document.getElementById('stats-content').innerHTML = `
+    <button class="retro-open" onclick="openRetro()">✨ ${t('retroOpen', { year })}</button>
     <div class="goal-card">
       <div class="goal-head">
         <div class="goal-count">${readThisYear.length} <small>${goal ? tt('goalOf', ty, { goal, year }) : ttn('readYear', ty, readThisYear.length, { year })}</small></div>
@@ -971,6 +972,10 @@ document.getElementById('modal').addEventListener('click', e => {
   if (e.target.id === 'modal') closeModal();
 });
 
+document.getElementById('retro-modal').addEventListener('click', e => {
+  if (e.target.id === 'retro-modal') closeRetro();
+});
+
 document.getElementById('share-modal').addEventListener('click', e => {
   if (e.target.id === 'share-modal') closeShareModal();
 });
@@ -992,6 +997,6 @@ renderTypeUI();
 showActiveCat('instant');
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeShareModal(); closeModal(); closeProfileModal(); closeStatsModal(); }
+  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeShareModal(); closeRetro(); closeModal(); closeProfileModal(); closeStatsModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
 });

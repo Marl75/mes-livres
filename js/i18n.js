@@ -112,6 +112,10 @@ const I18N = {
     shareError: 'Le lien n\'a pas pu être créé. Vérifie ta connexion et réessaie.',
     sharedBy: 'La wishlist de {name}', sharedUpdated: 'mise à jour le {date}', sharedMissing: "Ce lien de partage n'existe plus.",
     sharedEmpty: 'Cette wishlist est vide pour le moment.', sharedOwn: 'Créer ma propre collection',
+    retroOpen: 'Voir ma rétrospective {year}', retroTitle: 'Mon année {year}', retroTotal_one: 'œuvre terminée', retroTotal_other: 'œuvres terminées',
+    retroFavorites: 'Mes coups de cœur', retroMonths: 'Mois par mois', retroBusiest: 'Ton mois le plus riche : {month}.',
+    retroTags: 'Tes thèmes de l\'année', retroCreator: 'Créateur le plus présent : {name} ({n} œuvres).',
+    retroFirstLast: 'Tu as commencé l\'année avec « {first} », et ta dernière en date est « {last} ».', retroEmpty: 'Rien de terminé en {year} pour l\'instant.',
   },
   en: {
     locale: 'en-GB', docTitle: 'Collection', langSwitch: 'Français',
@@ -224,6 +228,10 @@ const I18N = {
     shareError: 'The link could not be created. Check your connection and try again.',
     sharedBy: "{name}'s wishlist", sharedUpdated: 'updated {date}', sharedMissing: 'This share link no longer exists.',
     sharedEmpty: 'This wishlist is empty for now.', sharedOwn: 'Create my own collection',
+    retroOpen: 'See my {year} in review', retroTitle: 'My {year}', retroTotal_one: 'title finished', retroTotal_other: 'titles finished',
+    retroFavorites: 'My favourites', retroMonths: 'Month by month', retroBusiest: 'Your busiest month: {month}.',
+    retroTags: 'Your themes of the year', retroCreator: 'Most present creator: {name} ({n} titles).',
+    retroFirstLast: 'You started the year with “{first}”, and your latest is “{last}”.', retroEmpty: 'Nothing finished in {year} yet.',
   },
 };
 
