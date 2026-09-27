@@ -381,6 +381,18 @@ header {
 .sync-status .ok { color: #6dbfa8; }
 .sync-status .err { color: var(--danger); }
 
+/* Mention des sources de données */
+.credits {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-faint);
+  text-align: center;
+}
+.credits a { color: var(--text-dim); }
+
 /* Type tabs (Tout, Livres, Films, Séries, Jeux) */
 .type-tabs {
   display: inline-flex;

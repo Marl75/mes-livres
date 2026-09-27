@@ -95,6 +95,11 @@ const I18N = {
     'undated_one__tout': '{n} élément terminé sans date de fin : ajoute-la via « Modifier » pour le compter par année.',
     'undated_other__tout': '{n} éléments terminés sans date de fin : ajoute-la via « Modifier » pour les compter par année.',
     'emptyHint__tout': 'Clique sur « Ajouter » pour commencer ta collection.',
+    'lookupPh__film': 'Titre du film…', 'lookupPh__serie': 'Titre de la série…', 'lookupPh__jeu': 'Nom du jeu…',
+    'lookupHint__film': "Choisis un résultat pour remplir le titre, la réalisation, l'année et l'affiche",
+    'lookupHint__serie': "Choisis un résultat pour remplir le titre, la création, l'année et l'affiche",
+    'lookupHint__jeu': "Choisis un résultat pour remplir le nom, le studio, l'année et la jaquette",
+    credits: "Fiches : Open Library, Google Books, TMDB et RAWG. Cette appli utilise l'API TMDB sans être approuvée ni certifiée par TMDB.",
   },
   en: {
     locale: 'en-GB', docTitle: 'My Books', langSwitch: 'Français',
@@ -190,6 +195,11 @@ const I18N = {
     'undated_one__tout': '{n} finished item has no finish date: add it via “Edit” to count it by year.',
     'undated_other__tout': '{n} finished items have no finish date: add it via “Edit” to count them by year.',
     'emptyHint__tout': 'Click “Add” to start your collection.',
+    'lookupPh__film': 'Film title…', 'lookupPh__serie': 'Show title…', 'lookupPh__jeu': 'Game name…',
+    'lookupHint__film': 'Pick a result to fill in the title, director, year and poster',
+    'lookupHint__serie': 'Pick a result to fill in the title, creator, year and poster',
+    'lookupHint__jeu': 'Pick a result to fill in the name, studio, year and box art',
+    credits: 'Data: Open Library, Google Books, TMDB and RAWG. This product uses the TMDB API but is not endorsed or certified by TMDB.',
   },
 };
 

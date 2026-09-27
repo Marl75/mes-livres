@@ -339,6 +339,8 @@ function renderTypePicker() {
 
 function pickType(type) {
   document.getElementById('f-type').value = type;
+  document.getElementById('f-lookup').value = '';
+  hideLookup();
   renderTypePicker();
   fillCategorySelect(document.getElementById('f-categorie').value);
   updateModalFields(true);
@@ -519,113 +521,6 @@ function renderStats() {
   `;
 }
 
-// ===== RECHERCHE DE LIVRES (Google Books + Open Library) =====
-let lookupTimer = null;
-let lookupSeq = 0;
-let lookupResults = [];
-let lookupIndex = -1;
-
-function normalize(s) {
-  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-}
-
-async function searchGoogleBooks(q, isbn) {
-  const query = isbn ? 'isbn:' + isbn : q;
-  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&printType=books`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.items || []).map(it => {
-    const v = it.volumeInfo || {};
-    const img = (v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || '';
-    return {
-      titre: v.title || '',
-      auteur: (v.authors || []).slice(0, 2).join(', '),
-      cover: img.replace(/^http:/, 'https:').replace('&edge=curl', ''),
-    };
-  }).filter(r => r.titre);
-}
-
-async function searchOpenLibrary(q, isbn) {
-  const params = isbn ? 'isbn=' + isbn : 'q=' + encodeURIComponent(q);
-  const res = await fetch(`https://openlibrary.org/search.json?${params}&limit=6&lang=fr&fields=title,author_name,cover_i`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.docs || []).map(d => ({
-    titre: d.title || '',
-    auteur: (d.author_name || []).slice(0, 2).join(', '),
-    cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
-  })).filter(r => r.titre);
-}
-
-function onLookupInput() {
-  clearTimeout(lookupTimer);
-  const q = document.getElementById('f-lookup').value.trim();
-  if (q.length < 3) { hideLookup(); return; }
-  lookupTimer = setTimeout(() => runLookup(q), 350);
-}
-
-async function runLookup(q) {
-  const seq = ++lookupSeq;
-  const box = document.getElementById('lookup-results');
-  box.innerHTML = `<div class="lookup-empty">${t('searching')}</div>`;
-  box.classList.add('active');
-  const compact = q.replace(/[-\s]/g, '');
-  const isbn = /^(97[89])?\d{9}[\dXx]$/.test(compact) ? compact : null;
-  const [gb, ol] = await Promise.all([
-    searchGoogleBooks(q, isbn).catch(() => []),
-    searchOpenLibrary(q, isbn).catch(() => []),
-  ]);
-  if (seq !== lookupSeq) return;
-  // Fusionne en gardant la version la plus complète de chaque livre
-  const merged = new Map();
-  [...gb, ...ol].forEach(r => {
-    const key = normalize(r.titre) + '|' + normalize(r.auteur.split(',')[0]);
-    const prev = merged.get(key);
-    if (!prev) merged.set(key, r);
-    else merged.set(key, { ...prev, cover: prev.cover || r.cover });
-  });
-  // Classe par pertinence : les mots tapés présents dans le titre/auteur (favorise l'édition française)
-  const words = normalize(q).split(' ').filter(Boolean);
-  const score = r => {
-    const hay = ' ' + normalize(r.titre + ' ' + r.auteur) + ' ';
-    return words.filter(w => hay.includes(' ' + w)).length / (words.length || 1) + (r.cover ? 0.01 : 0);
-  };
-  lookupResults = [...merged.values()]
-    .map((r, i) => ({ r, s: score(r), i }))
-    .sort((a, b) => b.s - a.s || a.i - b.i)
-    .map(x => x.r)
-    .slice(0, 8);
-  lookupIndex = -1;
-  if (!lookupResults.length) {
-    box.innerHTML = `<div class="lookup-empty">${t('noneFound')}</div>`;
-    return;
-  }
-  box.innerHTML = lookupResults.map((r, i) => `
-    <div class="lookup-item" data-i="${i}" onmousedown="event.preventDefault(); pickLookup(${i})">
-      ${r.cover ? `<img src="${escapeHtml(r.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=noimg></span>'">` : '<span class="noimg"></span>'}
-      <div>
-        <div class="t">${escapeHtml(r.titre)}</div>
-        <div class="a">${escapeHtml(r.auteur)}</div>
-      </div>
-    </div>`).join('');
-}
-
-function hideLookup() {
-  lookupSeq++;
-  document.getElementById('lookup-results').classList.remove('active');
-}
-
-function pickLookup(i) {
-  const r = lookupResults[i];
-  if (!r) return;
-  document.getElementById('f-titre').value = r.titre;
-  document.getElementById('f-auteur').value = r.auteur;
-  if (r.cover) document.getElementById('f-cover').value = r.cover;
-  updateCoverPreview();
-  document.getElementById('f-lookup').value = '';
-  hideLookup();
-}
-
 function updateCoverPreview() {
   const url = document.getElementById('f-cover').value.trim();
   const titre = document.getElementById('f-titre').value;
@@ -711,7 +606,7 @@ function openModal(book) {
   renderTagEditor();
   updateModalFields();
   document.getElementById('modal').classList.add('active');
-  const focusLookup = !book && document.getElementById('f-type').value === 'livre';
+  const focusLookup = !book && lookupAvailable(document.getElementById('f-type').value);
   setTimeout(() => document.getElementById(focusLookup ? 'f-lookup' : 'f-titre').focus(), 50);
 }
 
@@ -896,7 +791,9 @@ function updateModalFields(fromChange) {
   const cat = document.getElementById('f-categorie').value;
   const isEdit = !!document.getElementById('edit-id').value;
   document.getElementById('modal-title').textContent = tt(isEdit ? 'editBook' : 'addBook', type);
-  document.getElementById('field-lookup').style.display = type === 'livre' ? 'block' : 'none';
+  document.getElementById('field-lookup').style.display = lookupAvailable(type) ? 'block' : 'none';
+  document.getElementById('f-lookup').placeholder = tt('lookupPh', type);
+  document.getElementById('lookup-hint').textContent = tt('lookupHint', type);
   document.getElementById('f-titre').placeholder = tt('titlePh', type);
   document.getElementById('label-auteur').textContent = tt('author', type);
   document.getElementById('f-auteur').placeholder = tt('authorPh', type);
