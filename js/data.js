@@ -298,6 +298,7 @@ async function loadFromFirestore() {
     cacheLocally();
     listenRemote();
     loadedOffline = false;
+    recordVisit();
     setSyncBtnState('synced');
     setSyncStatus(t('connected', { email: escapeHtml(currentUser.email) }), 'ok');
     setTimeout(() => setSyncBtnState(null), 2000);
@@ -440,6 +441,7 @@ auth.onAuthStateChanged(async user => {
     await loadFromFirestore();
   } else {
     stopListening();
+    usageRecorded = false;
     currentUser = null;
     state = { profiles: [], deletedProfiles: {}, currentId: null };
     books = [];

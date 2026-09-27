@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Collection · Suivi d'utilisation</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0e13; --surface: rgba(255, 255, 255, 0.04); --border: rgba(255, 255, 255, 0.08);
+    --text: #f4f2ed; --dim: #a09bb0; --faint: #6b6678; --accent: #c9a961; --accent-soft: rgba(201, 169, 97, 0.15);
+    --green: #6dbfa8; --blue: #6a9bd4; --red: #e07a6c;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 20px 60px; line-height: 1.5; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; letter-spacing: -1px; color: #e3cf9f; }
+  .sub { color: var(--dim); font-size: 14px; margin-top: 4px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+  button, .btn { font-family: inherit; font-size: 14px; border-radius: 10px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--dim); }
+  button.primary { background: var(--accent); color: #1a1426; border: none; font-weight: 600; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+  .login { max-width: 380px; margin: 60px auto; display: flex; flex-direction: column; gap: 12px; }
+  .login label { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .login input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: inherit; font-size: 14px; margin-top: 6px; }
+  .error { color: var(--red); font-size: 14px; }
+  .note { color: var(--faint); font-size: 13px; }
+  .months { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+  .months button { padding: 7px 12px; border-radius: 999px; font-size: 13px; }
+  .months button.on { background: var(--accent-soft); border-color: var(--accent); color: #e3cf9f; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi .v { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 600; }
+  .kpi .l { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .section { margin-top: 26px; }
+  .section h2 { font-size: 13px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; margin-bottom: 12px; }
+  .chart { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; align-items: end; height: 190px; }
+  .col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; cursor: pointer; }
+  .bars { display: flex; gap: 3px; align-items: flex-end; height: 140px; width: 100%; justify-content: center; }
+  .bar { width: 42%; max-width: 18px; border-radius: 4px 4px 0 0; min-height: 2px; }
+  .bar.users { background: var(--accent); }
+  .bar.created { background: var(--green); }
+  .col .n { font-size: 11px; color: var(--dim); }
+  .col .m { font-size: 11px; color: var(--faint); }
+  .col.on .m { color: var(--text); font-weight: 600; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--dim); margin-top: 10px; }
+  .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .legend .u::before { background: var(--accent); }
+  .legend .c::before { background: var(--green); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px; border-bottom: 1px solid var(--border); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .table-wrap { overflow-x: auto; }
+  pre { background: #07060a; border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 12px; overflow-x: auto; color: #e3cf9f; margin: 12px 0; white-space: pre; }
+  code { color: #e3cf9f; }
+  ol { margin: 10px 0 0 20px; color: var(--dim); font-size: 14px; }
+  ol li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="root"><p class="note">Chargement…</p></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDj2AnlTDxOv_sHD311icF540ijNPMJS2E",
+  authDomain: "mes-livres-dafce.firebaseapp.com",
+  projectId: "mes-livres-dafce",
+  storageBucket: "mes-livres-dafce.firebasestorage.app",
+  messagingSenderId: "832888789850",
+  appId: "1:832888789850:web:82352a1b18640f89aab163",
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const root = document.getElementById('root');
+let docs = [];
+let selected = null;
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const monthKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const monthLabel = (m, style) => new Date(+m.slice(0, 4), +m.slice(5) - 1, 1).toLocaleDateString('fr-FR', { month: style || 'short', year: style ? 'numeric' : undefined }).replace('.', '');
+const dateLabel = ts => ts ? new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '–';
+
+function lastMonths(n) {
+  const out = [];
+  const d = new Date();
+  d.setDate(1);
+  for (let i = 0; i < n; i++) { out.unshift(monthKey(d)); d.setMonth(d.getMonth() - 1); }
+  return out;
+}
+
+function monthStats(m) {
+  const rows = docs.map(u => {
+    const mm = (u.months || {})[m] || {};
+    return {
+      email: u.email || u.id,
+      sessions: mm.sessions || 0,
+      created: (u.createdByMonth || {})[m] || 0,
+      modified: mm.modified || 0,
+      deleted: mm.deleted || 0,
+      lastSeen: mm.lastSeen || 0,
+    };
+  }).filter(r => r.sessions || r.created || r.modified || r.deleted);
+  const sum = k => rows.reduce((n, r) => n + r[k], 0);
+  return {
+    rows: rows.sort((a, b) => b.sessions - a.sessions || b.created - a.created),
+    active: rows.filter(r => r.sessions > 0).length,
+    sessions: sum('sessions'), created: sum('created'), modified: sum('modified'), deleted: sum('deleted'),
+  };
+}
+
+function showLogin(message) {
+  root.innerHTML = `
+    <div class="login card">
+      <h1>Suivi d'utilisation</h1>
+      <p class="sub">Connecte-toi avec ton compte Collection.</p>
+      ${message ? `<p class="error">${esc(message)}</p>` : ''}
+      <div><label>E-mail<input id="email" type="email" autocomplete="email"></label></div>
+      <div><label>Mot de passe<input id="password" type="password" autocomplete="current-password"></label></div>
+      <button class="primary" id="go">Se connecter</button>
+    </div>`;
+  const go = async () => {
+    try { await auth.signInWithEmailAndPassword(document.getElementById('email').value.trim(), document.getElementById('password').value); }
+    catch (e) { showLogin('E-mail ou mot de passe incorrect.'); }
+  };
+  document.getElementById('go').onclick = go;
+  document.getElementById('password').onkeydown = e => { if (e.key === 'Enter') go(); };
+}
+
+function showRules(user) {
+  const rules = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /shares/{shareId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.owner == request.auth.uid;
+      allow update: if request.auth != null && resource.data.owner == request.auth.uid
+                    && request.resource.data.owner == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
+    }
+    match /usage/{userId} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == userId || request.auth.uid == '${user.uid}');
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}`;
+  root.innerHTML = `
+    <div class="top"><div><h1>Suivi d'utilisation</h1><p class="sub">${esc(user.email)}</p></div>
+    <button onclick="auth.signOut()">Se déconnecter</button></div>
+    <div class="card">
+      <h2 style="font-size:18px; margin-bottom:8px;">Accès pas encore autorisé</h2>
+      <p class="sub">Pour que ce compte puisse lire les statistiques, remplace les règles de ta base Firebase par ce texte (il contient ton identifiant <code>${esc(user.uid)}</code>) :</p>
+      <pre id="rules">${esc(rules)}</pre>
+      <button class="primary" id="copy">Copier les règles</button>
+      <ol>
+        <li>Ouvre <a href="https://console.firebase.google.com/project/mes-livres-dafce/firestore/rules" target="_blank" rel="noopener" style="color:var(--accent)">les règles Firestore de ton projet</a>.</li>
+        <li>Remplace tout le texte par celui ci-dessus, puis clique sur <strong>Publier</strong>.</li>
+        <li>Attends une minute et recharge cette page.</li>
+      </ol>
+    </div>`;
+  document.getElementById('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(rules); document.getElementById('copy').textContent = 'Copié !'; } catch (e) {}
+  };
+}
+
+function render() {
+  const months = lastMonths(12);
+  if (!selected) selected = months[months.length - 1];
+  const stats = monthStats(selected);
+  const perMonth = months.map(m => ({ m, ...monthStats(m) }));
+  const maxUsers = Math.max(1, ...perMonth.map(p => p.active));
+  const maxCreated = Math.max(1, ...perMonth.map(p => p.created));
+  const firstTracked = Math.min(...docs.map(u => Math.min(...Object.values(u.months || {}).map(x => x.lastSeen || Infinity))));
+
+  root.innerHTML = `
+    <div class="top">
+      <div><h1>Suivi d'utilisation</h1><p class="sub">Collection · ${docs.length} compte${docs.length > 1 ? 's' : ''} connu${docs.length > 1 ? 's' : ''}</p></div>
+      <div style="display:flex; gap:8px;"><button onclick="load()">Actualiser</button><button onclick="auth.signOut()">Se déconnecter</button></div>
+    </div>
+
+    <div class="months">${months.slice().reverse().map(m => `<button class="${m === selected ? 'on' : ''}" onclick="pick('${m}')">${monthLabel(m, 'long')}</button>`).join('')}</div>
+
+    <div class="kpis">
+      <div class="card kpi"><div class="v">${stats.active}</div><div class="l">Utilisateurs actifs</div></div>
+      <div class="card kpi"><div class="v">${stats.created}</div><div class="l">Éléments créés</div></div>
+      <div class="card kpi"><div class="v">${stats.modified}</div><div class="l">Éléments modifiés</div></div>
+      <div class="card kpi"><div class="v">${stats.deleted}</div><div class="l">Éléments supprimés</div></div>
+      <div class="card kpi"><div class="v">${stats.sessions}</div><div class="l">Ouvertures de l'appli</div></div>
+    </div>
+
+    <div class="section card">
+      <h2>12 derniers mois</h2>
+      <div class="chart">${perMonth.map(p => `
+        <div class="col ${p.m === selected ? 'on' : ''}" onclick="pick('${p.m}')" title="${monthLabel(p.m, 'long')} : ${p.active} utilisateur(s), ${p.created} créé(s)">
+          <div class="bars">
+            <span class="bar users" style="height:${p.active / maxUsers * 100}%"></span>
+            <span class="bar created" style="height:${p.created / maxCreated * 100}%"></span>
+          </div>
+          <span class="n">${p.active || ''}</span>
+          <span class="m">${monthLabel(p.m)}</span>
+        </div>`).join('')}</div>
+      <div class="legend"><span class="u">Utilisateurs actifs</span><span class="c">Éléments créés</span></div>
+    </div>
+
+    <div class="section card">
+      <h2>Détail de ${monthLabel(selected, 'long')}</h2>
+      ${stats.rows.length ? `<div class="table-wrap"><table>
+        <thead><tr><th>E-mail</th><th class="num">Ouvertures</th><th class="num">Créés</th><th class="num">Modifiés</th><th class="num">Supprimés</th><th>Dernière visite</th></tr></thead>
+        <tbody>${stats.rows.map(r => `<tr><td>${esc(r.email)}</td><td class="num">${r.sessions}</td><td class="num">${r.created}</td><td class="num">${r.modified}</td><td class="num">${r.deleted}</td><td>${dateLabel(r.lastSeen)}</td></tr>`).join('')}</tbody>
+      </table></div>` : '<p class="note">Aucune activité ce mois-ci.</p>'}
+    </div>
+
+    <div class="section card">
+      <h2>Tous les comptes</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>E-mail</th><th>Premier suivi</th><th>Dernière visite</th><th class="num">Éléments</th><th class="num">Profils</th></tr></thead>
+        <tbody>${docs.slice().sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0)).map(u => `<tr><td>${esc(u.email || u.id)}</td><td>${dateLabel(u.firstSeen)}</td><td>${dateLabel(u.lastSeen)}</td><td class="num">${u.itemCount || 0}</td><td class="num">${u.profileCount || 0}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+
+    <p class="note" style="margin-top:20px;">Les éléments créés sont comptés d'après leur date d'ajout (historique complet, hors éléments supprimés). Les ouvertures, modifications et suppressions ne sont comptées que depuis la mise en place du suivi${isFinite(firstTracked) ? ` (${dateLabel(firstTracked)})` : ''}. Un compte n'apparaît qu'après sa première ouverture de l'appli depuis cette date.</p>`;
+}
+
+function pick(m) { selected = m; render(); }
+
+async function load() {
+  root.innerHTML = '<p class="note">Chargement…</p>';
+  try {
+    const snap = await db.collection('usage').get();
+    docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  } catch (e) {
+    if (e.code === 'permission-denied') showRules(auth.currentUser);
+    else root.innerHTML = `<p class="error">Impossible de charger les statistiques : ${esc(e.message)}</p>`;
+  }
+}
+
+auth.onAuthStateChanged(user => { if (user) load(); else showLogin(); });
+</script>
+</body>
+</html>

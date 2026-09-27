@@ -3,7 +3,7 @@
 //   copie locale seulement si le réseau manque.
 // - Bibliothèques Firebase et polices (adresses versionnées) : copie locale d'abord.
 // - Données (Firestore, connexion, recherches TMDB/RAWG/Open Library) : jamais interceptées.
-const CACHE = 'collection-v3';
+const CACHE = 'collection-v4';
 const CORE = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const CORE = [
   './js/i18n.js',
   './js/types.js',
   './js/data.js',
+  './js/usage.js',
   './js/lookup.js',
   './js/scanner.js',
   './js/watch.js',

@@ -645,6 +645,7 @@ function moveBook(id, cat) {
   b.categorie = cat;
   if (cat === 'lu' && !b.dateFinished) b.dateFinished = todayISO();
   touch(b);
+  trackUsage('modified');
   save();
   render();
 }
@@ -652,6 +653,7 @@ function moveBook(id, cat) {
 function deleteBook(id) {
   const item = books.find(b => b.id === id);
   if (!item || !confirm(t('confirmDeleteItem', { title: item.titre }))) return;
+  trackUsage('deleted');
   removeBook(id);
   save();
   render();
@@ -829,6 +831,7 @@ function saveBook() {
   if (pickedTmdb && pickedTmdb.kind === (type === 'film' ? 'movie' : type === 'serie' ? 'tv' : '')) data.tmdbId = pickedTmdb.id;
   if (id) {
     touch(Object.assign(books.find(b => b.id === id), data));
+    trackUsage('modified');
   } else {
     books.push(touch({ id: newId(), dateAdded: Date.now(), ...data }));
   }
