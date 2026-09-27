@@ -317,6 +317,7 @@ async function loadFromFirestore() {
     }
   }
   refreshUI();
+  handleSharedItem();
 }
 
 // Écoute en direct les changements faits depuis un autre appareil
