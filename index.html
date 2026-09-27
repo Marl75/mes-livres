@@ -1577,7 +1577,13 @@ let books = [];
 let saveTimer = null;
 let isSaving = false;
 let newProfileColor = PROFILE_COLORS[0];
+// Catégorie affichée, mémorisée sur l'appareil pour la retrouver au prochain lancement
+const CAT_KEY = 'mes-livres-cat';
 let currentCat = 'lu';
+try {
+  const savedCat = localStorage.getItem(CAT_KEY);
+  if (['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'].includes(savedCat)) currentCat = savedCat;
+} catch (e) {}
 let currentSearch = '';
 let currentRating = 0;
 let currentTags = [];
@@ -1740,6 +1746,7 @@ auth.onAuthStateChanged(async user => {
     currentUser = user;
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('app-container').style.display = '';
+    showActiveCat('instant');
     await loadFromFirestore();
   } else {
     currentUser = null;
@@ -2531,14 +2538,20 @@ function setRating(n) {
 
 function setActiveCat(cat) {
   currentCat = cat;
+  try { localStorage.setItem(CAT_KEY, cat); } catch (e) {}
+  showActiveCat('smooth');
+  render();
+}
+
+// Met en évidence la catégorie courante ; sur mobile, fait défiler la rangée jusqu'à elle
+function showActiveCat(behavior) {
   document.querySelectorAll('.stat-card').forEach(c => {
-    const isActive = c.dataset.cat === cat;
+    const isActive = c.dataset.cat === currentCat;
     c.classList.toggle('active', isActive);
     if (isActive && window.matchMedia('(max-width: 700px)').matches) {
-      c.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      c.scrollIntoView({ behavior, inline: 'center', block: 'nearest' });
     }
   });
-  render();
 }
 
 function updateModalFields(fromChange) {
@@ -2637,6 +2650,7 @@ document.getElementById('profile-modal').addEventListener('click', e => {
 
 applyTranslations();
 updateModalFields();
+showActiveCat('instant');
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeCardMenu(); closeModal(); closeProfileModal(); closeStatsModal(); }
