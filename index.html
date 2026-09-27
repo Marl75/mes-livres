@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mes Livres</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="icon-16.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="16x16" href="icon-16.png?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
 <meta name="theme-color" content="#0f0e13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -151,6 +151,19 @@
     display: none;
   }
   .auth-error.visible { display: block; }
+  .lang-link {
+    display: block;
+    margin: 18px auto 0;
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .lang-link:hover { color: var(--accent); }
   .auth-loading {
     text-align: center;
     color: var(--text-dim);
@@ -1094,49 +1107,50 @@
 <div class="auth-screen" id="auth-screen">
   <div class="auth-card">
     <div class="auth-brand">
-      <h1>Biblioth&egrave;que</h1>
-      <p>Connecte-toi pour retrouver tes livres</p>
+      <h1 data-i18n="appTitle">Biblioth&egrave;que</h1>
+      <p data-i18n="authSubtitle">Connecte-toi pour retrouver tes livres</p>
     </div>
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Connexion</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Inscription</button>
+      <button class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="tabLogin">Connexion</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')" data-i18n="tabRegister">Inscription</button>
     </div>
     <div class="auth-error" id="auth-error"></div>
     <div class="field">
-      <label>Email</label>
-      <input type="email" id="auth-email" placeholder="ton@email.com" autocomplete="email">
+      <label data-i18n="email">Email</label>
+      <input type="email" id="auth-email" placeholder="ton@email.com" data-i18n-ph="emailPh" autocomplete="email">
     </div>
     <div class="field">
-      <label>Mot de passe</label>
-      <input type="password" id="auth-password" placeholder="6 caract&egrave;res minimum" autocomplete="current-password">
+      <label data-i18n="password">Mot de passe</label>
+      <input type="password" id="auth-password" placeholder="6 caract&egrave;res minimum" data-i18n-ph="passwordPh" autocomplete="current-password">
     </div>
     <div class="field" id="auth-name-field" style="display:none;">
-      <label>Pr&eacute;nom (nom du profil)</label>
-      <input type="text" id="auth-name" placeholder="ex: Marl&egrave;ne" maxlength="30">
+      <label data-i18n="firstName">Pr&eacute;nom (nom du profil)</label>
+      <input type="text" id="auth-name" placeholder="ex: Marl&egrave;ne" data-i18n-ph="firstNamePh" maxlength="30">
     </div>
     <button class="btn-primary" id="auth-submit" onclick="submitAuth()" style="width:100%; margin-top:8px;">
       Se connecter
     </button>
-    <button class="btn-secondary" id="auth-reset-btn" onclick="resetPassword()" style="width:100%; margin-top:10px; font-size:13px; text-align:center;">
+    <button class="btn-secondary" id="auth-reset-btn" onclick="resetPassword()" style="width:100%; margin-top:10px; font-size:13px; text-align:center;" data-i18n="forgot">
       Mot de passe oubli&eacute; ?
     </button>
+    <button class="lang-link" onclick="toggleLanguage()" data-i18n="langSwitch">English</button>
   </div>
 </div>
 
 <div class="container" id="app-container" style="display:none;">
   <header>
     <div class="brand">
-      <h1>Biblioth&egrave;que</h1>
-      <p>Lectures, en attente, et envies</p>
+      <h1 data-i18n="appTitle">Biblioth&egrave;que</h1>
+      <p data-i18n="tagline">Lectures, en attente, et envies</p>
     </div>
     <div class="toolbar">
       <div class="search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" class="search" id="search" placeholder="Rechercher&hellip;">
+        <input type="text" class="search" id="search" placeholder="Rechercher&hellip;" data-i18n-ph="searchPh">
       </div>
       <button class="add-btn" onclick="openModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        <span class="add-btn-text">Ajouter</span>
+        <span class="add-btn-text" data-i18n="add">Ajouter</span>
       </button>
       <div class="profile-selector">
         <button class="profile-pill" id="profile-pill" onclick="toggleProfileDropdown(event)">
@@ -1146,10 +1160,10 @@
         </button>
         <div class="profile-dropdown" id="profile-dropdown"></div>
       </div>
-      <button class="icon-btn" onclick="openStatsModal()" title="Statistiques">
+      <button class="icon-btn" onclick="openStatsModal()" title="Statistiques" data-i18n-title="stats">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       </button>
-      <button class="icon-btn" id="sync-btn" onclick="manualSync()" title="Synchroniser">
+      <button class="icon-btn" id="sync-btn" onclick="manualSync()" title="Synchroniser" data-i18n-title="sync">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
       </button>
     </div>
@@ -1158,42 +1172,42 @@
 
   <div class="stats">
     <div class="stat-card active" data-cat="lu">
-      <div class="stat-label"><span class="dot"></span> Lu</div>
+      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_lu">Lu</span></div>
       <div class="stat-value" id="count-lu">0</div>
-      <div class="stat-sub">livres termin&eacute;s</div>
+      <div class="stat-sub" data-i18n="sub_lu">livres termin&eacute;s</div>
     </div>
     <div class="stat-card" data-cat="en-cours">
-      <div class="stat-label"><span class="dot"></span> En cours</div>
+      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_en-cours">En cours</span></div>
       <div class="stat-value" id="count-en-cours">0</div>
-      <div class="stat-sub">lectures en cours</div>
+      <div class="stat-sub" data-i18n="sub_en-cours">lectures en cours</div>
     </div>
     <div class="stat-card" data-cat="a-lire">
-      <div class="stat-label"><span class="dot"></span> &Agrave; lire</div>
+      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_a-lire">&Agrave; lire</span></div>
       <div class="stat-value" id="count-a-lire">0</div>
-      <div class="stat-sub">en attente sur l'&eacute;tag&egrave;re</div>
+      <div class="stat-sub" data-i18n="sub_a-lire">en attente sur l'&eacute;tag&egrave;re</div>
     </div>
     <div class="stat-card" data-cat="abandonne">
-      <div class="stat-label"><span class="dot"></span> Abandonn&eacute;</div>
+      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_abandonne">Abandonn&eacute;</span></div>
       <div class="stat-value" id="count-abandonne">0</div>
-      <div class="stat-sub">commenc&eacute;s, non termin&eacute;s</div>
+      <div class="stat-sub" data-i18n="sub_abandonne">commenc&eacute;s, non termin&eacute;s</div>
     </div>
     <div class="stat-card" data-cat="wishlist">
-      <div class="stat-label"><span class="dot"></span> Wishlist</div>
+      <div class="stat-label"><span class="dot"></span> <span data-i18n="cat_wishlist">Wishlist</span></div>
       <div class="stat-value" id="count-wishlist">0</div>
-      <div class="stat-sub">recommandations &agrave; d&eacute;couvrir</div>
+      <div class="stat-sub" data-i18n="sub_wishlist">recommandations &agrave; d&eacute;couvrir</div>
     </div>
   </div>
 
   <div class="tag-filter-bar" id="tag-filter-bar"></div>
   <div class="list-toolbar">
     <span id="list-count"></span>
-    <select class="sort-select" id="sort-select" aria-label="Trier">
-      <option value="recent">Ajout récent</option>
-      <option value="finished">Date de lecture</option>
-      <option value="title">Titre A → Z</option>
-      <option value="author">Auteur A → Z</option>
-      <option value="rating">Mieux notés</option>
-      <option value="progress">Progression</option>
+    <select class="sort-select" id="sort-select" aria-label="Trier" data-i18n-title="sortLabel">
+      <option value="recent" data-i18n="sort_recent">Ajout récent</option>
+      <option value="finished" data-i18n="sort_finished">Date de lecture</option>
+      <option value="title" data-i18n="sort_title">Titre A → Z</option>
+      <option value="author" data-i18n="sort_author">Auteur A → Z</option>
+      <option value="rating" data-i18n="sort_rating">Mieux notés</option>
+      <option value="progress" data-i18n="sort_progress">Progression</option>
     </select>
   </div>
   <div class="grid" id="grid"></div>
@@ -1205,10 +1219,10 @@
 <!-- Stats modal -->
 <div class="modal-overlay" id="stats-modal">
   <div class="modal stats-modal">
-    <h2>Statistiques</h2>
+    <h2 data-i18n="stats">Statistiques</h2>
     <div id="stats-content"></div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeStatsModal()">Fermer</button>
+      <button class="btn-secondary" onclick="closeStatsModal()" data-i18n="close">Fermer</button>
     </div>
   </div>
 </div>
@@ -1216,31 +1230,31 @@
 <!-- Profile manager modal -->
 <div class="modal-overlay" id="profile-modal">
   <div class="modal">
-    <h2>G&eacute;rer les profils</h2>
-    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px; line-height: 1.5;">
+    <h2 data-i18n="manageProfiles">G&eacute;rer les profils</h2>
+    <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 16px; line-height: 1.5;" data-i18n="profilesIntro">
       Chaque profil a sa propre liste de livres. Tous les profils sont synchronis&eacute;s sur ton compte &mdash; accessibles depuis n'importe quel appareil.
     </p>
     <div id="profile-list"></div>
     <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 12px;">
-      <h3 style="font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 12px;">Nouveau profil</h3>
+      <h3 style="font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 12px;" data-i18n="newProfile">Nouveau profil</h3>
       <div class="field">
-        <label>Nom</label>
-        <input type="text" id="f-profile-name" placeholder="ex: Marl&egrave;ne, Sophie&hellip;" maxlength="30">
+        <label data-i18n="name">Nom</label>
+        <input type="text" id="f-profile-name" placeholder="ex: Marl&egrave;ne, Sophie&hellip;" data-i18n-ph="profileNamePh" maxlength="30">
       </div>
       <div class="field">
-        <label>Couleur</label>
+        <label data-i18n="color">Couleur</label>
         <div class="color-picker" id="color-picker"></div>
       </div>
     </div>
     <div class="modal-actions" style="justify-content: space-between;">
       <div style="display: flex; gap: 8px;">
-        <button class="btn-secondary" onclick="exportBooks()">Exporter</button>
-        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">Importer</button>
+        <button class="btn-secondary" onclick="exportBooks()" data-i18n="export">Exporter</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()" data-i18n="import">Importer</button>
         <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBooks(event)">
       </div>
       <div style="display: flex; gap: 8px;">
-        <button class="btn-secondary" onclick="closeProfileModal()">Fermer</button>
-        <button class="btn-primary" onclick="createProfileFromForm()">Cr&eacute;er le profil</button>
+        <button class="btn-secondary" onclick="closeProfileModal()" data-i18n="close">Fermer</button>
+        <button class="btn-primary" onclick="createProfileFromForm()" data-i18n="createProfile">Cr&eacute;er le profil</button>
       </div>
     </div>
   </div>
@@ -1252,85 +1266,245 @@
     <h2 id="modal-title">Ajouter un livre</h2>
     <input type="hidden" id="edit-id">
     <div class="field">
-      <label>Remplir automatiquement</label>
+      <label data-i18n="autofill">Remplir automatiquement</label>
       <div class="lookup-wrap">
         <svg class="lookup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" class="lookup-input" id="f-lookup" placeholder="Titre, auteur ou ISBN&hellip;" autocomplete="off">
+        <input type="text" class="lookup-input" id="f-lookup" placeholder="Titre, auteur ou ISBN&hellip;" data-i18n-ph="lookupPh" autocomplete="off">
         <div class="lookup-results" id="lookup-results"></div>
       </div>
-      <div class="field-hint">Choisis un r&eacute;sultat pour remplir le titre, l'auteur, la couverture et le nombre de pages</div>
+      <div class="field-hint" data-i18n="lookupHint">Choisis un r&eacute;sultat pour remplir le titre, l'auteur, la couverture et le nombre de pages</div>
     </div>
     <div class="field">
-      <label>Titre</label>
-      <input type="text" id="f-titre" placeholder="Le nom du livre">
+      <label data-i18n="title">Titre</label>
+      <input type="text" id="f-titre" placeholder="Le nom du livre" data-i18n-ph="titlePh">
     </div>
     <div class="field">
-      <label>Auteur</label>
-      <input type="text" id="f-auteur" placeholder="Qui l'a &eacute;crit ?">
+      <label data-i18n="author">Auteur</label>
+      <input type="text" id="f-auteur" placeholder="Qui l'a &eacute;crit ?" data-i18n-ph="authorPh">
     </div>
     <div class="field">
-      <label>Cat&eacute;gorie</label>
+      <label data-i18n="category">Cat&eacute;gorie</label>
       <select id="f-categorie">
-        <option value="lu">Lu</option>
-        <option value="en-cours">En cours</option>
-        <option value="a-lire">&Agrave; lire</option>
-        <option value="abandonne">Abandonn&eacute;</option>
-        <option value="wishlist">Wishlist</option>
+        <option value="lu" data-i18n="cat_lu">Lu</option>
+        <option value="en-cours" data-i18n="cat_en-cours">En cours</option>
+        <option value="a-lire" data-i18n="cat_a-lire">&Agrave; lire</option>
+        <option value="abandonne" data-i18n="cat_abandonne">Abandonn&eacute;</option>
+        <option value="wishlist" data-i18n="cat_wishlist">Wishlist</option>
       </select>
     </div>
     <div class="field">
-      <label>Couverture</label>
+      <label data-i18n="cover">Couverture</label>
       <div class="cover-field">
         <div id="cover-preview"></div>
-        <input type="url" id="f-cover" placeholder="URL de l'image (remplie automatiquement)">
+        <input type="url" id="f-cover" placeholder="URL de l'image (remplie automatiquement)" data-i18n-ph="coverPh">
       </div>
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Pages</label>
-        <input type="number" id="f-pages" min="1" inputmode="numeric" placeholder="ex: 320">
+        <label data-i18n="pages">Pages</label>
+        <input type="number" id="f-pages" min="1" inputmode="numeric" placeholder="ex: 320" data-i18n-ph="pagesPh">
       </div>
       <div class="field" id="field-current-page">
-        <label>Page actuelle</label>
-        <input type="number" id="f-current-page" min="0" inputmode="numeric" placeholder="ex: 120">
+        <label data-i18n="currentPage">Page actuelle</label>
+        <input type="number" id="f-current-page" min="0" inputmode="numeric" placeholder="ex: 120" data-i18n-ph="currentPagePh">
       </div>
       <div class="field" id="field-finished">
-        <label>Termin&eacute; le</label>
+        <label data-i18n="finishedOn">Termin&eacute; le</label>
         <input type="date" id="f-finished">
       </div>
     </div>
     <div class="field" id="field-note">
-      <label>Note</label>
+      <label data-i18n="rating">Note</label>
       <div class="star-input" id="star-input">
         <span data-v="1">&#9733;</span><span data-v="2">&#9733;</span><span data-v="3">&#9733;</span><span data-v="4">&#9733;</span><span data-v="5">&#9733;</span>
       </div>
     </div>
     <div class="field" id="field-avis">
-      <label>Avis</label>
+      <label data-i18n="review">Avis</label>
       <textarea id="f-avis" placeholder="Ce que tu en as pens&eacute;&hellip;"></textarea>
     </div>
     <div class="field" id="field-reco" style="display:none;">
-      <label>Recommand&eacute; par</label>
-      <input type="text" id="f-reco" placeholder="Qui te l'a conseill&eacute; ?">
+      <label data-i18n="recoBy">Recommand&eacute; par</label>
+      <input type="text" id="f-reco" placeholder="Qui te l'a conseill&eacute; ?" data-i18n-ph="recoByPh">
     </div>
     <div class="field">
-      <label>Tags</label>
+      <label data-i18n="tags">Tags</label>
       <div class="tag-input-wrap">
         <div class="tag-editor" id="tag-editor" onclick="document.getElementById('f-tag-input').focus()">
           <input type="text" id="f-tag-input" placeholder="Ajouter un tag&hellip;" autocomplete="off">
         </div>
         <div class="tag-suggestions" id="tag-suggestions"></div>
       </div>
-      <div class="field-hint">Tape pour voir les tags existants &mdash; Entr&eacute;e / virgule pour valider, Tab pour autocompl&eacute;ter</div>
+      <div class="field-hint" data-i18n="tagHint">Tape pour voir les tags existants &mdash; Entr&eacute;e / virgule pour valider, Tab pour autocompl&eacute;ter</div>
     </div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal()">Annuler</button>
-      <button class="btn-primary" onclick="saveBook()">Enregistrer</button>
+      <button class="btn-secondary" onclick="closeModal()" data-i18n="cancel">Annuler</button>
+      <button class="btn-primary" onclick="saveBook()" data-i18n="save">Enregistrer</button>
     </div>
   </div>
 </div>
 
 <script>
+// ===== LANGUE (FR / EN) =====
+const I18N = {
+  fr: {
+    locale: 'fr-FR', docTitle: 'Mes Livres', langSwitch: 'English',
+    appTitle: 'Bibliothèque', authSubtitle: 'Connecte-toi pour retrouver tes livres', tagline: 'Lectures, en attente, et envies',
+    tabLogin: 'Connexion', tabRegister: 'Inscription', email: 'Email', emailPh: 'ton@email.com',
+    password: 'Mot de passe', passwordPh: '6 caractères minimum', firstName: 'Prénom (nom du profil)', firstNamePh: 'ex : Marlène',
+    login: 'Se connecter', createAccount: 'Créer mon compte', forgot: 'Mot de passe oublié ?', loading: 'Chargement…',
+    fillAll: 'Remplis tous les champs.', resetEnterEmail: 'Entre ton email pour réinitialiser le mot de passe.',
+    resetSent: 'Email de réinitialisation envoyé ! Vérifie ta boîte mail.',
+    'auth/invalid-email': 'Adresse email invalide.', 'auth/user-disabled': 'Ce compte a été désactivé.',
+    'auth/user-not-found': 'Aucun compte avec cet email.', 'auth/wrong-password': 'Mot de passe incorrect.',
+    'auth/invalid-credential': 'Email ou mot de passe incorrect.', 'auth/email-already-in-use': 'Un compte existe déjà avec cet email.',
+    'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.', 'auth/too-many-requests': 'Trop de tentatives. Réessaie dans quelques minutes.',
+    'auth/missing-password': 'Entre un mot de passe.', authDefault: 'Erreur de connexion. Vérifie tes identifiants.',
+    searchPh: 'Rechercher…', add: 'Ajouter', stats: 'Statistiques', sync: 'Synchroniser',
+    'cat_lu': 'Lu', 'cat_en-cours': 'En cours', 'cat_a-lire': 'À lire', 'cat_abandonne': 'Abandonné', 'cat_wishlist': 'Wishlist',
+    'sub_lu': 'livres terminés', 'sub_en-cours': 'lectures en cours', 'sub_a-lire': "en attente sur l'étagère",
+    'sub_abandonne': 'commencés, non terminés', 'sub_wishlist': 'recommandations à découvrir',
+    sortLabel: 'Trier', sort_recent: 'Ajout récent', sort_finished: 'Date de lecture', sort_title: 'Titre A → Z',
+    sort_author: 'Auteur A → Z', sort_rating: 'Mieux notés', sort_progress: 'Progression',
+    close: 'Fermer', cancel: 'Annuler', save: 'Enregistrer', edit: 'Modifier', delete: 'Supprimer', rename: 'Renommer', actions: 'Actions',
+    manageProfiles: 'Gérer les profils', manageProfilesAction: 'Nouveau profil / gérer', logout: 'Déconnexion', active: '(actif)',
+    profilesIntro: "Chaque profil a sa propre liste de livres. Tous les profils sont synchronisés sur ton compte — accessibles depuis n'importe quel appareil.",
+    newProfile: 'Nouveau profil', name: 'Nom', profileNamePh: 'ex : Marlène, Sophie…', color: 'Couleur',
+    export: 'Exporter', import: 'Importer', createProfile: 'Créer le profil',
+    profileNameRequired: 'Donne un nom au profil.', renamePrompt: 'Nouveau nom du profil :', cantDeleteLast: 'Impossible de supprimer le dernier profil.',
+    confirmDeleteProfile: 'Supprimer le profil « {name} » et ses {n} livre(s) ? Cette action est irréversible.',
+    confirmImportProfiles: 'Importer {n} profil(s) ? (Remplacera tous tes profils actuels)',
+    confirmImportBooks: 'Importer {n} livre(s) dans le profil « {name} » ?', invalidFormat: 'Format invalide', importError: "Erreur d'import : ",
+    addBook: 'Ajouter un livre', editBook: 'Modifier le livre', autofill: 'Remplir automatiquement', lookupPh: 'Titre, auteur ou ISBN…',
+    lookupHint: "Choisis un résultat pour remplir le titre, l'auteur, la couverture et le nombre de pages",
+    title: 'Titre', titlePh: 'Le nom du livre', author: 'Auteur', authorPh: "Qui l'a écrit ?", category: 'Catégorie',
+    cover: 'Couverture', coverPh: "URL de l'image (remplie automatiquement)", pages: 'Pages', pagesPh: 'ex : 320',
+    currentPage: 'Page actuelle', currentPagePh: 'ex : 120', finishedOn: 'Terminé le', rating: 'Note', review: 'Avis',
+    reviewPh: 'Ce que tu en as pensé…', reviewPhReading: 'Tes impressions en cours de lecture…', reviewPhAbandoned: "Pourquoi l'as-tu abandonné ?",
+    recoBy: 'Recommandé par', recoByPh: "Qui te l'a conseillé ?", tags: 'Tags', tagPh: 'Ajouter un tag…',
+    tagHint: 'Tape pour voir les tags existants — Entrée / virgule pour valider, Tab pour autocompléter',
+    removeTag: 'retirer', createTag: '+ Créer « {q} »', newTag: 'nouveau', clearTags: '✕ tout effacer',
+    books_one: '{n} livre', books_other: '{n} livres', pagesShort: '{n} p.', readIn: 'Lu en {date}',
+    noResults: 'Aucun résultat', tryAnother: 'Essaie un autre terme.', emptyTitle: "Rien ici pour l'instant",
+    emptyHint: 'Clique sur « Ajouter » pour commencer ta collection.', confirmDeleteBook: 'Supprimer ce livre ?',
+    moveTo: 'Déplacer vers', updatePage: 'Mettre à jour la page', progressAddPages: 'Ajouter le nombre de pages pour suivre ta progression',
+    promptPages: 'Nombre de pages de « {title} » :', promptPage: 'Tu en es à quelle page ? (sur {total})',
+    confirmFinished: 'Bravo, tu as terminé « {title} » ! Le passer dans « Lu » ?',
+    goal: 'Objectif', goalOf: '/ {goal} livres en {year}', readYear_one: 'livre lu en {year}', readYear_other: 'livres lus en {year}',
+    totalRead: 'Lus au total', pagesIn: 'Pages en {year}', avgRating: 'Note moyenne', byYear: 'Livres lus par année',
+    topAuthors: 'Auteurs les plus lus', topTags: 'Tags favoris', noneRead: 'Pas encore de livre lu dans ce profil.',
+    undated_one: '{n} livre lu sans date de fin : ajoute-la via « Modifier » pour le compter par année.',
+    undated_other: '{n} livres lus sans date de fin : ajoute-la via « Modifier » pour les compter par année.',
+    searching: 'Recherche…', noneFound: 'Aucun livre trouvé. Tu peux remplir la fiche à la main.',
+    migrated: '✓ {n} livre(s) migré(s) depuis cet appareil', connected: '✓ Connecté — {email}', saved: '✓ Sauvegardé — {email}',
+    offline: 'Mode hors-ligne — données locales', loadError: 'Erreur de chargement : ', saveError: 'Erreur de sauvegarde : ',
+  },
+  en: {
+    locale: 'en-GB', docTitle: 'My Books', langSwitch: 'Français',
+    appTitle: 'Library', authSubtitle: 'Sign in to find your books', tagline: 'Read, waiting, and wished for',
+    tabLogin: 'Log in', tabRegister: 'Sign up', email: 'Email', emailPh: 'you@email.com',
+    password: 'Password', passwordPh: 'At least 6 characters', firstName: 'First name (profile name)', firstNamePh: 'e.g. Marlène',
+    login: 'Log in', createAccount: 'Create my account', forgot: 'Forgot your password?', loading: 'Loading…',
+    fillAll: 'Please fill in all fields.', resetEnterEmail: 'Enter your email to reset your password.',
+    resetSent: 'Reset email sent! Check your inbox.',
+    'auth/invalid-email': 'Invalid email address.', 'auth/user-disabled': 'This account has been disabled.',
+    'auth/user-not-found': 'No account with this email.', 'auth/wrong-password': 'Incorrect password.',
+    'auth/invalid-credential': 'Incorrect email or password.', 'auth/email-already-in-use': 'An account already exists with this email.',
+    'auth/weak-password': 'Password must be at least 6 characters.', 'auth/too-many-requests': 'Too many attempts. Try again in a few minutes.',
+    'auth/missing-password': 'Enter a password.', authDefault: 'Sign-in error. Check your details.',
+    searchPh: 'Search…', add: 'Add', stats: 'Statistics', sync: 'Sync',
+    'cat_lu': 'Read', 'cat_en-cours': 'Reading', 'cat_a-lire': 'To read', 'cat_abandonne': 'Abandoned', 'cat_wishlist': 'Wishlist',
+    'sub_lu': 'finished books', 'sub_en-cours': 'currently reading', 'sub_a-lire': 'waiting on the shelf',
+    'sub_abandonne': 'started, not finished', 'sub_wishlist': 'recommendations to discover',
+    sortLabel: 'Sort', sort_recent: 'Recently added', sort_finished: 'Date read', sort_title: 'Title A → Z',
+    sort_author: 'Author A → Z', sort_rating: 'Top rated', sort_progress: 'Progress',
+    close: 'Close', cancel: 'Cancel', save: 'Save', edit: 'Edit', delete: 'Delete', rename: 'Rename', actions: 'Actions',
+    manageProfiles: 'Manage profiles', manageProfilesAction: 'New profile / manage', logout: 'Log out', active: '(active)',
+    profilesIntro: 'Each profile has its own book list. All profiles are synced to your account — available from any device.',
+    newProfile: 'New profile', name: 'Name', profileNamePh: 'e.g. Marlène, Sophie…', color: 'Colour',
+    export: 'Export', import: 'Import', createProfile: 'Create profile',
+    profileNameRequired: 'Give the profile a name.', renamePrompt: 'New profile name:', cantDeleteLast: "You can't delete the last profile.",
+    confirmDeleteProfile: 'Delete the profile “{name}” and its {n} book(s)? This cannot be undone.',
+    confirmImportProfiles: 'Import {n} profile(s)? (This will replace all your current profiles)',
+    confirmImportBooks: 'Import {n} book(s) into the profile “{name}”?', invalidFormat: 'Invalid format', importError: 'Import error: ',
+    addBook: 'Add a book', editBook: 'Edit book', autofill: 'Autofill', lookupPh: 'Title, author or ISBN…',
+    lookupHint: 'Pick a result to fill in the title, author, cover and page count',
+    title: 'Title', titlePh: "The book's title", author: 'Author', authorPh: 'Who wrote it?', category: 'Category',
+    cover: 'Cover', coverPh: 'Image URL (filled in automatically)', pages: 'Pages', pagesPh: 'e.g. 320',
+    currentPage: 'Current page', currentPagePh: 'e.g. 120', finishedOn: 'Finished on', rating: 'Rating', review: 'Review',
+    reviewPh: 'What you thought of it…', reviewPhReading: 'Your thoughts so far…', reviewPhAbandoned: 'Why did you give up on it?',
+    recoBy: 'Recommended by', recoByPh: 'Who recommended it?', tags: 'Tags', tagPh: 'Add a tag…',
+    tagHint: 'Type to see existing tags — Enter / comma to confirm, Tab to autocomplete',
+    removeTag: 'remove', createTag: '+ Create “{q}”', newTag: 'new', clearTags: '✕ clear all',
+    books_one: '{n} book', books_other: '{n} books', pagesShort: '{n} pp.', readIn: 'Read in {date}',
+    noResults: 'No results', tryAnother: 'Try another search.', emptyTitle: 'Nothing here yet',
+    emptyHint: 'Click “Add” to start your collection.', confirmDeleteBook: 'Delete this book?',
+    moveTo: 'Move to', updatePage: 'Update page', progressAddPages: 'Add the page count to track your progress',
+    promptPages: 'Number of pages in “{title}”:', promptPage: 'Which page are you on? (out of {total})',
+    confirmFinished: 'Well done, you finished “{title}”! Move it to “Read”?',
+    goal: 'Goal', goalOf: '/ {goal} books in {year}', readYear_one: 'book read in {year}', readYear_other: 'books read in {year}',
+    totalRead: 'Read in total', pagesIn: 'Pages in {year}', avgRating: 'Average rating', byYear: 'Books read per year',
+    topAuthors: 'Most-read authors', topTags: 'Favourite tags', noneRead: 'No books read in this profile yet.',
+    undated_one: '{n} read book has no finish date: add it via “Edit” to count it by year.',
+    undated_other: '{n} read books have no finish date: add it via “Edit” to count them by year.',
+    searching: 'Searching…', noneFound: 'No book found. You can fill in the details by hand.',
+    migrated: '✓ {n} book(s) migrated from this device', connected: '✓ Signed in — {email}', saved: '✓ Saved — {email}',
+    offline: 'Offline mode — local data', loadError: 'Loading error: ', saveError: 'Saving error: ',
+  },
+};
+
+const LANG_KEY = 'mes-livres-lang';
+let currentLang = 'fr';
+try {
+  const savedLang = localStorage.getItem(LANG_KEY);
+  currentLang = savedLang === 'en' || savedLang === 'fr'
+    ? savedLang
+    : ((navigator.language || 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en');
+} catch (e) {}
+
+function t(key, params) {
+  let str = I18N[currentLang][key] ?? I18N.fr[key] ?? key;
+  if (params) Object.entries(params).forEach(([k, v]) => { str = str.split(`{${k}}`).join(v); });
+  return str;
+}
+
+// Pluriel : en français 0 et 1 sont au singulier, en anglais seul 1 l'est
+function tn(key, n, params) {
+  const one = currentLang === 'fr' ? n <= 1 : n === 1;
+  return t(key + (one ? '_one' : '_other'), { n, ...params });
+}
+
+function locale() { return t('locale'); }
+function catLabel(k) { return t('cat_' + k); }
+
+function applyTranslations() {
+  document.documentElement.lang = currentLang;
+  document.title = t('docTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); el.setAttribute('aria-label', t(el.dataset.i18nTitle)); });
+  document.getElementById('auth-submit').textContent = authMode === 'login' ? t('login') : t('createAccount');
+  document.getElementById('modal-title').textContent = document.getElementById('edit-id').value ? t('editBook') : t('addBook');
+  const tagInput = document.getElementById('f-tag-input');
+  if (tagInput) tagInput.placeholder = t('tagPh');
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'fr' ? 'en' : 'fr';
+  try { localStorage.setItem(LANG_KEY, currentLang); } catch (e) {}
+  applyTranslations();
+  updateModalFields();
+  document.getElementById('profile-dropdown').classList.remove('active');
+  closeCardMenu();
+  if (currentUser) {
+    renderProfileSelector();
+    renderProfileList();
+    render();
+    if (document.getElementById('stats-modal').classList.contains('active')) renderStats();
+    setSyncStatus('');
+  }
+}
+
 // ===== FIREBASE =====
 const firebaseConfig = {
   apiKey: "AIzaSyDj2AnlTDxOv_sHD311icF540ijNPMJS2E",
@@ -1354,7 +1528,7 @@ function switchAuthTab(mode) {
     t.classList.toggle('active', (i === 0 && mode === 'login') || (i === 1 && mode === 'register'));
   });
   document.getElementById('auth-name-field').style.display = mode === 'register' ? 'block' : 'none';
-  document.getElementById('auth-submit').textContent = mode === 'login' ? 'Se connecter' : 'Créer mon compte';
+  document.getElementById('auth-submit').textContent = mode === 'login' ? t('login') : t('createAccount');
   document.getElementById('auth-reset-btn').style.display = mode === 'login' ? 'block' : 'none';
   document.getElementById('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
   document.getElementById('auth-error').classList.remove('visible');
@@ -1367,27 +1541,16 @@ function showAuthError(msg) {
 }
 
 function translateAuthError(code) {
-  const map = {
-    'auth/invalid-email': 'Adresse email invalide.',
-    'auth/user-disabled': 'Ce compte a été désactivé.',
-    'auth/user-not-found': 'Aucun compte avec cet email.',
-    'auth/wrong-password': 'Mot de passe incorrect.',
-    'auth/invalid-credential': 'Email ou mot de passe incorrect.',
-    'auth/email-already-in-use': 'Un compte existe déjà avec cet email.',
-    'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
-    'auth/too-many-requests': 'Trop de tentatives. Réessaie dans quelques minutes.',
-    'auth/missing-password': 'Entre un mot de passe.',
-  };
-  return map[code] || 'Erreur de connexion. Vérifie tes identifiants.';
+  return code && code.startsWith('auth/') && I18N.fr[code] ? t(code) : t('authDefault');
 }
 
 async function submitAuth() {
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   const btn = document.getElementById('auth-submit');
-  if (!email || !password) { showAuthError('Remplis tous les champs.'); return; }
+  if (!email || !password) { showAuthError(t('fillAll')); return; }
   btn.disabled = true;
-  btn.textContent = 'Chargement…';
+  btn.textContent = t('loading');
   document.getElementById('auth-error').classList.remove('visible');
   try {
     if (authMode === 'login') {
@@ -1400,16 +1563,16 @@ async function submitAuth() {
   } catch (e) {
     showAuthError(translateAuthError(e.code));
     btn.disabled = false;
-    btn.textContent = authMode === 'login' ? 'Se connecter' : 'Créer mon compte';
+    btn.textContent = authMode === 'login' ? t('login') : t('createAccount');
   }
 }
 
 async function resetPassword() {
   const email = document.getElementById('auth-email').value.trim();
-  if (!email) { showAuthError('Entre ton email pour réinitialiser le mot de passe.'); return; }
+  if (!email) { showAuthError(t('resetEnterEmail')); return; }
   try {
     await auth.sendPasswordResetEmail(email);
-    showAuthError('Email de réinitialisation envoyé ! Vérifie ta boîte mail.');
+    showAuthError(t('resetSent'));
     document.getElementById('auth-error').style.color = '#6dbfa8';
     document.getElementById('auth-error').style.borderColor = 'rgba(109, 191, 168, 0.3)';
     document.getElementById('auth-error').style.background = 'rgba(109, 191, 168, 0.08)';
@@ -1444,7 +1607,7 @@ let currentTags = [];
 let activeTagFilters = [];
 let suggestionIndex = -1;
 
-const CAT_LABELS = { 'lu': 'Lu', 'en-cours': 'En cours', 'a-lire': 'À lire', 'abandonne': 'Abandonné', 'wishlist': 'Wishlist' };
+const CATEGORIES = ['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'];
 
 function newId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
 
@@ -1477,7 +1640,7 @@ function setSyncBtnState(s) {
 }
 
 async function loadFromFirestore() {
-  setSyncStatus('Chargement…');
+  setSyncStatus(t('loading'));
   setSyncBtnState('syncing');
   try {
     const doc = await db.collection('users').doc(currentUser.uid).get();
@@ -1492,7 +1655,7 @@ async function loadFromFirestore() {
         state.currentId = localState.currentId || state.profiles[0].id;
         await saveToFirestore();
         const totalBooks = state.profiles.reduce((n, p) => n + (p.books || []).length, 0);
-        setSyncStatus(`✓ ${totalBooks} livre(s) migré(s) depuis cet appareil`, 'ok');
+        setSyncStatus(t('migrated', { n: totalBooks }), 'ok');
       } else {
         const name = currentUser.displayName || 'Moi';
         const id = newId();
@@ -1507,7 +1670,7 @@ async function loadFromFirestore() {
     bindBooksToProfile();
     cacheLocally();
     setSyncBtnState('synced');
-    setSyncStatus(`✓ Connecté — ${currentUser.email}`, 'ok');
+    setSyncStatus(t('connected', { email: escapeHtml(currentUser.email) }), 'ok');
     setTimeout(() => setSyncBtnState(null), 2000);
   } catch (e) {
     const cached = loadCache();
@@ -1515,10 +1678,10 @@ async function loadFromFirestore() {
       state = cached;
       bindBooksToProfile();
       setSyncBtnState('error');
-      setSyncStatus('Mode hors-ligne — données locales', 'err');
+      setSyncStatus(t('offline'), 'err');
     } else {
       setSyncBtnState('error');
-      setSyncStatus('Erreur de chargement : ' + e.message, 'err');
+      setSyncStatus(t('loadError') + escapeHtml(e.message), 'err');
     }
   }
   renderProfileSelector();
@@ -1538,11 +1701,11 @@ async function saveToFirestore() {
     });
     cacheLocally();
     setSyncBtnState('synced');
-    setSyncStatus(`✓ Sauvegardé — ${currentUser.email}`, 'ok');
+    setSyncStatus(t('saved', { email: escapeHtml(currentUser.email) }), 'ok');
     setTimeout(() => setSyncBtnState(null), 2000);
   } catch (e) {
     setSyncBtnState('error');
-    setSyncStatus('Erreur de sauvegarde : ' + e.message, 'err');
+    setSyncStatus(t('saveError') + escapeHtml(e.message), 'err');
   } finally {
     isSaving = false;
   }
@@ -1637,21 +1800,25 @@ function renderProfileSelector() {
     <div class="profile-item ${p.id === state.currentId ? 'current' : ''}" onclick="switchProfile('${p.id}')">
       <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
       <span>${escapeHtml(p.name)}</span>
-      <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${(p.books || []).length} livre${(p.books || []).length > 1 ? 's' : ''}</span>
+      <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${tn('books', (p.books || []).length)}</span>
     </div>
   `).join('') + `
     <div class="profile-divider"></div>
     <button class="profile-action" onclick="openProfileModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      Nouveau profil / gérer
+      ${t('manageProfilesAction')}
     </button>
     <button class="profile-action mobile-only" onclick="toggleProfileDropdown(); manualSync()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
-      Synchroniser
+      ${t('sync')}
+    </button>
+    <button class="profile-action" onclick="toggleLanguage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      ${t('langSwitch')}
     </button>
     <button class="profile-action danger" onclick="logoutUser()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Déconnexion
+      ${t('logout')}
     </button>
   `;
 }
@@ -1705,12 +1872,12 @@ function renderProfileList() {
     <div class="profile-row">
       <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
       <div class="info">
-        <div class="name">${escapeHtml(p.name)}${p.id === state.currentId ? ' <span style="color:var(--accent); font-size:11px;">(actif)</span>' : ''}</div>
-        <div class="meta">${(p.books || []).length} livre${(p.books || []).length > 1 ? 's' : ''}</div>
+        <div class="name">${escapeHtml(p.name)}${p.id === state.currentId ? ` <span style="color:var(--accent); font-size:11px;">${t('active')}</span>` : ''}</div>
+        <div class="meta">${tn('books', (p.books || []).length)}</div>
       </div>
       <div class="row-actions">
-        <button onclick="renameProfile('${p.id}')">Renommer</button>
-        ${state.profiles.length > 1 ? `<button class="danger" onclick="deleteProfile('${p.id}')">Supprimer</button>` : ''}
+        <button onclick="renameProfile('${p.id}')">${t('rename')}</button>
+        ${state.profiles.length > 1 ? `<button class="danger" onclick="deleteProfile('${p.id}')">${t('delete')}</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -1718,7 +1885,7 @@ function renderProfileList() {
 
 function createProfileFromForm() {
   const name = document.getElementById('f-profile-name').value.trim();
-  if (!name) { alert('Donne un nom au profil.'); return; }
+  if (!name) { alert(t('profileNameRequired')); return; }
   const profile = { id: newId(), name, color: newProfileColor, books: [], createdAt: Date.now() };
   state.profiles.push(profile);
   state.currentId = profile.id;
@@ -1735,7 +1902,7 @@ function createProfileFromForm() {
 function renameProfile(id) {
   const p = state.profiles.find(x => x.id === id);
   if (!p) return;
-  const name = prompt('Nouveau nom du profil :', p.name);
+  const name = prompt(t('renamePrompt'), p.name);
   if (!name || !name.trim()) return;
   p.name = name.trim();
   save();
@@ -1746,8 +1913,8 @@ function renameProfile(id) {
 function deleteProfile(id) {
   const p = state.profiles.find(x => x.id === id);
   if (!p) return;
-  if (state.profiles.length <= 1) { alert('Impossible de supprimer le dernier profil.'); return; }
-  if (!confirm(`Supprimer le profil « ${p.name} » et ses ${(p.books || []).length} livre(s) ? Cette action est irréversible.`)) return;
+  if (state.profiles.length <= 1) { alert(t('cantDeleteLast')); return; }
+  if (!confirm(t('confirmDeleteProfile', { name: p.name, n: (p.books || []).length }))) return;
   state.profiles = state.profiles.filter(x => x.id !== id);
   if (state.currentId === id) state.currentId = state.profiles[0].id;
   bindBooksToProfile();
@@ -1776,7 +1943,7 @@ function importBooks(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (Array.isArray(data.profiles) && data.profiles.length) {
-        if (confirm(`Importer ${data.profiles.length} profil(s) ? (Remplacera tous tes profils actuels)`)) {
+        if (confirm(t('confirmImportProfiles', { n: data.profiles.length }))) {
           state.profiles = data.profiles;
           state.currentId = data.profiles[0].id;
           bindBooksToProfile();
@@ -1787,8 +1954,8 @@ function importBooks(e) {
         }
       } else {
         const imported = Array.isArray(data) ? data : data.books;
-        if (!Array.isArray(imported)) throw new Error('Format invalide');
-        if (confirm(`Importer ${imported.length} livre(s) dans le profil « ${getCurrentProfile().name} » ?`)) {
+        if (!Array.isArray(imported)) throw new Error(t('invalidFormat'));
+        if (confirm(t('confirmImportBooks', { n: imported.length, name: getCurrentProfile().name }))) {
           books.length = 0;
           imported.forEach(b => books.push(b));
           save();
@@ -1797,7 +1964,7 @@ function importBooks(e) {
         }
       }
     } catch (err) {
-      alert('Erreur d\'import : ' + err.message);
+      alert(t('importError') + err.message);
     }
   };
   reader.readAsText(file);
@@ -1840,12 +2007,12 @@ function render() {
   ));
 
   document.getElementById('list-count').textContent = filtered.length
-    ? `${filtered.length} livre${filtered.length > 1 ? 's' : ''}`
+    ? tn('books', filtered.length)
     : '';
 
   if (filtered.length === 0) {
-    const msg = currentSearch ? 'Aucun résultat' : 'Rien ici pour l\'instant';
-    const sub = currentSearch ? 'Essaie un autre terme.' : 'Clique sur « Ajouter » pour commencer ta collection.';
+    const msg = currentSearch ? t('noResults') : t('emptyTitle');
+    const sub = currentSearch ? t('tryAnother') : t('emptyHint');
     grid.innerHTML = `<div class="empty-state"><div class="icon">📖</div><h3>${msg}</h3><p>${sub}</p></div>`;
     return;
   }
@@ -1858,8 +2025,8 @@ function render() {
       ? `<div class="tags">${b.tags.map(t => `<span class="tag" onclick="filterByTag('${escapeAttr(t)}')">${escapeHtml(t)}</span>`).join('')}</div>`
       : '';
     const meta = [];
-    if (b.categorie === 'lu' && b.dateFinished) meta.push('Lu en ' + formatMonthYear(b.dateFinished));
-    if (b.pages) meta.push(b.pages + ' p.');
+    if (b.categorie === 'lu' && b.dateFinished) meta.push(t('readIn', { date: formatMonthYear(b.dateFinished) }));
+    if (b.pages) meta.push(t('pagesShort', { n: b.pages }));
     return `
       <div class="card" data-cat="${b.categorie}">
         <div class="card-top">
@@ -1867,7 +2034,7 @@ function render() {
           <div class="card-info">
             <div class="card-header">
               <div class="card-title">${escapeHtml(b.titre)}</div>
-              <button class="card-menu" onclick="openCardMenu(event, '${b.id}')" aria-label="Actions" title="Actions">
+              <button class="card-menu" onclick="openCardMenu(event, '${b.id}')" aria-label="${t('actions')}" title="${t('actions')}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
               </button>
             </div>
@@ -1899,14 +2066,14 @@ function progressRatio(b) {
 }
 
 function sortBooks(list) {
-  const byTitle = (a, b) => a.titre.localeCompare(b.titre, 'fr', { sensitivity: 'base' });
+  const byTitle = (a, b) => a.titre.localeCompare(b.titre, locale(), { sensitivity: 'base' });
   const byRecent = (a, b) => (b.dateAdded || 0) - (a.dateAdded || 0);
   const sorters = {
     recent: byRecent,
     title: byTitle,
     author: (a, b) => {
       if (!a.auteur !== !b.auteur) return a.auteur ? -1 : 1;
-      return lastName(a.auteur).localeCompare(lastName(b.auteur), 'fr', { sensitivity: 'base' }) || byTitle(a, b);
+      return lastName(a.auteur).localeCompare(lastName(b.auteur), locale(), { sensitivity: 'base' }) || byTitle(a, b);
     },
     rating: (a, b) => (b.note || 0) - (a.note || 0) || byTitle(a, b),
     finished: (a, b) => (b.dateFinished || '').localeCompare(a.dateFinished || '') || byRecent(a, b),
@@ -1932,12 +2099,12 @@ function coverFallback(img) {
 
 function renderProgress(b) {
   if (!b.pages) {
-    return `<div class="progress" onclick="updateProgress('${b.id}')"><div class="progress-label"><span>Ajouter le nombre de pages pour suivre ta progression</span></div></div>`;
+    return `<div class="progress" onclick="updateProgress('${b.id}')"><div class="progress-label"><span>${t('progressAddPages')}</span></div></div>`;
   }
   const cur = Math.min(b.currentPage || 0, b.pages);
   const pct = Math.round(cur / b.pages * 100);
   return `
-    <div class="progress" onclick="updateProgress('${b.id}')" title="Mettre à jour la page">
+    <div class="progress" onclick="updateProgress('${b.id}')" title="${t('updatePage')}">
       <div class="progress-bar"><span style="width:${pct}%"></span></div>
       <div class="progress-label"><span>p. ${cur} / ${b.pages}</span><span>${pct} %</span></div>
     </div>`;
@@ -1947,16 +2114,16 @@ function updateProgress(id) {
   const b = books.find(x => x.id === id);
   if (!b) return;
   if (!b.pages) {
-    const pages = parseInt(prompt(`Nombre de pages de « ${b.titre} » :`, ''), 10);
+    const pages = parseInt(prompt(t('promptPages', { title: b.titre }), ''), 10);
     if (!pages || pages < 1) return;
     b.pages = pages;
   }
-  const input = prompt(`Tu en es à quelle page ? (sur ${b.pages})`, b.currentPage || '');
+  const input = prompt(t('promptPage', { total: b.pages }), b.currentPage || '');
   if (input === null) { save(); render(); return; }
   const page = parseInt(input, 10);
   if (isNaN(page) || page < 0) return;
   b.currentPage = Math.min(page, b.pages);
-  if (b.currentPage >= b.pages && confirm(`Bravo, tu as terminé « ${b.titre} » ! Le passer dans « Lu » ?`)) {
+  if (b.currentPage >= b.pages && confirm(t('confirmFinished', { title: b.titre }))) {
     moveBook(id, 'lu');
     return;
   }
@@ -1972,7 +2139,7 @@ function todayISO() {
 
 function formatMonthYear(iso) {
   const d = new Date(iso + 'T00:00:00');
-  return isNaN(d) ? '' : d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  return isNaN(d) ? '' : d.toLocaleDateString(locale(), { month: 'long', year: 'numeric' });
 }
 
 // ===== MENU DES CARTES =====
@@ -1990,15 +2157,15 @@ function openCardMenu(e, id) {
   const catColors = { 'lu': '#6dbfa8', 'en-cours': '#6a9bd4', 'a-lire': '#d4936a', 'abandonne': '#c97070', 'wishlist': '#b899d8' };
   const icon = path => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
   pop.innerHTML = `
-    <button class="profile-action" onclick="closeCardMenu(); editBook('${id}')">${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}Modifier</button>
-    ${b.categorie === 'en-cours' ? `<button class="profile-action" onclick="closeCardMenu(); updateProgress('${id}')">${icon('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>')}Mettre à jour la page</button>` : ''}
+    <button class="profile-action" onclick="closeCardMenu(); editBook('${id}')">${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}${t('edit')}</button>
+    ${b.categorie === 'en-cours' ? `<button class="profile-action" onclick="closeCardMenu(); updateProgress('${id}')">${icon('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>')}${t('updatePage')}</button>` : ''}
     <div class="profile-divider"></div>
-    <div class="menu-label">Déplacer vers</div>
-    ${Object.keys(CAT_LABELS).filter(k => k !== b.categorie).map(k =>
-      `<button class="profile-action" onclick="closeCardMenu(); moveBook('${id}', '${k}')"><span class="dot" style="background:${catColors[k]}"></span>${CAT_LABELS[k]}</button>`
+    <div class="menu-label">${t('moveTo')}</div>
+    ${CATEGORIES.filter(k => k !== b.categorie).map(k =>
+      `<button class="profile-action" onclick="closeCardMenu(); moveBook('${id}', '${k}')"><span class="dot" style="background:${catColors[k]}"></span>${catLabel(k)}</button>`
     ).join('')}
     <div class="profile-divider"></div>
-    <button class="profile-action danger" onclick="closeCardMenu(); deleteBook('${id}')">${icon('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>')}Supprimer</button>
+    <button class="profile-action danger" onclick="closeCardMenu(); deleteBook('${id}')">${icon('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>')}${t('delete')}</button>
   `;
   pop.classList.add('active');
   const r = e.currentTarget.getBoundingClientRect();
@@ -2046,7 +2213,7 @@ function barRows(entries) {
 function topCounts(values, limit) {
   const counts = {};
   values.forEach(v => { if (v) counts[v] = (counts[v] || 0) + 1; });
-  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'fr')).slice(0, limit);
+  return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], locale())).slice(0, limit);
 }
 
 function renderStats() {
@@ -2057,7 +2224,7 @@ function renderStats() {
   const goal = (p && p.goal) || 0;
   const pagesThisYear = readThisYear.reduce((n, b) => n + (b.pages || 0), 0);
   const rated = read.filter(b => b.note);
-  const avg = rated.length ? (rated.reduce((n, b) => n + b.note, 0) / rated.length).toFixed(1).replace('.', ',') : '–';
+  const avg = rated.length ? (rated.reduce((n, b) => n + b.note, 0) / rated.length).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '–';
   const undated = read.filter(b => !b.dateFinished).length;
 
   const byYear = topCounts(read.map(b => (b.dateFinished || '').slice(0, 4)), 100)
@@ -2069,21 +2236,21 @@ function renderStats() {
   document.getElementById('stats-content').innerHTML = `
     <div class="goal-card">
       <div class="goal-head">
-        <div class="goal-count">${readThisYear.length}${goal ? ` <small>/ ${goal} livres en ${year}</small>` : ` <small>livre${readThisYear.length > 1 ? 's' : ''} lu${readThisYear.length > 1 ? 's' : ''} en ${year}</small>`}</div>
-        <label class="goal-input">Objectif <input type="number" min="1" value="${goal || ''}" placeholder="–" onchange="setGoal(this.value)"></label>
+        <div class="goal-count">${readThisYear.length} <small>${goal ? t('goalOf', { goal, year }) : tn('readYear', readThisYear.length, { year })}</small></div>
+        <label class="goal-input">${t('goal')} <input type="number" min="1" value="${goal || ''}" placeholder="–" onchange="setGoal(this.value)"></label>
       </div>
       ${goal ? `<div class="progress-bar"><span style="width:${pct}%"></span></div>` : ''}
     </div>
     <div class="kpis">
-      <div class="kpi"><div class="v">${read.length}</div><div class="l">Lus au total</div></div>
-      <div class="kpi"><div class="v">${pagesThisYear.toLocaleString('fr-FR')}</div><div class="l">Pages en ${year}</div></div>
-      <div class="kpi"><div class="v">${avg}${rated.length ? ' ★' : ''}</div><div class="l">Note moyenne</div></div>
+      <div class="kpi"><div class="v">${read.length}</div><div class="l">${t('totalRead')}</div></div>
+      <div class="kpi"><div class="v">${pagesThisYear.toLocaleString(locale())}</div><div class="l">${t('pagesIn', { year })}</div></div>
+      <div class="kpi"><div class="v">${avg}${rated.length ? ' ★' : ''}</div><div class="l">${t('avgRating')}</div></div>
     </div>
-    ${byYear.length ? `<div class="stats-section"><h3>Livres lus par année</h3>${barRows(byYear)}</div>` : ''}
-    ${authors.length ? `<div class="stats-section"><h3>Auteurs les plus lus</h3>${barRows(authors)}</div>` : ''}
-    ${tags.length ? `<div class="stats-section"><h3>Tags favoris</h3>${barRows(tags)}</div>` : ''}
-    ${undated ? `<p class="stats-hint">${undated} livre${undated > 1 ? 's' : ''} lu${undated > 1 ? 's' : ''} sans date de fin : ajoute-la via « Modifier » pour les compter par année.</p>` : ''}
-    ${read.length === 0 ? `<p class="stats-hint">Pas encore de livre lu dans ce profil.</p>` : ''}
+    ${byYear.length ? `<div class="stats-section"><h3>${t('byYear')}</h3>${barRows(byYear)}</div>` : ''}
+    ${authors.length ? `<div class="stats-section"><h3>${t('topAuthors')}</h3>${barRows(authors)}</div>` : ''}
+    ${tags.length ? `<div class="stats-section"><h3>${t('topTags')}</h3>${barRows(tags)}</div>` : ''}
+    ${undated ? `<p class="stats-hint">${tn('undated', undated)}</p>` : ''}
+    ${read.length === 0 ? `<p class="stats-hint">${t('noneRead')}</p>` : ''}
   `;
 }
 
@@ -2137,7 +2304,7 @@ function onLookupInput() {
 async function runLookup(q) {
   const seq = ++lookupSeq;
   const box = document.getElementById('lookup-results');
-  box.innerHTML = '<div class="lookup-empty">Recherche…</div>';
+  box.innerHTML = `<div class="lookup-empty">${t('searching')}</div>`;
   box.classList.add('active');
   const compact = q.replace(/[-\s]/g, '');
   const isbn = /^(97[89])?\d{9}[\dXx]$/.test(compact) ? compact : null;
@@ -2167,7 +2334,7 @@ async function runLookup(q) {
     .slice(0, 8);
   lookupIndex = -1;
   if (!lookupResults.length) {
-    box.innerHTML = '<div class="lookup-empty">Aucun livre trouvé. Tu peux remplir la fiche à la main.</div>';
+    box.innerHTML = `<div class="lookup-empty">${t('noneFound')}</div>`;
     return;
   }
   box.innerHTML = lookupResults.map((r, i) => `
@@ -2175,7 +2342,7 @@ async function runLookup(q) {
       ${r.cover ? `<img src="${escapeHtml(r.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=noimg></span>'">` : '<span class="noimg"></span>'}
       <div>
         <div class="t">${escapeHtml(r.titre)}</div>
-        <div class="a">${escapeHtml([r.auteur, r.pages ? r.pages + ' p.' : ''].filter(Boolean).join(' · '))}</div>
+        <div class="a">${escapeHtml([r.auteur, r.pages ? t('pagesShort', { n: r.pages }) : ''].filter(Boolean).join(' · '))}</div>
       </div>
     </div>`).join('');
 }
@@ -2217,9 +2384,9 @@ function renderTagFilterBar() {
   if (tags.length === 0) { bar.innerHTML = ''; bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML =
-    '<span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Tags</span>'
+    '<span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>' + t('tags') + '</span>'
     + tags.map(t => `<span class="tag ${activeTagFilters.includes(t) ? 'active' : ''}" onclick="toggleTagFilter('${escapeAttr(t)}')">${escapeHtml(t)}<span class="count">${tagCounts[t]}</span></span>`).join('')
-    + (activeTagFilters.length ? '<button class="clear" onclick="clearTagFilter()">✕ tout effacer</button>' : '');
+    + (activeTagFilters.length ? `<button class="clear" onclick="clearTagFilter()">${t('clearTags')}</button>` : '');
 }
 
 function toggleTagFilter(tag) {
@@ -2255,7 +2422,7 @@ function moveBook(id, cat) {
 }
 
 function deleteBook(id) {
-  if (!confirm('Supprimer ce livre ?')) return;
+  if (!confirm(t('confirmDeleteBook'))) return;
   books = books.filter(b => b.id !== id);
   syncBooksToProfile();
   save();
@@ -2263,7 +2430,7 @@ function deleteBook(id) {
 }
 
 function openModal(book) {
-  document.getElementById('modal-title').textContent = book ? 'Modifier le livre' : 'Ajouter un livre';
+  document.getElementById('modal-title').textContent = book ? t('editBook') : t('addBook');
   document.getElementById('edit-id').value = book ? book.id : '';
   document.getElementById('f-titre').value = book ? book.titre : '';
   document.getElementById('f-auteur').value = book ? (book.auteur || '') : '';
@@ -2287,9 +2454,9 @@ function openModal(book) {
 
 function renderTagEditor() {
   const editor = document.getElementById('tag-editor');
-  editor.innerHTML = currentTags.map((t, i) =>
-    `<span class="chip">${escapeHtml(t)}<button type="button" onclick="removeTag(${i})" aria-label="retirer">×</button></span>`
-  ).join('') + '<input type="text" id="f-tag-input" placeholder="Ajouter un tag…" autocomplete="off">';
+  editor.innerHTML = currentTags.map((tag, i) =>
+    `<span class="chip">${escapeHtml(tag)}<button type="button" onclick="removeTag(${i})" aria-label="${t('removeTag')}">×</button></span>`
+  ).join('') + `<input type="text" id="f-tag-input" placeholder="${t('tagPh')}" autocomplete="off">`;
   bindTagInput();
 }
 
@@ -2373,10 +2540,10 @@ function renderSuggestions(query) {
   if (q) all = all.filter(t => t.tag.includes(q));
   all = all.slice(0, 8);
 
-  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${t.count} livre${t.count > 1 ? 's' : ''}</span></div>`).join('');
+  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${tn('books', t.count)}</span></div>`).join('');
 
   if (q && !getAllTags().some(t => t.tag === q) && !currentTags.includes(q)) {
-    html += `<div class="tag-suggestion" data-tag="${escapeAttr(q)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(q)}')"><span>+ Créer « ${escapeHtml(q)} »</span><span class="new">nouveau</span></div>`;
+    html += `<div class="tag-suggestion" data-tag="${escapeAttr(q)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(q)}')"><span>${t('createTag', { q: escapeHtml(q) })}</span><span class="new">${t('newTag')}</span></div>`;
   }
 
   if (!html) { box.classList.remove('active'); return; }
@@ -2463,9 +2630,9 @@ function updateModalFields(fromChange) {
   const isNew = !document.getElementById('edit-id').value;
   if (cat === 'lu' && !finished.value && (isNew || fromChange)) finished.value = todayISO();
   const avis = document.getElementById('f-avis');
-  if (cat === 'en-cours') avis.placeholder = 'Tes impressions en cours de lecture…';
-  else if (cat === 'abandonne') avis.placeholder = 'Pourquoi l\'as-tu abandonné ?';
-  else avis.placeholder = 'Ce que tu en as pensé…';
+  if (cat === 'en-cours') avis.placeholder = t('reviewPhReading');
+  else if (cat === 'abandonne') avis.placeholder = t('reviewPhAbandoned');
+  else avis.placeholder = t('reviewPh');
 }
 
 function escapeHtml(s) {
@@ -2545,6 +2712,9 @@ document.getElementById('modal').addEventListener('click', e => {
 document.getElementById('profile-modal').addEventListener('click', e => {
   if (e.target.id === 'profile-modal') closeProfileModal();
 });
+
+applyTranslations();
+updateModalFields();
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeCardMenu(); closeModal(); closeProfileModal(); closeStatsModal(); }
