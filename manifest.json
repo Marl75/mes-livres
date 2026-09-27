@@ -1,7 +1,7 @@
 {
-  "name": "Mes Livres",
-  "short_name": "Mes Livres",
-  "description": "Ma bibliothèque personnelle",
+  "name": "Collection",
+  "short_name": "Collection",
+  "description": "Livres, films, séries et jeux vidéo",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

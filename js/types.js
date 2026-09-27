@@ -68,6 +68,15 @@ function rememberView() {
   } catch (e) {}
 }
 
+// Affichage en cartes ou en affiches, mémorisé par onglet (affiches par défaut pour films et séries)
+const VIEWS_KEY = 'mes-livres-views';
+let viewByType = {};
+try { viewByType = JSON.parse(localStorage.getItem(VIEWS_KEY) || '{}') || {}; } catch (e) {}
+
+function viewMode() {
+  return viewByType[currentType] || (currentType === 'film' || currentType === 'serie' ? 'posters' : 'cards');
+}
+
 // Éléments du profil dans l'onglet de type courant
 function scopedItems() {
   return currentType === 'tout' ? books : books.filter(b => typeOf(b) === currentType);

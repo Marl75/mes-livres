@@ -1,8 +1,8 @@
 // ===== LANGUE (FR / EN) =====
 const I18N = {
   fr: {
-    locale: 'fr-FR', docTitle: 'Mes Livres', langSwitch: 'English',
-    appTitle: 'Bibliothèque', authSubtitle: 'Connecte-toi pour retrouver tes livres',
+    locale: 'fr-FR', docTitle: 'Collection', langSwitch: 'English',
+    appTitle: 'Ma Collection', authSubtitle: 'Connecte-toi pour retrouver ta collection',
     tabLogin: 'Connexion', tabRegister: 'Inscription', email: 'Email', emailPh: 'ton@email.com',
     password: 'Mot de passe', passwordPh: '6 caractères minimum', firstName: 'Prénom (nom du profil)', firstNamePh: 'ex : Marlène',
     login: 'Se connecter', createAccount: 'Créer mon compte', forgot: 'Mot de passe oublié ?', loading: 'Chargement…',
@@ -21,7 +21,7 @@ const I18N = {
     sort_author: 'Auteur A → Z', sort_rating: 'Mieux notés',
     close: 'Fermer', cancel: 'Annuler', save: 'Enregistrer', edit: 'Modifier', delete: 'Supprimer', rename: 'Renommer', actions: 'Actions',
     manageProfiles: 'Gérer les profils', manageProfilesAction: 'Nouveau profil / gérer', logout: 'Déconnexion', active: '(actif)',
-    profilesIntro: "Chaque profil a sa propre liste de livres. Tous les profils sont synchronisés sur ton compte — accessibles depuis n'importe quel appareil.",
+    profilesIntro: "Chaque profil a sa propre collection. Tous les profils sont synchronisés sur ton compte — accessibles depuis n'importe quel appareil.",
     newProfile: 'Nouveau profil', name: 'Nom', profileNamePh: 'ex : Marlène, Sophie…', color: 'Couleur',
     export: 'Exporter', import: 'Importer', createProfile: 'Créer le profil',
     profileNameRequired: 'Donne un nom au profil.', renamePrompt: 'Nouveau nom du profil :', cantDeleteLast: 'Impossible de supprimer le dernier profil.',
@@ -100,10 +100,11 @@ const I18N = {
     'lookupHint__serie': "Choisis un résultat pour remplir le titre, la création, l'année et l'affiche",
     'lookupHint__jeu': "Choisis un résultat pour remplir le nom, le studio, l'année et la jaquette",
     credits: "Fiches : Open Library, Google Books, TMDB et RAWG. Cette appli utilise l'API TMDB sans être approuvée ni certifiée par TMDB.",
+    viewPosters: 'Affiches', viewCards: 'Cartes',
   },
   en: {
-    locale: 'en-GB', docTitle: 'My Books', langSwitch: 'Français',
-    appTitle: 'Library', authSubtitle: 'Sign in to find your books',
+    locale: 'en-GB', docTitle: 'Collection', langSwitch: 'Français',
+    appTitle: 'My Collection', authSubtitle: 'Sign in to find your collection',
     tabLogin: 'Log in', tabRegister: 'Sign up', email: 'Email', emailPh: 'you@email.com',
     password: 'Password', passwordPh: 'At least 6 characters', firstName: 'First name (profile name)', firstNamePh: 'e.g. Marlène',
     login: 'Log in', createAccount: 'Create my account', forgot: 'Forgot your password?', loading: 'Loading…',
@@ -122,7 +123,7 @@ const I18N = {
     sort_author: 'Author A → Z', sort_rating: 'Top rated',
     close: 'Close', cancel: 'Cancel', save: 'Save', edit: 'Edit', delete: 'Delete', rename: 'Rename', actions: 'Actions',
     manageProfiles: 'Manage profiles', manageProfilesAction: 'New profile / manage', logout: 'Log out', active: '(active)',
-    profilesIntro: 'Each profile has its own book list. All profiles are synced to your account — available from any device.',
+    profilesIntro: 'Each profile has its own collection. All profiles are synced to your account — available from any device.',
     newProfile: 'New profile', name: 'Name', profileNamePh: 'e.g. Marlène, Sophie…', color: 'Colour',
     export: 'Export', import: 'Import', createProfile: 'Create profile',
     profileNameRequired: 'Give the profile a name.', renamePrompt: 'New profile name:', cantDeleteLast: "You can't delete the last profile.",
@@ -200,6 +201,7 @@ const I18N = {
     'lookupHint__serie': 'Pick a result to fill in the title, creator, year and poster',
     'lookupHint__jeu': 'Pick a result to fill in the name, studio, year and box art',
     credits: 'Data: Open Library, Google Books, TMDB and RAWG. This product uses the TMDB API but is not endorsed or certified by TMDB.',
+    viewPosters: 'Posters', viewCards: 'Cards',
   },
 };
 

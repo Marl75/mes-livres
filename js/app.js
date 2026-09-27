@@ -151,7 +151,7 @@ function exportBooks() {
   const blob = new Blob([JSON.stringify({ profiles: state.profiles, exportedAt: Date.now() }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `mes-livres-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `collection-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -241,6 +241,13 @@ function render() {
     return;
   }
 
+  const posters = viewMode() === 'posters';
+  grid.classList.toggle('posters', posters);
+  if (posters) {
+    grid.innerHTML = filtered.map(renderPoster).join('');
+    return;
+  }
+
   grid.innerHTML = filtered.map(b => {
     const stars = b.note ? renderStars(b.note) : '';
     const reco = b.recoBy ? `<div class="reco-by">✨ ${escapeHtml(b.recoBy)}</div>` : '';
@@ -283,6 +290,41 @@ function render() {
   }).join('');
 }
 
+// ===== VUE AFFICHES =====
+function renderPoster(b) {
+  const type = typeOf(b);
+  const sub = [b.auteur, b.annee].filter(Boolean).map(escapeHtml).join(' · ');
+  const chip = type === 'serie' && b.progression && b.categorie !== 'lu'
+    ? `<span class="poster-chip">${escapeHtml(b.progression)}</span>` : '';
+  const image = b.cover
+    ? `<img class="poster-cover" src="${escapeHtml(b.cover)}" alt="" loading="lazy" data-title="${escapeHtml(b.titre)}" onerror="posterFallback(this)">`
+    : posterPlaceholder(b.titre);
+  return `
+    <div class="poster" data-cat="${b.categorie}">
+      <button class="poster-img${chip ? ' has-chip' : ''}" onclick="editBook('${b.id}')" aria-label="${escapeHtml(b.titre)}">${image}${chip}</button>
+      <button class="card-menu poster-menu" onclick="openCardMenu(event, '${b.id}')" aria-label="${t('actions')}" title="${t('actions')}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+      </button>
+      <div class="poster-title">${escapeHtml(b.titre)}</div>
+      ${sub ? `<div class="poster-sub">${sub}</div>` : ''}
+      ${b.note ? renderStars(b.note) : ''}
+    </div>`;
+}
+
+function posterPlaceholder(titre) {
+  return `<span class="poster-cover placeholder">${escapeHtml(titre || '')}</span>`;
+}
+
+function posterFallback(img) {
+  img.outerHTML = posterPlaceholder(img.dataset.title);
+}
+
+function setViewMode(mode) {
+  viewByType[currentType] = mode;
+  try { localStorage.setItem(VIEWS_KEY, JSON.stringify(viewByType)); } catch (e) {}
+  render();
+}
+
 // ===== TYPES (interface) =====
 const LAST_TYPE_KEY = 'mes-livres-last-type';
 
@@ -302,6 +344,11 @@ function renderTypeUI() {
     c.querySelector('.stat-sub').textContent = tt('sub_' + cat, currentType);
   });
   document.getElementById('sort-author').textContent = tt('sort_author', currentType);
+  const mode = viewMode();
+  document.querySelectorAll('#view-toggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === mode);
+    btn.setAttribute('aria-pressed', btn.dataset.view === mode);
+  });
 }
 
 function setActiveType(type, cat) {
