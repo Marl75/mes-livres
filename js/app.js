@@ -23,6 +23,10 @@ function renderProfileSelector() {
     </div>
   `).join('') + `
     <div class="profile-divider"></div>
+    <button class="profile-action" onclick="openShareModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      ${t('shareWishlist')}
+    </button>
     <button class="profile-action" onclick="openProfileModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       ${t('manageProfilesAction')}
@@ -136,6 +140,7 @@ function deleteProfile(id) {
   if (!p) return;
   if (state.profiles.length <= 1) { alert(t('cantDeleteLast')); return; }
   if (!confirm(t('confirmDeleteProfile', { name: p.name, n: (p.books || []).length }))) return;
+  if (p.shareId) db.collection('shares').doc(p.shareId).delete().catch(() => {});
   removeProfile(id);
   if (state.currentId === id) { state.currentId = state.profiles[0].id; rememberCurrentProfile(); }
   bindBooksToProfile();
@@ -966,6 +971,10 @@ document.getElementById('modal').addEventListener('click', e => {
   if (e.target.id === 'modal') closeModal();
 });
 
+document.getElementById('share-modal').addEventListener('click', e => {
+  if (e.target.id === 'share-modal') closeShareModal();
+});
+
 document.getElementById('profile-modal').addEventListener('click', e => {
   if (e.target.id === 'profile-modal') closeProfileModal();
 });
@@ -983,6 +992,6 @@ renderTypeUI();
 showActiveCat('instant');
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeModal(); closeProfileModal(); closeStatsModal(); }
+  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeShareModal(); closeModal(); closeProfileModal(); closeStatsModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
 });

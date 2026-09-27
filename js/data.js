@@ -351,6 +351,7 @@ async function saveToFirestore() {
     });
     pendingSave = false;
     applyRemote(merged);
+    syncShares();
     setSyncBtnState('synced');
     if (size > SIZE_WARNING) {
       setSyncStatus(t('sizeWarning', { pct: Math.round(size / (1024 * 1024) * 100) }), 'err');
@@ -429,6 +430,8 @@ function loadLocalData() {
 
 // ===== AUTH STATE LISTENER =====
 auth.onAuthStateChanged(async user => {
+  // Page publique d'une wishlist partagée : pas d'écran de connexion
+  if (typeof SHARE_VIEW_ID !== 'undefined' && SHARE_VIEW_ID) return;
   if (user) {
     currentUser = user;
     document.getElementById('auth-screen').classList.add('hidden');

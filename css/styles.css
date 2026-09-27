@@ -490,6 +490,33 @@ header {
 .poster .stars { margin-top: 0; }
 .poster .stars svg { width: 12px; height: 12px; }
 
+/* Partage de la wishlist */
+.share-intro { color: var(--text-dim); font-size: 14px; line-height: 1.55; margin-bottom: 14px; }
+.share-count { color: var(--text-faint); font-size: 13px; }
+.share-message { margin-top: 12px; color: var(--accent); font-size: 13px; }
+.share-link {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+}
+.share-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.share-buttons a { text-decoration: none; display: inline-flex; align-items: center; }
+.danger-link:hover { color: var(--danger); border-color: var(--danger); }
+.share-view { padding-top: 8px; }
+.share-header { display: block; margin-bottom: 28px; }
+.share-brand { color: var(--accent); font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+.share-header h1 { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 600; letter-spacing: -1px; margin-top: 4px; }
+.share-meta { color: var(--text-faint); font-size: 14px; margin-top: 6px; }
+.share-section { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; margin: 26px 0 14px; }
+.share-view .poster-img { cursor: default; }
+.share-view .poster-img:hover { transform: none; }
+.share-loading { color: var(--text-dim); padding: 60px 0; text-align: center; }
+
 /* Où regarder */
 .providers { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-height: 0; margin-top: 2px; }
 .providers:empty { display: none; }
