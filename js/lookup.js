@@ -10,6 +10,7 @@ let lookupTimer = null;
 let lookupSeq = 0;
 let lookupResults = [];
 let lookupIndex = -1;
+let pickedTmdb = null;   // identifiant TMDB du résultat choisi (pour « Où regarder »)
 
 function lookupAvailable(type) {
   if (type === 'film' || type === 'serie') return !!TMDB_KEY;
@@ -19,6 +20,65 @@ function lookupAvailable(type) {
 
 function normalize(s) {
   return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+// ----- Genres, ajoutés en tags (deux au plus) -----
+const MAX_GENRES = 2;
+// Sujets de livres (Open Library, Google Books) reconnus : [mots-clés, tag fr, tag en]
+const BOOK_GENRES = [
+  [['science fiction', 'science-fiction'], 'science-fiction', 'science fiction'],
+  [['fantasy'], 'fantasy', 'fantasy'],
+  [['detective', 'mystery', 'crime', 'policier'], 'policier', 'crime'],
+  [['thriller', 'suspense'], 'thriller', 'thriller'],
+  [['horror', 'horreur'], 'horreur', 'horror'],
+  [['romance', 'love stories'], 'romance', 'romance'],
+  [['biograph'], 'biographie', 'biography'],
+  [['comic', 'graphic novel', 'bandes dessin'], 'bd', 'comics'],
+  [['juvenile', 'children', 'jeunesse'], 'jeunesse', 'children'],
+  [['poetry', 'poésie'], 'poésie', 'poetry'],
+  [['philosoph'], 'philosophie', 'philosophy'],
+  [['history', 'histoire'], 'histoire', 'history'],
+  [['humor', 'humour'], 'humour', 'humour'],
+  [['essay', 'essais'], 'essai', 'essay'],
+  [['classic'], 'classique', 'classic'],
+];
+const RAWG_GENRES_FR = {
+  'action': 'action', 'indie': 'indé', 'adventure': 'aventure', 'rpg': 'rpg', 'strategy': 'stratégie',
+  'shooter': 'tir', 'casual': 'casual', 'simulation': 'simulation', 'puzzle': 'réflexion', 'arcade': 'arcade',
+  'platformer': 'plateforme', 'massively multiplayer': 'mmo', 'racing': 'course', 'sports': 'sport',
+  'fighting': 'combat', 'family': 'famille', 'board games': 'jeu de société', 'card': 'cartes', 'educational': 'éducatif',
+};
+const TMDB_GENRES_FIX = {
+  fr: { 'action & adventure': 'action', 'war & politics': 'guerre', 'kids': 'jeunesse', 'reality': 'téléréalité', 'soap': 'feuilleton', 'news': 'actualité', 'talk': 'talk-show', 'sci-fi & fantasy': 'science-fiction' },
+  en: { 'action & adventure': 'action', 'war & politics': 'war', 'sci-fi & fantasy': 'science fiction' },
+};
+const tmdbGenreLists = {};
+
+function bookGenres(subjects) {
+  const text = (subjects || []).join(' | ').toLowerCase();
+  const found = BOOK_GENRES.filter(([keys]) => keys.some(k => text.includes(k))).map(g => currentLang === 'fr' ? g[1] : g[2]);
+  return [...new Set(found)].slice(0, MAX_GENRES);
+}
+
+async function tmdbGenreNames(kind, ids) {
+  const key = kind + '|' + currentLang;
+  if (!tmdbGenreLists[key]) {
+    tmdbGenreLists[key] = fetch(`https://api.themoviedb.org/3/genre/${kind}/list?api_key=${TMDB_KEY}&language=${locale()}`)
+      .then(r => r.json()).then(d => Object.fromEntries((d.genres || []).map(g => [g.id, g.name]))).catch(() => ({}));
+  }
+  const names = await tmdbGenreLists[key];
+  const fix = TMDB_GENRES_FIX[currentLang] || {};
+  return [...new Set((ids || []).map(id => names[id]).filter(Boolean).map(n => {
+    const low = n.toLowerCase();
+    return fix[low] || low.split(' & ')[0];
+  }))].slice(0, MAX_GENRES);
+}
+
+function rawgGenres(genres) {
+  return [...new Set((genres || []).map(g => {
+    const low = (g.name || '').toLowerCase();
+    return currentLang === 'fr' ? (RAWG_GENRES_FR[low] || low) : low;
+  }).filter(Boolean))].slice(0, MAX_GENRES);
 }
 
 // ----- Livres -----
@@ -34,19 +94,21 @@ async function searchGoogleBooks(q, isbn) {
       titre: v.title || '',
       auteur: (v.authors || []).slice(0, 2).join(', '),
       cover: img.replace(/^http:/, 'https:').replace('&edge=curl', ''),
+      genres: bookGenres(v.categories),
     };
   }).filter(r => r.titre);
 }
 
 async function searchOpenLibrary(q, isbn) {
   const params = isbn ? 'isbn=' + isbn : 'q=' + encodeURIComponent(q);
-  const res = await fetch(`https://openlibrary.org/search.json?${params}&limit=6&lang=fr&fields=title,author_name,cover_i`);
+  const res = await fetch(`https://openlibrary.org/search.json?${params}&limit=6&lang=fr&fields=title,author_name,cover_i,subject`);
   if (!res.ok) return [];
   const data = await res.json();
   return (data.docs || []).map(d => ({
     titre: d.title || '',
     auteur: (d.author_name || []).slice(0, 2).join(', '),
     cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
+    genres: bookGenres(d.subject),
   })).filter(r => r.titre);
 }
 
@@ -63,7 +125,7 @@ async function searchBooks(q) {
     const key = normalize(r.titre) + '|' + normalize(r.auteur.split(',')[0]);
     const prev = merged.get(key);
     if (!prev) merged.set(key, r);
-    else merged.set(key, { ...prev, cover: prev.cover || r.cover });
+    else merged.set(key, { ...prev, cover: prev.cover || r.cover, genres: prev.genres && prev.genres.length ? prev.genres : r.genres });
   });
   // Classe par pertinence : les mots tapés présents dans le titre/auteur (favorise l'édition française)
   const words = normalize(q).split(' ').filter(Boolean);
@@ -82,14 +144,16 @@ async function searchTmdb(kind, q) {
   const res = await fetch(`https://api.themoviedb.org/3/search/${kind}?api_key=${TMDB_KEY}&language=${locale()}&include_adult=false&query=${encodeURIComponent(q)}`);
   if (!res.ok) return [];
   const data = await res.json();
-  return (data.results || []).map(r => ({
+  return Promise.all((data.results || []).map(async r => ({
     titre: r.title || r.name || '',
     auteur: '',
     annee: parseInt((r.release_date || r.first_air_date || '').slice(0, 4), 10) || null,
     cover: r.poster_path ? TMDB_IMG + r.poster_path : '',
     // Le réalisateur ou le créateur demande un second appel, fait seulement pour le résultat choisi
     details: () => tmdbCreators(kind, r.id),
-  })).filter(r => r.titre);
+    genres: await tmdbGenreNames(kind, r.genre_ids),
+    tmdb: { kind, id: r.id },
+  }))).then(list => list.filter(r => r.titre));
 }
 
 async function tmdbCreators(kind, id) {
@@ -114,6 +178,7 @@ async function searchRawg(q) {
     annee: parseInt((g.released || '').slice(0, 4), 10) || null,
     cover: g.background_image ? g.background_image.replace('/media/', '/media/resize/420/-/') : '',
     platforms: (g.platforms || []).map(p => p.platform && p.platform.name).filter(Boolean),
+    genres: rawgGenres(g.genres),
     details: () => rawgDevelopers(g.id),
   })).filter(r => r.titre);
 }
@@ -181,6 +246,11 @@ function pickLookup(i) {
   auteur.value = r.auteur;
   if (r.cover) document.getElementById('f-cover').value = r.cover;
   if (r.annee) document.getElementById('f-year').value = r.annee;
+  if (r.genres && r.genres.length) {
+    r.genres.forEach(g => { if (!currentTags.includes(g)) currentTags.push(g); });
+    renderTagEditor();
+  }
+  pickedTmdb = r.tmdb || null;
   updateCoverPreview();
   checkDuplicate();
   document.getElementById('f-lookup').value = '';
