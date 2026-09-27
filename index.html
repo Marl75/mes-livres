@@ -855,8 +855,6 @@
   }
   .card-meta { font-size: 12px; color: var(--text-faint); }
 
-  /* Reading progress */
-  .progress { margin-top: 12px; cursor: pointer; }
   .progress-bar {
     height: 6px;
     border-radius: 999px;
@@ -867,17 +865,9 @@
     display: block;
     height: 100%;
     border-radius: 999px;
-    background: var(--cat-color, var(--accent));
+    background: var(--accent);
     transition: width 0.3s;
   }
-  .progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: 6px;
-  }
-  .progress:hover .progress-label { color: var(--text); }
 
   /* Card menu */
   .card-popover {
@@ -1207,7 +1197,6 @@
       <option value="title" data-i18n="sort_title">Titre A → Z</option>
       <option value="author" data-i18n="sort_author">Auteur A → Z</option>
       <option value="rating" data-i18n="sort_rating">Mieux notés</option>
-      <option value="progress" data-i18n="sort_progress">Progression</option>
     </select>
   </div>
   <div class="grid" id="grid"></div>
@@ -1272,7 +1261,7 @@
         <input type="text" class="lookup-input" id="f-lookup" placeholder="Titre, auteur ou ISBN&hellip;" data-i18n-ph="lookupPh" autocomplete="off">
         <div class="lookup-results" id="lookup-results"></div>
       </div>
-      <div class="field-hint" data-i18n="lookupHint">Choisis un r&eacute;sultat pour remplir le titre, l'auteur, la couverture et le nombre de pages</div>
+      <div class="field-hint" data-i18n="lookupHint">Choisis un r&eacute;sultat pour remplir le titre, l'auteur et la couverture</div>
     </div>
     <div class="field">
       <label data-i18n="title">Titre</label>
@@ -1300,14 +1289,6 @@
       </div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label data-i18n="pages">Pages</label>
-        <input type="number" id="f-pages" min="1" inputmode="numeric" placeholder="ex: 320" data-i18n-ph="pagesPh">
-      </div>
-      <div class="field" id="field-current-page">
-        <label data-i18n="currentPage">Page actuelle</label>
-        <input type="number" id="f-current-page" min="0" inputmode="numeric" placeholder="ex: 120" data-i18n-ph="currentPagePh">
-      </div>
       <div class="field" id="field-finished">
         <label data-i18n="finishedOn">Termin&eacute; le</label>
         <input type="date" id="f-finished">
@@ -1365,7 +1346,7 @@ const I18N = {
     'sub_lu': 'livres terminés', 'sub_en-cours': 'lectures en cours', 'sub_a-lire': "en attente sur l'étagère",
     'sub_abandonne': 'commencés, non terminés', 'sub_wishlist': 'recommandations à découvrir',
     sortLabel: 'Trier', sort_recent: 'Ajout récent', sort_finished: 'Date de lecture', sort_title: 'Titre A → Z',
-    sort_author: 'Auteur A → Z', sort_rating: 'Mieux notés', sort_progress: 'Progression',
+    sort_author: 'Auteur A → Z', sort_rating: 'Mieux notés',
     close: 'Fermer', cancel: 'Annuler', save: 'Enregistrer', edit: 'Modifier', delete: 'Supprimer', rename: 'Renommer', actions: 'Actions',
     manageProfiles: 'Gérer les profils', manageProfilesAction: 'Nouveau profil / gérer', logout: 'Déconnexion', active: '(actif)',
     profilesIntro: "Chaque profil a sa propre liste de livres. Tous les profils sont synchronisés sur ton compte — accessibles depuis n'importe quel appareil.",
@@ -1376,22 +1357,20 @@ const I18N = {
     confirmImportProfiles: 'Importer {n} profil(s) ? (Remplacera tous tes profils actuels)',
     confirmImportBooks: 'Importer {n} livre(s) dans le profil « {name} » ?', invalidFormat: 'Format invalide', importError: "Erreur d'import : ",
     addBook: 'Ajouter un livre', editBook: 'Modifier le livre', autofill: 'Remplir automatiquement', lookupPh: 'Titre, auteur ou ISBN…',
-    lookupHint: "Choisis un résultat pour remplir le titre, l'auteur, la couverture et le nombre de pages",
+    lookupHint: "Choisis un résultat pour remplir le titre, l'auteur et la couverture",
     title: 'Titre', titlePh: 'Le nom du livre', author: 'Auteur', authorPh: "Qui l'a écrit ?", category: 'Catégorie',
-    cover: 'Couverture', coverPh: "URL de l'image (remplie automatiquement)", pages: 'Pages', pagesPh: 'ex : 320',
-    currentPage: 'Page actuelle', currentPagePh: 'ex : 120', finishedOn: 'Terminé le', rating: 'Note', review: 'Avis',
+    cover: 'Couverture', coverPh: "URL de l'image (remplie automatiquement)",
+    finishedOn: 'Terminé le', rating: 'Note', review: 'Avis',
     reviewPh: 'Ce que tu en as pensé…', reviewPhReading: 'Tes impressions en cours de lecture…', reviewPhAbandoned: "Pourquoi l'as-tu abandonné ?",
     recoBy: 'Recommandé par', recoByPh: "Qui te l'a conseillé ?", tags: 'Tags', tagPh: 'Ajouter un tag…',
     tagHint: 'Tape pour voir les tags existants — Entrée / virgule pour valider, Tab pour autocompléter',
     removeTag: 'retirer', createTag: '+ Créer « {q} »', newTag: 'nouveau', clearTags: '✕ tout effacer',
-    books_one: '{n} livre', books_other: '{n} livres', pagesShort: '{n} p.', readIn: 'Lu en {date}',
+    books_one: '{n} livre', books_other: '{n} livres', readIn: 'Lu en {date}',
     noResults: 'Aucun résultat', tryAnother: 'Essaie un autre terme.', emptyTitle: "Rien ici pour l'instant",
     emptyHint: 'Clique sur « Ajouter » pour commencer ta collection.', confirmDeleteBook: 'Supprimer ce livre ?',
-    moveTo: 'Déplacer vers', updatePage: 'Mettre à jour la page', progressAddPages: 'Ajouter le nombre de pages pour suivre ta progression',
-    promptPages: 'Nombre de pages de « {title} » :', promptPage: 'Tu en es à quelle page ? (sur {total})',
-    confirmFinished: 'Bravo, tu as terminé « {title} » ! Le passer dans « Lu » ?',
+    moveTo: 'Déplacer vers',
     goal: 'Objectif', goalOf: '/ {goal} livres en {year}', readYear_one: 'livre lu en {year}', readYear_other: 'livres lus en {year}',
-    totalRead: 'Lus au total', pagesIn: 'Pages en {year}', avgRating: 'Note moyenne', byYear: 'Livres lus par année',
+    totalRead: 'Lus au total', authorsRead: 'Auteurs lus', avgRating: 'Note moyenne', byYear: 'Livres lus par année',
     topAuthors: 'Auteurs les plus lus', topTags: 'Tags favoris', noneRead: 'Pas encore de livre lu dans ce profil.',
     undated_one: '{n} livre lu sans date de fin : ajoute-la via « Modifier » pour le compter par année.',
     undated_other: '{n} livres lus sans date de fin : ajoute-la via « Modifier » pour les compter par année.',
@@ -1417,7 +1396,7 @@ const I18N = {
     'sub_lu': 'finished books', 'sub_en-cours': 'currently reading', 'sub_a-lire': 'waiting on the shelf',
     'sub_abandonne': 'started, not finished', 'sub_wishlist': 'recommendations to discover',
     sortLabel: 'Sort', sort_recent: 'Recently added', sort_finished: 'Date read', sort_title: 'Title A → Z',
-    sort_author: 'Author A → Z', sort_rating: 'Top rated', sort_progress: 'Progress',
+    sort_author: 'Author A → Z', sort_rating: 'Top rated',
     close: 'Close', cancel: 'Cancel', save: 'Save', edit: 'Edit', delete: 'Delete', rename: 'Rename', actions: 'Actions',
     manageProfiles: 'Manage profiles', manageProfilesAction: 'New profile / manage', logout: 'Log out', active: '(active)',
     profilesIntro: 'Each profile has its own book list. All profiles are synced to your account — available from any device.',
@@ -1428,22 +1407,20 @@ const I18N = {
     confirmImportProfiles: 'Import {n} profile(s)? (This will replace all your current profiles)',
     confirmImportBooks: 'Import {n} book(s) into the profile “{name}”?', invalidFormat: 'Invalid format', importError: 'Import error: ',
     addBook: 'Add a book', editBook: 'Edit book', autofill: 'Autofill', lookupPh: 'Title, author or ISBN…',
-    lookupHint: 'Pick a result to fill in the title, author, cover and page count',
+    lookupHint: 'Pick a result to fill in the title, author and cover',
     title: 'Title', titlePh: "The book's title", author: 'Author', authorPh: 'Who wrote it?', category: 'Category',
-    cover: 'Cover', coverPh: 'Image URL (filled in automatically)', pages: 'Pages', pagesPh: 'e.g. 320',
-    currentPage: 'Current page', currentPagePh: 'e.g. 120', finishedOn: 'Finished on', rating: 'Rating', review: 'Review',
+    cover: 'Cover', coverPh: 'Image URL (filled in automatically)',
+    finishedOn: 'Finished on', rating: 'Rating', review: 'Review',
     reviewPh: 'What you thought of it…', reviewPhReading: 'Your thoughts so far…', reviewPhAbandoned: 'Why did you give up on it?',
     recoBy: 'Recommended by', recoByPh: 'Who recommended it?', tags: 'Tags', tagPh: 'Add a tag…',
     tagHint: 'Type to see existing tags — Enter / comma to confirm, Tab to autocomplete',
     removeTag: 'remove', createTag: '+ Create “{q}”', newTag: 'new', clearTags: '✕ clear all',
-    books_one: '{n} book', books_other: '{n} books', pagesShort: '{n} pp.', readIn: 'Read in {date}',
+    books_one: '{n} book', books_other: '{n} books', readIn: 'Read in {date}',
     noResults: 'No results', tryAnother: 'Try another search.', emptyTitle: 'Nothing here yet',
     emptyHint: 'Click “Add” to start your collection.', confirmDeleteBook: 'Delete this book?',
-    moveTo: 'Move to', updatePage: 'Update page', progressAddPages: 'Add the page count to track your progress',
-    promptPages: 'Number of pages in “{title}”:', promptPage: 'Which page are you on? (out of {total})',
-    confirmFinished: 'Well done, you finished “{title}”! Move it to “Read”?',
+    moveTo: 'Move to',
     goal: 'Goal', goalOf: '/ {goal} books in {year}', readYear_one: 'book read in {year}', readYear_other: 'books read in {year}',
-    totalRead: 'Read in total', pagesIn: 'Pages in {year}', avgRating: 'Average rating', byYear: 'Books read per year',
+    totalRead: 'Read in total', authorsRead: 'Authors read', avgRating: 'Average rating', byYear: 'Books read per year',
     topAuthors: 'Most-read authors', topTags: 'Favourite tags', noneRead: 'No books read in this profile yet.',
     undated_one: '{n} read book has no finish date: add it via “Edit” to count it by year.',
     undated_other: '{n} read books have no finish date: add it via “Edit” to count them by year.',
@@ -2026,7 +2003,6 @@ function render() {
       : '';
     const meta = [];
     if (b.categorie === 'lu' && b.dateFinished) meta.push(t('readIn', { date: formatMonthYear(b.dateFinished) }));
-    if (b.pages) meta.push(t('pagesShort', { n: b.pages }));
     return `
       <div class="card" data-cat="${b.categorie}">
         <div class="card-top">
@@ -2044,7 +2020,6 @@ function render() {
             ${reco}
           </div>
         </div>
-        ${b.categorie === 'en-cours' ? renderProgress(b) : ''}
         ${tags}
         ${note}
       </div>
@@ -2056,13 +2031,10 @@ function render() {
 const SORT_KEY = 'mes-livres-sort';
 let currentSort = 'recent';
 try { currentSort = localStorage.getItem(SORT_KEY) || 'recent'; } catch (e) {}
+if (!['recent', 'finished', 'title', 'author', 'rating'].includes(currentSort)) currentSort = 'recent';
 
 function lastName(author) {
   return (author || '').split(',')[0].trim().split(/\s+/).pop() || '';
-}
-
-function progressRatio(b) {
-  return b.pages ? Math.min(1, (b.currentPage || 0) / b.pages) : -1;
 }
 
 function sortBooks(list) {
@@ -2077,7 +2049,6 @@ function sortBooks(list) {
     },
     rating: (a, b) => (b.note || 0) - (a.note || 0) || byTitle(a, b),
     finished: (a, b) => (b.dateFinished || '').localeCompare(a.dateFinished || '') || byRecent(a, b),
-    progress: (a, b) => progressRatio(b) - progressRatio(a) || byRecent(a, b),
   };
   return list.sort(sorters[currentSort] || byRecent);
 }
@@ -2095,40 +2066,6 @@ function renderCover(b) {
 
 function coverFallback(img) {
   img.outerHTML = coverPlaceholder(img.dataset.letter);
-}
-
-function renderProgress(b) {
-  if (!b.pages) {
-    return `<div class="progress" onclick="updateProgress('${b.id}')"><div class="progress-label"><span>${t('progressAddPages')}</span></div></div>`;
-  }
-  const cur = Math.min(b.currentPage || 0, b.pages);
-  const pct = Math.round(cur / b.pages * 100);
-  return `
-    <div class="progress" onclick="updateProgress('${b.id}')" title="${t('updatePage')}">
-      <div class="progress-bar"><span style="width:${pct}%"></span></div>
-      <div class="progress-label"><span>p. ${cur} / ${b.pages}</span><span>${pct} %</span></div>
-    </div>`;
-}
-
-function updateProgress(id) {
-  const b = books.find(x => x.id === id);
-  if (!b) return;
-  if (!b.pages) {
-    const pages = parseInt(prompt(t('promptPages', { title: b.titre }), ''), 10);
-    if (!pages || pages < 1) return;
-    b.pages = pages;
-  }
-  const input = prompt(t('promptPage', { total: b.pages }), b.currentPage || '');
-  if (input === null) { save(); render(); return; }
-  const page = parseInt(input, 10);
-  if (isNaN(page) || page < 0) return;
-  b.currentPage = Math.min(page, b.pages);
-  if (b.currentPage >= b.pages && confirm(t('confirmFinished', { title: b.titre }))) {
-    moveBook(id, 'lu');
-    return;
-  }
-  save();
-  render();
 }
 
 // ===== DATES =====
@@ -2158,7 +2095,6 @@ function openCardMenu(e, id) {
   const icon = path => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
   pop.innerHTML = `
     <button class="profile-action" onclick="closeCardMenu(); editBook('${id}')">${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}${t('edit')}</button>
-    ${b.categorie === 'en-cours' ? `<button class="profile-action" onclick="closeCardMenu(); updateProgress('${id}')">${icon('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>')}${t('updatePage')}</button>` : ''}
     <div class="profile-divider"></div>
     <div class="menu-label">${t('moveTo')}</div>
     ${CATEGORIES.filter(k => k !== b.categorie).map(k =>
@@ -2222,7 +2158,7 @@ function renderStats() {
   const year = String(new Date().getFullYear());
   const readThisYear = read.filter(b => (b.dateFinished || '').startsWith(year));
   const goal = (p && p.goal) || 0;
-  const pagesThisYear = readThisYear.reduce((n, b) => n + (b.pages || 0), 0);
+  const authorCount = new Set(read.map(b => (b.auteur || '').trim().toLowerCase()).filter(Boolean)).size;
   const rated = read.filter(b => b.note);
   const avg = rated.length ? (rated.reduce((n, b) => n + b.note, 0) / rated.length).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '–';
   const undated = read.filter(b => !b.dateFinished).length;
@@ -2243,7 +2179,7 @@ function renderStats() {
     </div>
     <div class="kpis">
       <div class="kpi"><div class="v">${read.length}</div><div class="l">${t('totalRead')}</div></div>
-      <div class="kpi"><div class="v">${pagesThisYear.toLocaleString(locale())}</div><div class="l">${t('pagesIn', { year })}</div></div>
+      <div class="kpi"><div class="v">${authorCount}</div><div class="l">${t('authorsRead')}</div></div>
       <div class="kpi"><div class="v">${avg}${rated.length ? ' ★' : ''}</div><div class="l">${t('avgRating')}</div></div>
     </div>
     ${byYear.length ? `<div class="stats-section"><h3>${t('byYear')}</h3>${barRows(byYear)}</div>` : ''}
@@ -2275,7 +2211,6 @@ async function searchGoogleBooks(q, isbn) {
     return {
       titre: v.title || '',
       auteur: (v.authors || []).slice(0, 2).join(', '),
-      pages: v.pageCount || null,
       cover: img.replace(/^http:/, 'https:').replace('&edge=curl', ''),
     };
   }).filter(r => r.titre);
@@ -2283,13 +2218,12 @@ async function searchGoogleBooks(q, isbn) {
 
 async function searchOpenLibrary(q, isbn) {
   const params = isbn ? 'isbn=' + isbn : 'q=' + encodeURIComponent(q);
-  const res = await fetch(`https://openlibrary.org/search.json?${params}&limit=6&lang=fr&fields=title,author_name,cover_i,number_of_pages_median`);
+  const res = await fetch(`https://openlibrary.org/search.json?${params}&limit=6&lang=fr&fields=title,author_name,cover_i`);
   if (!res.ok) return [];
   const data = await res.json();
   return (data.docs || []).map(d => ({
     titre: d.title || '',
     auteur: (d.author_name || []).slice(0, 2).join(', '),
-    pages: d.number_of_pages_median || null,
     cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
   })).filter(r => r.titre);
 }
@@ -2319,7 +2253,7 @@ async function runLookup(q) {
     const key = normalize(r.titre) + '|' + normalize(r.auteur.split(',')[0]);
     const prev = merged.get(key);
     if (!prev) merged.set(key, r);
-    else merged.set(key, { ...prev, cover: prev.cover || r.cover, pages: prev.pages || r.pages });
+    else merged.set(key, { ...prev, cover: prev.cover || r.cover });
   });
   // Classe par pertinence : les mots tapés présents dans le titre/auteur (favorise l'édition française)
   const words = normalize(q).split(' ').filter(Boolean);
@@ -2342,7 +2276,7 @@ async function runLookup(q) {
       ${r.cover ? `<img src="${escapeHtml(r.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=noimg></span>'">` : '<span class="noimg"></span>'}
       <div>
         <div class="t">${escapeHtml(r.titre)}</div>
-        <div class="a">${escapeHtml([r.auteur, r.pages ? t('pagesShort', { n: r.pages }) : ''].filter(Boolean).join(' · '))}</div>
+        <div class="a">${escapeHtml(r.auteur)}</div>
       </div>
     </div>`).join('');
 }
@@ -2357,7 +2291,6 @@ function pickLookup(i) {
   if (!r) return;
   document.getElementById('f-titre').value = r.titre;
   document.getElementById('f-auteur').value = r.auteur;
-  if (r.pages) document.getElementById('f-pages').value = r.pages;
   if (r.cover) document.getElementById('f-cover').value = r.cover;
   updateCoverPreview();
   document.getElementById('f-lookup').value = '';
@@ -2413,10 +2346,7 @@ function moveBook(id, cat) {
   const b = books.find(x => x.id === id);
   if (!b) return;
   b.categorie = cat;
-  if (cat === 'lu') {
-    if (!b.dateFinished) b.dateFinished = todayISO();
-    if (b.pages) b.currentPage = b.pages;
-  }
+  if (cat === 'lu' && !b.dateFinished) b.dateFinished = todayISO();
   save();
   render();
 }
@@ -2438,8 +2368,6 @@ function openModal(book) {
   document.getElementById('f-avis').value = book ? (book.avis || '') : '';
   document.getElementById('f-reco').value = book ? (book.recoBy || '') : '';
   document.getElementById('f-cover').value = book ? (book.cover || '') : '';
-  document.getElementById('f-pages').value = book && book.pages ? book.pages : '';
-  document.getElementById('f-current-page').value = book && book.currentPage ? book.currentPage : '';
   document.getElementById('f-finished').value = book ? (book.dateFinished || '') : '';
   document.getElementById('f-lookup').value = '';
   hideLookup();
@@ -2571,9 +2499,6 @@ function saveBook() {
   const pendingTag = document.getElementById('f-tag-input');
   if (pendingTag && pendingTag.value.trim()) addTag(pendingTag.value);
   const categorie = document.getElementById('f-categorie').value;
-  const pages = parseInt(document.getElementById('f-pages').value, 10) || null;
-  let currentPage = parseInt(document.getElementById('f-current-page').value, 10) || null;
-  if (pages && currentPage) currentPage = Math.min(currentPage, pages);
   let dateFinished = document.getElementById('f-finished').value || null;
   if (categorie === 'lu' && !dateFinished && !id) dateFinished = todayISO();
   const data = {
@@ -2585,8 +2510,6 @@ function saveBook() {
     recoBy: document.getElementById('f-reco').value.trim(),
     tags: [...currentTags],
     cover: document.getElementById('f-cover').value.trim(),
-    pages,
-    currentPage,
     dateFinished,
   };
   if (id) {
@@ -2623,7 +2546,6 @@ function updateModalFields(fromChange) {
   document.getElementById('field-note').style.display = (cat === 'lu' || cat === 'abandonne') ? 'block' : 'none';
   document.getElementById('field-avis').style.display = (cat === 'lu' || cat === 'en-cours' || cat === 'abandonne') ? 'block' : 'none';
   document.getElementById('field-reco').style.display = cat === 'wishlist' ? 'block' : 'none';
-  document.getElementById('field-current-page').style.display = cat === 'en-cours' ? 'block' : 'none';
   document.getElementById('field-finished').style.display = cat === 'lu' ? 'block' : 'none';
   const finished = document.getElementById('f-finished');
   // Pas de date automatique sur un ancien livre déjà lu (on ne connaît pas sa vraie date)
