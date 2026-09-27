@@ -134,6 +134,7 @@ const PROFILE_KEY = 'mes-livres-profile';
 let unsubscribeRemote = null;
 let pendingSave = false;
 let retryTimer = null;
+let loadedOffline = false;   // l'appli a démarré sans réseau : on recharge au retour de la connexion
 
 function setSyncStatus(msg, type) {
   const el = document.getElementById('sync-status');
@@ -296,6 +297,7 @@ async function loadFromFirestore() {
     bindBooksToProfile();
     cacheLocally();
     listenRemote();
+    loadedOffline = false;
     setSyncBtnState('synced');
     setSyncStatus(t('connected', { email: escapeHtml(currentUser.email) }), 'ok');
     setTimeout(() => setSyncBtnState(null), 2000);
@@ -307,6 +309,7 @@ async function loadFromFirestore() {
       bindBooksToProfile();
       setSyncBtnState('error');
       setSyncStatus(t('offline'), 'err');
+      loadedOffline = true;
       listenRemote();
     } else {
       setSyncBtnState('error');
@@ -447,7 +450,11 @@ auth.onAuthStateChanged(async user => {
 });
 
 // Les changements en attente partent dès que la connexion revient ou que l'appli revient au premier plan
-window.addEventListener('online', () => { if (currentUser && pendingSave) saveToFirestore(); });
+window.addEventListener('online', async () => {
+  if (!currentUser) return;
+  if (pendingSave) await saveToFirestore();
+  if (loadedOffline) loadFromFirestore();
+});
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && currentUser && pendingSave) saveToFirestore();
 });

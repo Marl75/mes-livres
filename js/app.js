@@ -942,6 +942,11 @@ document.getElementById('profile-modal').addEventListener('click', e => {
   if (e.target.id === 'profile-modal') closeProfileModal();
 });
 
+// Copie locale de l'appli pour pouvoir l'ouvrir sans connexion
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker :', err));
+}
+
 applyTranslations();
 renderTypePicker();
 fillCategorySelect(currentCat);
