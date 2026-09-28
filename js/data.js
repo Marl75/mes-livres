@@ -64,6 +64,7 @@ async function resetPassword() {
   const email = document.getElementById('auth-email').value.trim();
   if (!email) { showAuthError(t('resetEnterEmail')); return; }
   try {
+    auth.languageCode = currentLang;   // e-mail de réinitialisation dans la langue de l'appli
     await auth.sendPasswordResetEmail(email);
     showAuthError(t('resetSent'));
     document.getElementById('auth-error').style.color = '#6dbfa8';
@@ -134,7 +135,29 @@ const PROFILE_KEY = 'mes-livres-profile';
 let unsubscribeRemote = null;
 let pendingSave = false;
 let retryTimer = null;
-let loadedOffline = false;   // l'appli a démarré sans réseau : on recharge au retour de la connexion
+let loadedOffline = false;
+// L'appli s'ouvre directement sur la copie locale quand une session existait :
+// la connexion Firebase se confirme ensuite en arrière-plan.
+const SESSION_KEY = 'mes-livres-session';
+let bootUid = null;
+
+function bootFromCache() {
+  let hadSession = false;
+  try { hadSession = localStorage.getItem(SESSION_KEY) === '1'; } catch (e) {}
+  const cached = hadSession ? loadCache() : null;
+  if (!cached || !cached.uid) {
+    if (!currentUser) document.getElementById('auth-screen').classList.remove('hidden');
+    return;
+  }
+  bootUid = cached.uid;
+  state = { deletedProfiles: {}, ...cached };
+  pendingSave = !!cached.pending;
+  if (!state.profiles.find(p => p.id === state.currentId)) state.currentId = state.profiles[0].id;
+  bindBooksToProfile();
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-container').style.display = '';
+  refreshUI();
+}   // l'appli a démarré sans réseau : on recharge au retour de la connexion
 
 function setSyncStatus(msg, type) {
   const el = document.getElementById('sync-status');
@@ -392,7 +415,7 @@ function cacheLocally() {
   try {
     syncBooksToProfile();
     localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify({
-      uid: currentUser && currentUser.uid,
+      uid: (currentUser && currentUser.uid) || bootUid,
       profiles: state.profiles,
       deletedProfiles: state.deletedProfiles || {},
       currentId: state.currentId,
@@ -434,6 +457,9 @@ auth.onAuthStateChanged(async user => {
   // Page publique d'une wishlist partagée : pas d'écran de connexion
   if (typeof SHARE_VIEW_ID !== 'undefined' && SHARE_VIEW_ID) return;
   if (user) {
+    try { localStorage.setItem(SESSION_KEY, '1'); } catch (e) {}
+    if (bootUid && bootUid !== user.uid) { state = { profiles: [], deletedProfiles: {}, currentId: null }; books = []; pendingSave = false; }
+    bootUid = user.uid;
     currentUser = user;
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('app-container').style.display = '';
@@ -442,6 +468,8 @@ auth.onAuthStateChanged(async user => {
   } else {
     stopListening();
     usageRecorded = false;
+    try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+    bootUid = null;
     currentUser = null;
     state = { profiles: [], deletedProfiles: {}, currentId: null };
     books = [];

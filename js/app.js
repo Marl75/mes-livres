@@ -13,24 +13,34 @@ function renderProfileSelector() {
 
   const dd = document.getElementById('profile-dropdown');
   let userEmail = currentUser ? currentUser.email : '';
+  // Un seul profil (cas normal) : pas de notion de profil, le menu devient celui du compte
+  const multi = state.profiles.length > 1;
+  const icon = path => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
   dd.innerHTML =
     (userEmail ? `<div style="padding: 6px 12px 8px; font-size: 12px; color: var(--text-faint); overflow: hidden; text-overflow: ellipsis;">${escapeHtml(userEmail)}</div><div class="profile-divider"></div>` : '') +
-    state.profiles.map(p => `
+    (!multi ? '' : state.profiles.map(p => `
     <div class="profile-item ${p.id === state.currentId ? 'current' : ''}" onclick="switchProfile('${p.id}')">
       <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
       <span>${escapeHtml(p.name)}</span>
       <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${ttn('items', 'tout', (p.books || []).length)}</span>
     </div>
-  `).join('') + `
-    <div class="profile-divider"></div>
+  `).join('') + '<div class="profile-divider"></div>') + `
     <button class="profile-action" onclick="openShareModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
       ${t('shareWishlist')}
     </button>
-    <button class="profile-action" onclick="openProfileModal()">
+    ${multi ? `<button class="profile-action" onclick="openProfileModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       ${t('manageProfilesAction')}
+    </button>` : `<button class="profile-action" onclick="toggleProfileDropdown(); renameProfile('${cur.id}')">
+      ${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}${t('renameMe')}
     </button>
+    <button class="profile-action" onclick="toggleProfileDropdown(); exportBooks()">
+      ${icon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>')}${t('exportAction')}
+    </button>
+    <button class="profile-action" onclick="toggleProfileDropdown(); document.getElementById('import-file').click()">
+      ${icon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>')}${t('importAction')}
+    </button>`}
     <button class="profile-action mobile-only" onclick="toggleProfileDropdown(); manualSync()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
       ${t('sync')}
@@ -126,7 +136,7 @@ function createProfileFromForm() {
 function renameProfile(id) {
   const p = state.profiles.find(x => x.id === id);
   if (!p) return;
-  const name = prompt(t('renamePrompt'), p.name);
+  const name = prompt(state.profiles.length > 1 ? t('renamePrompt') : t('renamePromptMe'), p.name);
   if (!name || !name.trim()) return;
   p.name = name.trim();
   touch(p);
@@ -240,9 +250,13 @@ function render() {
     : '';
 
   if (filtered.length === 0) {
+    const query = document.getElementById('search').value.trim();
     const msg = currentSearch ? t('noResults') : t('emptyTitle');
     const sub = currentSearch ? t('tryAnother') : tt('emptyHint', currentType);
-    grid.innerHTML = `<div class="empty-state"><div class="icon">${TYPE_EMOJI[currentType]}</div><h3>${msg}</h3><p>${sub}</p></div>`;
+    const cta = currentSearch ? t('addQuery', { q: query }) : (TYPES.includes(currentType) ? tt('addBook', currentType) : t('add'));
+    grid.innerHTML = `<button type="button" class="empty-state" onclick="addFromEmpty()">
+      <span class="icon">${TYPE_EMOJI[currentType]}</span><span class="empty-title">${msg}</span>
+      <span class="empty-sub">${sub}</span><span class="empty-cta">+ ${escapeHtml(cta)}</span></button>`;
     return;
   }
 
@@ -296,6 +310,24 @@ function render() {
     `;
   }).join('');
   hydrateProviders();
+}
+
+// Page publique d'une liste partagée (?share=…) : pas de démarrage sur la collection locale
+const SHARE_VIEW_PARAM = new URLSearchParams(location.search).get('share');
+
+// Ajout depuis un état vide : dans l'onglet et la catégorie affichés, avec la recherche en cours
+function addFromEmpty() {
+  const query = document.getElementById('search').value.trim();
+  openModal();
+  if (!query) return;
+  const type = document.getElementById('f-type').value;
+  if (lookupAvailable(type)) {
+    document.getElementById('f-lookup').value = query;
+    runLookup(query);
+  } else {
+    document.getElementById('f-titre').value = query;
+    checkDuplicate();
+  }
 }
 
 // ===== VUE AFFICHES =====
@@ -553,14 +585,51 @@ function topCounts(values, limit) {
   return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], locale())).slice(0, limit);
 }
 
+// Objectif annuel d'un type ; l'ancien objectif unique était celui des livres
+function goalFor(p, type) {
+  if (!p) return 0;
+  if (p.goals && p.goals[type]) return p.goals[type];
+  return type === 'livre' && !(p.goals && 'livre' in p.goals) ? (p.goal || 0) : 0;
+}
+
+// Onglet « Tout » : un bloc par type plutôt qu'un total qui mélange livres, films et jeux
+function typeStatsHtml(year) {
+  const p = getCurrentProfile();
+  const tiles = TYPES.map(type => {
+    const items = books.filter(b => typeOf(b) === type);
+    const done = items.filter(b => b.categorie === 'lu');
+    const n = done.filter(b => (b.dateFinished || '').startsWith(year)).length;
+    const goal = goalFor(p, type);
+    if (!items.length && !goal) return '';
+    return `
+      <div class="type-stat">
+        <div class="ts-head">${typeIcon(type, 14)} ${t('type_' + type)}</div>
+        <div class="ts-value">${n}${goal ? ` <small>/ ${goal}</small>` : ''}</div>
+        <div class="ts-label">${ttn('readYear', type, n, { year })}</div>
+        ${goal ? `<div class="progress-bar"><span style="width:${Math.min(100, Math.round(n / goal * 100))}%"></span></div>` : ''}
+        <div class="ts-total">${t('totalShort', { n: done.length })}</div>
+      </div>`;
+  }).join('');
+  return `<div class="type-stats">${tiles}</div><p class="stats-hint" style="margin:-12px 0 20px;">${t('goalHint')}</p>`;
+}
+
+function byYearPerTypeHtml(read) {
+  const years = [...new Set(read.map(b => (b.dateFinished || '').slice(0, 4)).filter(Boolean))].sort().reverse().slice(0, 6);
+  if (!years.length) return '';
+  return `<div class="stats-section"><h3>${tt('byYear', 'tout')}</h3>${years.map(y => `
+    <div class="year-row"><span class="y">${y}</span>${TYPES.map(type => {
+      const n = read.filter(b => typeOf(b) === type && (b.dateFinished || '').startsWith(y)).length;
+      return n ? `<span title="${t('type_' + type)}">${typeIcon(type, 13)} ${n}</span>` : '';
+    }).join('')}</div>`).join('')}</div>`;
+}
+
 function renderStats() {
   const p = getCurrentProfile();
   const ty = currentType;
   const read = scopedItems().filter(b => b.categorie === 'lu');
   const year = String(new Date().getFullYear());
   const readThisYear = read.filter(b => (b.dateFinished || '').startsWith(year));
-  // Objectif par type ; l'ancien objectif unique était celui des livres
-  const goal = (p && ((p.goals && p.goals[ty]) || (ty === 'livre' && !(p.goals && 'livre' in p.goals) ? p.goal : 0))) || 0;
+  const goal = goalFor(p, ty);
   const authorCount = new Set(read.map(b => (b.auteur || '').trim().toLowerCase()).filter(Boolean)).size;
   const rated = read.filter(b => b.note);
   const avg = rated.length ? (rated.reduce((n, b) => n + b.note, 0) / rated.length).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '–';
@@ -574,7 +643,7 @@ function renderStats() {
   const pct = goal ? Math.min(100, Math.round(readThisYear.length / goal * 100)) : 0;
   document.getElementById('stats-content').innerHTML = `
     <button class="retro-open" onclick="openRetro()">✨ ${t('retroOpen', { year })}</button>
-    <div class="goal-card">
+    ${ty === 'tout' ? typeStatsHtml(year) : `<div class="goal-card">
       <div class="goal-head">
         <div class="goal-count">${readThisYear.length} <small>${goal ? tt('goalOf', ty, { goal, year }) : ttn('readYear', ty, readThisYear.length, { year })}</small></div>
         <label class="goal-input">${t('goal')} <input type="number" min="1" value="${goal || ''}" placeholder="–" onchange="setGoal(this.value)"></label>
@@ -585,8 +654,8 @@ function renderStats() {
       <div class="kpi"><div class="v">${read.length}</div><div class="l">${tt('totalRead', ty)}</div></div>
       <div class="kpi"><div class="v">${authorCount}</div><div class="l">${tt('authorsRead', ty)}</div></div>
       <div class="kpi"><div class="v">${avg}${rated.length ? ' ★' : ''}</div><div class="l">${t('avgRating')}</div></div>
-    </div>
-    ${byYear.length ? `<div class="stats-section"><h3>${tt('byYear', ty)}</h3>${barRows(byYear)}</div>` : ''}
+    </div>`}
+    ${ty === 'tout' ? byYearPerTypeHtml(read) : (byYear.length ? `<div class="stats-section"><h3>${tt('byYear', ty)}</h3>${barRows(byYear)}</div>` : '')}
     ${authors.length ? `<div class="stats-section"><h3>${tt('topAuthors', ty)}</h3>${barRows(authors)}</div>` : ''}
     ${tags.length ? `<div class="stats-section"><h3>${t('topTags')}</h3>${barRows(tags)}</div>` : ''}
     ${undated ? `<p class="stats-hint">${ttn('undated', ty === 'livre' ? 'livre' : 'tout', undated)}</p>` : ''}
@@ -997,6 +1066,7 @@ renderTypePicker();
 fillCategorySelect(currentCat);
 updateModalFields();
 renderTypeUI();
+if (!SHARE_VIEW_PARAM) bootFromCache();
 showActiveCat('instant');
 
 document.addEventListener('keydown', e => {

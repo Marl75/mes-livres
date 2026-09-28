@@ -61,9 +61,7 @@ function renderRetro() {
 
   box.innerHTML = nav + `
     <div class="retro-hero">
-      <div class="retro-total">${items.length}</div>
-      <div class="retro-total-label">${ttn('retroTotal', 'tout', items.length).replace(/^\d+\s*/, '')}</div>
-      <div class="retro-types">${byType.map(([type, n]) => `<span>${typeIcon(type, 15)} ${ttn('items', type, n)}</span>`).join('')}</div>
+      <div class="retro-types-big">${byType.map(([type, n]) => `<div>${typeIcon(type, 18)}<strong>${n}</strong>${ttn('readYear', type, n, { year: retroYear }).replace(/\s\S+\s\d{4}$/, '')}</div>`).join('')}</div>
     </div>
     ${favorites.length ? `
       <h3 class="retro-h">${t('retroFavorites')}</h3>

@@ -16,15 +16,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=10">
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="css/styles.css?v=12">
 </head>
 <body>
 
 <!-- Auth screen -->
-<div class="auth-screen" id="auth-screen">
+<div class="auth-screen hidden" id="auth-screen">
   <div class="auth-card">
     <div class="auth-brand">
       <h1 data-i18n="appTitle">Ma Collection</h1>
@@ -44,7 +44,7 @@
       <input type="password" id="auth-password" placeholder="6 caract&egrave;res minimum" data-i18n-ph="passwordPh" autocomplete="current-password">
     </div>
     <div class="field" id="auth-name-field" style="display:none;">
-      <label data-i18n="firstName">Pr&eacute;nom (nom du profil)</label>
+      <label data-i18n="firstName">Pr&eacute;nom</label>
       <input type="text" id="auth-name" placeholder="ex: Marl&egrave;ne" data-i18n-ph="firstNamePh" maxlength="30">
     </div>
     <button class="btn-primary" id="auth-submit" onclick="submitAuth()" style="width:100%; margin-top:8px;">
@@ -63,11 +63,11 @@
       <h1 data-i18n="appTitle">Ma Collection</h1>
       <p data-i18n="tagline">Lectures, en attente, et envies</p>
     </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="search" class="search" id="search" placeholder="Rechercher&hellip;" data-i18n-ph="searchPh">
+    </div>
     <div class="toolbar">
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" class="search" id="search" placeholder="Rechercher&hellip;" data-i18n-ph="searchPh">
-      </div>
       <button class="add-btn" onclick="openModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         <span class="add-btn-text" data-i18n="add">Ajouter</span>
@@ -142,6 +142,9 @@
     </div>
   </div>
   <div class="grid" id="grid"></div>
+  <button class="fab" id="fab" onclick="openModal()" data-i18n-title="add">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
   <footer class="credits">
     <span data-i18n="credits">Fiches : Open Library, Google Books, TMDB et RAWG.</span>
     <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a> ·
@@ -316,16 +319,16 @@
   </div>
 </div>
 
-<script src="js/i18n.js?v=10"></script>
-<script src="js/types.js?v=10"></script>
-<script src="js/data.js?v=10"></script>
-<script src="js/usage.js?v=10"></script>
-<script src="js/lookup.js?v=10"></script>
-<script src="js/watch.js?v=10"></script>
-<script src="js/share-target.js?v=10"></script>
-<script src="js/scanner.js?v=10"></script>
-<script src="js/app.js?v=10"></script>
-<script src="js/retro.js?v=10"></script>
-<script src="js/share.js?v=10"></script>
+<script defer src="js/i18n.js?v=12"></script>
+<script defer src="js/types.js?v=12"></script>
+<script defer src="js/data.js?v=12"></script>
+<script defer src="js/usage.js?v=12"></script>
+<script defer src="js/lookup.js?v=12"></script>
+<script defer src="js/watch.js?v=12"></script>
+<script defer src="js/share-target.js?v=12"></script>
+<script defer src="js/scanner.js?v=12"></script>
+<script defer src="js/app.js?v=12"></script>
+<script defer src="js/retro.js?v=12"></script>
+<script defer src="js/share.js?v=12"></script>
 </body>
 </html>
