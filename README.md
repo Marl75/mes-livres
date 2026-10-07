@@ -1,1 +1,29 @@
-# mes-livres
+# My Collection
+
+**Live app: [marl75.github.io/mes-livres](https://marl75.github.io/mes-livres/)** · available in English and French
+
+A progressive web app to keep track of everything you read, watch and play: books, films, TV shows and video games, in one place.
+
+## Features
+
+- **One collection, four types**: books, films, shows and games, each sorted into categories (finished, in progress, to discover, abandoned, wishlist)
+- **Autofill**: search by title, author or ISBN and the app fills in the details and cover (Open Library, Google Books, TMDB, RAWG)
+- **Barcode scanning**: point the phone camera at a book's barcode to add it
+- **Where to watch**: streaming availability for films and shows (JustWatch)
+- **Add from anywhere**: share a link from another app on your phone straight into the collection
+- **Duplicate detection** when adding something you already have
+- **Sharing**: create a read-only link to all or part of your collection, with or without your ratings and reviews
+- **Statistics and yearly goals** per type, plus a **year in review** (favourites, month by month, themes)
+- **Several profiles** per account, synced across devices, with export and import of backups
+- **Works offline**: changes made without a connection are synced automatically later
+
+## Stack
+
+- Plain HTML, CSS and JavaScript, no build step
+- [Firebase](https://firebase.google.com/) Authentication and Firestore, with security rules in `firestore.rules`
+- Service worker (`sw.js`) for offline use, web app manifest for installation on a phone
+- Usage statistics per account for the owner (`admin.html`), described in the privacy policy (`privacy-policy.html`)
+
+## Run locally
+
+Serve the folder with any static server, for example `python3 -m http.server 8000`, then open http://localhost:8000.
