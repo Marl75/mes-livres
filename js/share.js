@@ -57,6 +57,7 @@ function syncShares() {
 
 // ----- Fenêtre « Partager ma wishlist » -----
 function openShareModal() {
+  if (DEMO) { document.getElementById('profile-dropdown').classList.remove('active'); setSyncStatus(t('demoNoShare'), 'err'); return; }
   document.getElementById('profile-dropdown').classList.remove('active');
   renderShareModal();
   document.getElementById('share-modal').classList.add('active');

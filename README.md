@@ -2,6 +2,10 @@
 
 **Live app: [marl75.github.io/mes-livres](https://marl75.github.io/mes-livres/)** · available in English and French
 
+**Try it without an account: [demo mode](https://marl75.github.io/mes-livres/?demo&lang=en)** (sample collection, nothing is saved)
+
+<img src="screenshots/collection-desktop.png" alt="My Collection on desktop, demo mode" width="640"> <img src="screenshots/collection-mobile.png" alt="My Collection on mobile, demo mode" width="200">
+
 A progressive web app to keep track of everything you read, watch and play: books, films, TV shows and video games, in one place.
 
 ## Features
@@ -20,6 +24,8 @@ A progressive web app to keep track of everything you read, watch and play: book
 ## Stack
 
 - Plain HTML, CSS and JavaScript, no build step
+- Demo mode with `?demo` in the address (`js/demo.js`): sample data, no account, nothing saved
+- Language follows the browser; `?lang=en` or `?lang=fr` in the address forces it
 - [Firebase](https://firebase.google.com/) Authentication and Firestore, with security rules in `firestore.rules`
 - Service worker (`sw.js`) for offline use, web app manifest for installation on a phone
 - Usage statistics per account for the owner (`admin.html`), described in the privacy policy (`privacy-policy.html`)

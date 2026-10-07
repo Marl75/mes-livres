@@ -1,4 +1,6 @@
 // ===== FIREBASE =====
+// Mode démo (?demo dans l'adresse) : voir demo.js
+const DEMO = new URLSearchParams(location.search).has('demo');
 const firebaseConfig = {
   apiKey: "AIzaSyDj2AnlTDxOv_sHD311icF540ijNPMJS2E",
   authDomain: "mes-livres-dafce.firebaseapp.com",
@@ -76,6 +78,7 @@ async function resetPassword() {
 }
 
 function logoutUser() {
+  if (DEMO) { location.href = location.pathname; return; }   // quitter la démo
   auth.signOut();
 }
 
@@ -142,6 +145,7 @@ const SESSION_KEY = 'mes-livres-session';
 let bootUid = null;
 
 function bootFromCache() {
+  if (DEMO) { startDemo(); return; }
   let hadSession = false;
   try { hadSession = localStorage.getItem(SESSION_KEY) === '1'; } catch (e) {}
   const cached = hadSession ? loadCache() : null;
@@ -412,6 +416,7 @@ async function manualSync() {
 }
 
 function cacheLocally() {
+  if (DEMO) return;   // la démo ne touche pas à la copie locale d'un vrai compte
   try {
     syncBooksToProfile();
     localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify({
@@ -454,6 +459,7 @@ function loadLocalData() {
 
 // ===== AUTH STATE LISTENER =====
 auth.onAuthStateChanged(async user => {
+  if (DEMO) return;
   // Page publique d'une wishlist partagée : pas d'écran de connexion
   if (typeof SHARE_VIEW_ID !== 'undefined' && SHARE_VIEW_ID) return;
   if (user) {

@@ -2,6 +2,7 @@
 const I18N = {
   fr: {
     locale: 'fr-FR', docTitle: 'Collection', langSwitch: 'English',
+    tryDemo: 'Essayer sans compte (démo)', demoBanner: 'Mode démo : collection d’exemple, vos modifications ne sont pas enregistrées.', demoNoShare: 'Le partage n’est pas disponible en mode démo.',
     appTitle: 'Ma Collection', authSubtitle: 'Connecte-toi pour retrouver ta collection',
     tabLogin: 'Connexion', tabRegister: 'Inscription', email: 'Email', emailPh: 'ton@email.com',
     password: 'Mot de passe', passwordPh: '6 caractères minimum', firstName: 'Prénom', firstNamePh: 'ex : Marlène',
@@ -242,12 +243,16 @@ const I18N = {
     sharedCollectionBy: "{name}'s collection",
     addQuery: 'Add “{q}”', renameMe: 'Change my first name', renamePromptMe: 'Your first name:', exportAction: 'Export a backup', importAction: 'Import a backup',
     totalShort: '{n} in total', goalHint: 'Set a yearly goal in each type\'s tab.',
+    tryDemo: 'Try it without an account (demo)', demoBanner: 'Demo mode: sample collection, your changes are not saved.', demoNoShare: 'Sharing is not available in demo mode.',
   },
 };
 
 const LANG_KEY = 'mes-livres-lang';
 let currentLang = 'fr';
 try {
+  // ?lang=en ou ?lang=fr dans l'adresse force la langue (et la mémorise)
+  const urlLang = new URLSearchParams(location.search).get('lang');
+  if (urlLang === 'en' || urlLang === 'fr') localStorage.setItem(LANG_KEY, urlLang);
   const savedLang = localStorage.getItem(LANG_KEY);
   currentLang = savedLang === 'en' || savedLang === 'fr'
     ? savedLang
@@ -289,12 +294,12 @@ function toggleLanguage() {
   updateModalFields();
   document.getElementById('profile-dropdown').classList.remove('active');
   closeCardMenu();
-  if (currentUser) {
+  if (currentUser || DEMO) {
     renderProfileSelector();
     renderProfileList();
     render();
     if (document.getElementById('stats-modal').classList.contains('active')) renderStats();
-    setSyncStatus('');
+    setSyncStatus(DEMO ? t('demoBanner') : '');
   }
 }
 
