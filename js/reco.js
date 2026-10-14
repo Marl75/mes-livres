@@ -27,7 +27,9 @@ function saveRecoCache(data) {
 }
 
 function openReco() {
-  recoType = currentType;
+  // Reprend le type de la dernière recherche, sinon l'onglet affiché
+  const cache = loadRecoCache();
+  recoType = cache ? cache.type || 'tout' : currentType;
   recoError = '';
   renderReco();
   document.getElementById('reco-modal').classList.add('active');
@@ -51,7 +53,8 @@ function renderReco() {
       ${TYPE_EMOJI[type]} ${t('type_' + type)}
     </button>`).join('');
   const results = cache && cache.recommandations
-    ? `<p class="reco-profil">${escapeHtml(cache.profil || '')}</p>
+    ? `${recoSourceHtml(cache, typed)}
+       <p class="reco-profil">${escapeHtml(cache.profil || '')}</p>
        <div class="reco-list">${cache.recommandations.map(recoCard).join('') || `<p class="share-intro">${t('recoAllDone')}</p>`}</div>`
     : '';
   document.getElementById('reco-content').innerHTML = `
@@ -68,6 +71,18 @@ function renderReco() {
     <p class="reco-privacy">${t('recoPrivacy')}</p>`;
   const input = document.getElementById('reco-demande');
   input.addEventListener('keydown', e => { if (e.key === 'Enter') runReco(); });
+  input.addEventListener('change', renderReco);
+}
+
+// Rappelle de quelle demande viennent les suggestions affichées, et signale quand
+// le type ou l'envie ont changé depuis (il faut alors relancer une recherche)
+function recoSourceHtml(cache, typed) {
+  const type = cache.type || 'tout';
+  const date = new Date(cache.at).toLocaleDateString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const parts = [t('type_' + type), cache.demande ? (currentLang === 'en' ? `“${escapeHtml(cache.demande)}”` : `« ${escapeHtml(cache.demande)} »`) : t('recoNoWish')];
+  const changed = type !== recoType || (cache.demande || '') !== typed.trim();
+  return `<div class="reco-source">${t('recoSource', { date: escapeHtml(date) })} ${parts.join(' · ')}</div>
+    ${changed ? `<div class="reco-stale">${t('recoStale')}</div>` : ''}`;
 }
 
 function recoCard(r, i) {
@@ -113,12 +128,13 @@ async function runReco() {
   if (recoLoading) return;
   recoError = '';
   if (!DEMO && !navigator.onLine) { recoError = t('recoOffline'); renderReco(); return; }
+  const payload = recoPayload();   // lu avant l'affichage « Claude réfléchit… »
   recoLoading = true;
   renderReco();
   try {
-    const data = DEMO ? await demoReco() : (await firebase.functions().httpsCallable('recommendations', { timeout: 130000 })(recoPayload())).data;
+    const data = DEMO ? await demoReco() : (await firebase.functions().httpsCallable('recommendations', { timeout: 130000 })(payload)).data;
     const recommandations = await Promise.all(data.recommandations.map(withCover));
-    saveRecoCache({ at: Date.now(), profil: data.profil, recommandations });
+    saveRecoCache({ at: Date.now(), type: payload.type, demande: payload.demande, profil: data.profil, recommandations });
   } catch (e) {
     console.warn('Recommandations indisponibles :', e);
     recoError = e && e.code === 'functions/resource-exhausted' ? t('recoLimit') : t('recoFailed');

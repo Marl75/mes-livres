@@ -1524,7 +1524,9 @@ button.empty-state:hover { border-color: var(--accent); background: var(--accent
 .reco-go { width: 100%; }
 .reco-go:disabled { opacity: 0.7; cursor: wait; }
 .reco-error { margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: var(--danger); background: rgba(224, 122, 108, 0.08); border: 1px solid rgba(224, 122, 108, 0.3); }
-.reco-profil { margin: 18px 0 12px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); border: 1px solid rgba(201, 169, 97, 0.3); font-size: 14px; line-height: 1.5; }
+.reco-source { margin-top: 18px; font-size: 12px; color: var(--text-faint); }
+.reco-stale { margin-top: 8px; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(201, 169, 97, 0.3); }
+.reco-profil { margin: 10px 0 12px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); border: 1px solid rgba(201, 169, 97, 0.3); font-size: 14px; line-height: 1.5; }
 .reco-list { display: flex; flex-direction: column; gap: 12px; }
 .reco-card { display: flex; gap: 14px; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); }
 .reco-cover { flex: 0 0 72px; height: 108px; border-radius: 8px; overflow: hidden; background: var(--bg-soft); }
