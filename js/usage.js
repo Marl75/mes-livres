@@ -50,7 +50,8 @@ async function recordVisit() {
   }
 }
 
-// Compte une action du mois en cours : 'modified' ou 'deleted'
+// Compte une action du mois en cours : 'modified', 'deleted', 'recoAdded' ou 'recoDismissed'
+// (les demandes de recommandations et leur coût sont comptés par la fonction serveur)
 function trackUsage(field) {
   if (!currentUser) return;
   usageDoc().set({ months: { [monthKey()]: { [field]: firebase.firestore.FieldValue.increment(1) } } }, { merge: true })

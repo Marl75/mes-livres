@@ -53,6 +53,10 @@
   .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
   .legend .u::before { background: var(--accent); }
   .legend .c::before { background: var(--green); }
+  .bar.cost { background: var(--blue); width: 60%; max-width: 26px; }
+  .legend .k::before { background: var(--blue); }
+  .kpi.ai .v { color: #a9c6ec; }
+  td.num { white-space: nowrap; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th { text-align: left; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); }
   td { padding: 10px; border-bottom: 1px solid var(--border); }
@@ -88,6 +92,39 @@ const monthKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,
 const monthLabel = (m, style) => new Date(+m.slice(0, 4), +m.slice(5) - 1, 1).toLocaleDateString('fr-FR', { month: style || 'short', year: style ? 'numeric' : undefined }).replace('.', '');
 const dateLabel = ts => ts ? new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '–';
 
+const usd = n => n ? `${n < 0.995 ? n.toFixed(3) : n.toFixed(2)} $` : '0 $';
+const dateTimeLabel = ts => ts ? new Date(ts).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '–';
+
+function totalRecoCost() {
+  return docs.reduce((n, u) => n + Object.values(u.months || {}).reduce((m, x) => m + (x.recoCost || 0), 0), 0);
+}
+
+function recoSection(stats, perMonth) {
+  const maxCost = Math.max(0.0001, ...perMonth.map(p => p.recoCost));
+  const rows = stats.rows.filter(r => r.reco || r.recoFailed || r.recoBlocked || r.recoAdded || r.recoDismissed)
+    .sort((a, b) => b.recoCost - a.recoCost || b.reco - a.reco);
+  return `
+    <div class="section card">
+      <h2>Recommandations (Claude) · coût sur 12 mois</h2>
+      <div class="chart">${perMonth.map(p => `
+        <div class="col ${p.m === selected ? 'on' : ''}" onclick="pick('${p.m}')" title="${monthLabel(p.m, 'long')} : ${p.reco} demande(s), ${usd(p.recoCost)}">
+          <div class="bars"><span class="bar cost" style="height:${p.recoCost / maxCost * 100}%"></span></div>
+          <span class="n">${p.recoCost ? usd(p.recoCost) : ''}</span>
+          <span class="m">${monthLabel(p.m)}</span>
+        </div>`).join('')}</div>
+      <div class="legend"><span class="k">Coût estimé des appels à Claude</span><span>Total depuis le début : <strong>${usd(totalRecoCost())}</strong></span></div>
+    </div>
+
+    <div class="section card">
+      <h2>Recommandations en ${monthLabel(selected, 'long')}</h2>
+      ${rows.length ? `<div class="table-wrap"><table>
+        <thead><tr><th>E-mail</th><th class="num">Demandes</th><th class="num">Échecs</th><th class="num">Bloquées (limite)</th><th class="num">Ajoutées à la wishlist</th><th class="num">Refusées</th><th class="num">Tokens</th><th class="num">Coût</th><th>Dernière demande</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${esc(r.email)}</td><td class="num">${r.reco}</td><td class="num">${r.recoFailed}</td><td class="num">${r.recoBlocked}</td><td class="num">${r.recoAdded}</td><td class="num">${r.recoDismissed}</td><td class="num">${r.recoTokens.toLocaleString('fr-FR')}</td><td class="num">${usd(r.recoCost)}</td><td>${dateTimeLabel(r.recoLastAt)}</td></tr>`).join('')}</tbody>
+      </table></div>` : '<p class="note">Aucune demande de recommandations ce mois-ci.</p>'}
+      <p class="note" style="margin-top:12px;">Coût estimé d'après les tokens consommés et le tarif de Claude Sonnet 5.5 (2 $ / 10 $ par million de tokens en entrée / sortie). La facture réelle est sur <a href="https://platform.claude.com/usage" target="_blank" rel="noopener" style="color:var(--accent)">la console Anthropic</a>. Limite : 5 demandes par compte et par jour.</p>
+    </div>`;
+}
+
 function lastMonths(n) {
   const out = [];
   const d = new Date();
@@ -106,13 +143,24 @@ function monthStats(m) {
       modified: mm.modified || 0,
       deleted: mm.deleted || 0,
       lastSeen: mm.lastSeen || 0,
+      reco: mm.reco || 0,
+      recoFailed: mm.recoFailed || 0,
+      recoBlocked: mm.recoBlocked || 0,
+      recoAdded: mm.recoAdded || 0,
+      recoDismissed: mm.recoDismissed || 0,
+      recoTokens: (mm.recoTokensIn || 0) + (mm.recoTokensOut || 0),
+      recoCost: mm.recoCost || 0,
+      recoLastAt: mm.recoLastAt || 0,
     };
-  }).filter(r => r.sessions || r.created || r.modified || r.deleted);
+  }).filter(r => r.sessions || r.created || r.modified || r.deleted || r.reco || r.recoFailed || r.recoBlocked);
   const sum = k => rows.reduce((n, r) => n + r[k], 0);
   return {
     rows: rows.sort((a, b) => b.sessions - a.sessions || b.created - a.created),
     active: rows.filter(r => r.sessions > 0).length,
     sessions: sum('sessions'), created: sum('created'), modified: sum('modified'), deleted: sum('deleted'),
+    reco: sum('reco'), recoFailed: sum('recoFailed'), recoBlocked: sum('recoBlocked'), recoAdded: sum('recoAdded'),
+    recoDismissed: sum('recoDismissed'), recoCost: sum('recoCost'),
+    recoUsers: rows.filter(r => r.reco || r.recoFailed || r.recoBlocked).length,
   };
 }
 
@@ -200,6 +248,8 @@ function render() {
       <div class="card kpi"><div class="v">${stats.modified}</div><div class="l">Éléments modifiés</div></div>
       <div class="card kpi"><div class="v">${stats.deleted}</div><div class="l">Éléments supprimés</div></div>
       <div class="card kpi"><div class="v">${stats.sessions}</div><div class="l">Ouvertures de l'appli</div></div>
+      <div class="card kpi ai"><div class="v">${stats.reco}</div><div class="l">Demandes de recos (${stats.recoUsers} compte${stats.recoUsers > 1 ? 's' : ''})</div></div>
+      <div class="card kpi ai"><div class="v">${usd(stats.recoCost)}</div><div class="l">Coût IA du mois</div></div>
     </div>
 
     <div class="section card">
@@ -223,6 +273,8 @@ function render() {
         <tbody>${stats.rows.map(r => `<tr><td>${esc(r.email)}</td><td class="num">${r.sessions}</td><td class="num">${r.created}</td><td class="num">${r.modified}</td><td class="num">${r.deleted}</td><td>${dateLabel(r.lastSeen)}</td></tr>`).join('')}</tbody>
       </table></div>` : '<p class="note">Aucune activité ce mois-ci.</p>'}
     </div>
+
+    ${recoSection(stats, perMonth)}
 
     <div class="section card">
       <h2>Tous les comptes</h2>

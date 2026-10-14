@@ -189,6 +189,7 @@ function addReco(i) {
     save();
     render();
   }
+  trackUsage('recoAdded');
   updateCachedReco(list => { list[i].added = true; });
 }
 
@@ -202,6 +203,7 @@ function dismissReco(i) {
     touch(p);
     save();
   }
+  trackUsage('recoDismissed');
   updateCachedReco(list => { list.splice(i, 1); });
 }
 

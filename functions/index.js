@@ -6,7 +6,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { logger } from 'firebase-functions';
 import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { cleanInput, recommend } from './recommend.js';
 
 initializeApp();
@@ -31,17 +31,41 @@ async function takeQuota(uid) {
   });
 }
 
+// Suivi pour la page admin.html : ajouté au document usage/{uid} déjà utilisé par l'appli,
+// dans le mois en cours. Statuts : « reco » (réussie), « recoFailed », « recoBlocked » (limite).
+async function trackReco(uid, status, usage) {
+  const d = new Date();
+  const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const inc = { [status]: FieldValue.increment(1), recoLastAt: Date.now() };
+  if (usage) {
+    inc.recoTokensIn = FieldValue.increment(usage.input);
+    inc.recoTokensOut = FieldValue.increment(usage.output);
+    inc.recoCost = FieldValue.increment(usage.cost);
+  }
+  try {
+    await getFirestore().collection('usage').doc(uid).set({ months: { [month]: inc } }, { merge: true });
+  } catch (e) {
+    logger.warn('suivi des recommandations non enregistré', e);
+  }
+}
+
 export const recommendations = onCall({ secrets: [ANTHROPIC_API_KEY], timeoutSeconds: 120, memory: '512MiB' }, async request => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Connexion requise.');
   const input = cleanInput(request.data);
   const remaining = await takeQuota(request.auth.uid);
-  if (remaining < 0) throw new HttpsError('resource-exhausted', 'Limite quotidienne atteinte.');
+  if (remaining < 0) {
+    await trackReco(request.auth.uid, 'recoBlocked');
+    throw new HttpsError('resource-exhausted', 'Limite quotidienne atteinte.');
+  }
+  let result;
   try {
-    const result = await recommend(input, ANTHROPIC_API_KEY.value());
-    logger.info('recommandations', { uid: request.auth.uid, items: input.items.length, ...result.usage });
-    return { profil: result.profil, recommandations: result.recommandations, remaining };
+    result = await recommend(input, ANTHROPIC_API_KEY.value());
   } catch (e) {
     logger.error('recommandations : échec', e);
+    await trackReco(request.auth.uid, 'recoFailed');
     throw new HttpsError('internal', 'Recommandations indisponibles pour le moment.');
   }
+  logger.info('recommandations', { uid: request.auth.uid, items: input.items.length, ...result.usage });
+  await trackReco(request.auth.uid, 'reco', result.usage);
+  return { profil: result.profil, recommandations: result.recommandations, remaining };
 });

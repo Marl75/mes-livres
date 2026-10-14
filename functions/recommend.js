@@ -5,6 +5,9 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const TYPES = ['livre', 'film', 'serie', 'jeu'];
 const CATS = ['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'];
+const MODEL = 'claude-sonnet-5-5';
+// Tarif de Claude Sonnet 5.5, en dollars par million de tokens (pour le suivi des coûts)
+const PRICE = { input: 2, output: 10 };
 const MAX_ITEMS = 400;
 const COUNT = 6;
 
@@ -97,7 +100,7 @@ export async function recommend(input, apiKey) {
 
   const client = new Anthropic({ apiKey });
   const response = await client.beta.messages.create({
-    model: 'claude-sonnet-5-5',
+    model: MODEL,
     max_tokens: 16000,
     output_config: { effort: 'medium', format: { type: 'json_schema', schema: SCHEMA } },
     // Si le modèle décline la demande, l'API la relance sur un modèle de secours
@@ -121,6 +124,10 @@ export async function recommend(input, apiKey) {
   return {
     profil: result.profil,
     recommandations,
-    usage: { input: response.usage.input_tokens, output: response.usage.output_tokens },
+    usage: {
+      input: response.usage.input_tokens,
+      output: response.usage.output_tokens,
+      cost: (response.usage.input_tokens * PRICE.input + response.usage.output_tokens * PRICE.output) / 1e6,
+    },
   };
 }
