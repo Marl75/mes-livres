@@ -51,8 +51,9 @@ Déduis ses goûts : les œuvres notées 4 ou 5 et leurs avis disent ce qu'il ou
 Règles :
 - Propose exactement ${COUNT} œuvres réelles et existantes. N'invente rien : en cas de doute sur un titre, un auteur ou une année, choisis une autre œuvre.
 - Ne propose jamais une œuvre déjà présente dans la collection (quelle que soit la catégorie) ni une œuvre de la liste « déjà refusées ».
-- Donne le titre tel qu'il est publié dans la langue de réponse quand une traduction existe.
-- Varie les créateurs, et au moins une proposition doit sortir de ses habitudes (champ « audacieux »).
+- Titre : donne le titre officiel de l'édition publiée dans la langue de réponse (par exemple « Seul sur Mars » et non « The Martian » en français), même si sa collection contient des titres en version originale. Garde le titre original seulement s'il n'existe pas de traduction.
+- Au plus une œuvre par créateur, et aucune d'un créateur déjà très présent dans sa collection, sauf demande explicite.
+- Au moins une proposition doit sortir de ses habitudes (champ « audacieux »).
 - « pourquoi » : une ou deux phrases personnelles, qui parlent de ses goûts à elle ou lui, pas un résumé générique.
 - « base_sur » : les titres exacts de sa collection qui justifient la recommandation.
 - Si la collection est presque vide, propose des valeurs sûres et variées et dis-le dans le profil.`;
@@ -91,12 +92,12 @@ export async function recommend(input, apiKey) {
     type === 'tout' ? 'Mélange les types (livres, films, séries, jeux) selon ses goûts.' : `Propose uniquement ${TYPE_NAMES[type]}.`,
     demande ? `Son envie du moment : « ${demande} »` : '',
     refuses.length ? `Déjà refusées (ne plus les proposer) : ${JSON.stringify(refuses)}` : '',
-    lang === 'en' ? 'Answer in English.' : 'Réponds en français.',
+    lang === 'en' ? 'Answer in English, with English titles.' : 'Réponds en français, avec les titres des éditions françaises.',
   ].filter(Boolean).join('\n');
 
   const client = new Anthropic({ apiKey });
   const response = await client.beta.messages.create({
-    model: 'claude-opus-5-5',
+    model: 'claude-sonnet-5-5',
     max_tokens: 16000,
     output_config: { effort: 'medium', format: { type: 'json_schema', schema: SCHEMA } },
     // Si le modèle décline la demande, l'API la relance sur un modèle de secours
