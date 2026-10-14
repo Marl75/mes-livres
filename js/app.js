@@ -461,9 +461,10 @@ function fillCategorySelect(selected) {
 
 // ===== TRI =====
 const SORT_KEY = 'mes-livres-sort';
-let currentSort = 'recent';
-try { currentSort = localStorage.getItem(SORT_KEY) || 'recent'; } catch (e) {}
-if (!['recent', 'finished', 'title', 'author', 'rating'].includes(currentSort)) currentSort = 'recent';
+// Tri par défaut : titre A → Z (un tri choisi sur l'appareil reste mémorisé)
+let currentSort = 'title';
+try { currentSort = localStorage.getItem(SORT_KEY) || 'title'; } catch (e) {}
+if (!['recent', 'finished', 'title', 'author', 'rating'].includes(currentSort)) currentSort = 'title';
 
 function lastName(author) {
   return (author || '').split(',')[0].trim().split(/\s+/).pop() || '';
@@ -679,7 +680,7 @@ function renderTagFilterBar() {
   scopedItems().filter(matchesSearch).forEach(b => (b.tags || []).forEach(t => {
     tagCounts[t] = (tagCounts[t] || 0) + 1;
   }));
-  const tags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a] || a.localeCompare(b));
+  const tags = Object.keys(tagCounts).sort((a, b) => a.localeCompare(b, locale(), { sensitivity: 'base' }));
   if (tags.length === 0) { bar.innerHTML = ''; bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML =
@@ -842,7 +843,8 @@ function renderSuggestions(query) {
   const q = (query || '').trim().toLowerCase();
   let all = getAllTags().filter(t => !currentTags.includes(t.tag));
   if (q) all = all.filter(t => t.tag.includes(q));
-  all = all.slice(0, 8);
+  // Les 8 tags les plus utilisés, affichés par ordre alphabétique
+  all = all.slice(0, 8).sort((a, b) => a.tag.localeCompare(b.tag, locale(), { sensitivity: 'base' }));
 
   let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${ttn('items', 'tout', t.count)}</span></div>`).join('');
 
