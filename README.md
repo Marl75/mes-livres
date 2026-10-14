@@ -28,7 +28,7 @@ A progressive web app to keep track of everything you read, watch and play: book
 - Language follows the browser; `?lang=en` or `?lang=fr` in the address forces it
 - [Firebase](https://firebase.google.com/) Authentication and Firestore, with security rules in `firestore.rules`
 - Service worker (`sw.js`) for offline use, web app manifest for installation on a phone
-- Usage statistics per account for the owner (`admin.html`), described in the privacy policy (`privacy-policy.html`)
+- Usage statistics per account for the owner, shown on the shared admin page [marl75.github.io/admin](https://marl75.github.io/admin/) (`admin.html` redirects there), described in the privacy policy (`privacy-policy.html`)
 
 ## Run locally
 

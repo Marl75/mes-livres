@@ -1,9 +1,9 @@
-// ===== STATISTIQUES D'UTILISATION (pour la page de suivi admin.html) =====
+// ===== STATISTIQUES D'UTILISATION (pour la page de suivi marl75.github.io/admin) =====
 // Un document usage/{uid} par compte : e-mail, première et dernière visite, et par mois
 // le nombre d'ouvertures de l'appli, d'éléments modifiés et supprimés. Les éléments créés
 // sont recalculés à partir des dates d'ajout (historique complet). Aucun contenu
 // (titres, avis…) n'est enregistré ici. Lisible seulement par le compte lui-même et
-// par l'administratrice (voir firestore.rules).
+// par l'administratrice (voir firestore.rules ; affichage : marl75.github.io/admin).
 let usageRecorded = false;
 
 function monthKey(date) {
