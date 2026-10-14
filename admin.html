@@ -53,10 +53,15 @@
   .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
   .legend .u::before { background: var(--accent); }
   .legend .c::before { background: var(--green); }
-  .bar.cost { background: var(--blue); width: 60%; max-width: 26px; }
-  .legend .k::before { background: var(--blue); }
+  .stack { display: flex; flex-direction: column-reverse; gap: 2px; width: 60%; max-width: 26px; min-height: 2px; }
+  .stack .seg { border-radius: 0; min-height: 2px; }
+  .stack .seg:last-child { border-radius: 4px 4px 0 0; }
+  .stack .seg:hover { filter: brightness(1.25); }
+  .legend .who::before { background: var(--c); }
   .kpi.ai .v { color: #a9c6ec; }
   td.num { white-space: nowrap; }
+  td:first-child { white-space: nowrap; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th { text-align: left; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); }
   td { padding: 10px; border-bottom: 1px solid var(--border); }
@@ -99,8 +104,40 @@ function totalRecoCost() {
   return docs.reduce((n, u) => n + Object.values(u.months || {}).reduce((m, x) => m + (x.recoCost || 0), 0), 0);
 }
 
+// Couleurs des utilisateurs dans le graphique des coûts (palette catégorielle validée pour
+// fond sombre, dans un ordre fixe). Au-delà de 7 comptes, les autres sont regroupés.
+const USER_COLORS = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9'];
+const OTHERS_COLOR = '#6b6678';
+
+// Comptes classés par coût total sur la période : la couleur suit le compte, pas le mois
+function recoColors(perMonth) {
+  const totals = {};
+  perMonth.forEach(p => p.rows.forEach(r => { if (r.recoCost) totals[r.email] = (totals[r.email] || 0) + r.recoCost; }));
+  const ranked = Object.keys(totals).sort((a, b) => totals[b] - totals[a] || a.localeCompare(b));
+  const colors = {};
+  ranked.forEach((email, i) => { colors[email] = USER_COLORS[i] || OTHERS_COLOR; });
+  return { colors, ranked, totals };
+}
+
+function costStack(p, colors, ranked, maxCost) {
+  const segs = {};
+  p.rows.forEach(r => {
+    if (!r.recoCost) return;
+    const key = colors[r.email] === OTHERS_COLOR ? 'Autres comptes' : r.email;
+    segs[key] = (segs[key] || 0) + r.recoCost;
+  });
+  const order = [...ranked.filter(e => segs[e]), ...(segs['Autres comptes'] ? ['Autres comptes'] : [])];
+  if (!order.length) return '<div class="stack"></div>';
+  return `<div class="stack" style="height:${p.recoCost / maxCost * 100}%">${order.map(k => `
+    <span class="seg" style="flex:${(segs[k] / p.recoCost * 100).toFixed(2)} 1 0; background:${colors[k] || OTHERS_COLOR}" title="${esc(monthLabel(p.m, 'long'))} · ${esc(k)} : ${usd(segs[k])}"></span>`).join('')}</div>`;
+}
+
 function recoSection(stats, perMonth) {
   const maxCost = Math.max(0.0001, ...perMonth.map(p => p.recoCost));
+  const { colors, ranked, totals } = recoColors(perMonth);
+  const shown = ranked.filter(e => colors[e] !== OTHERS_COLOR);
+  const others = ranked.filter(e => colors[e] === OTHERS_COLOR);
+  const avg = stats.reco ? stats.recoCost / stats.reco : 0;
   const rows = stats.rows.filter(r => r.reco || r.recoFailed || r.recoBlocked || r.recoAdded || r.recoDismissed)
     .sort((a, b) => b.recoCost - a.recoCost || b.reco - a.reco);
   return `
@@ -108,20 +145,25 @@ function recoSection(stats, perMonth) {
       <h2>Recommandations (Claude) · coût sur 12 mois</h2>
       <div class="chart">${perMonth.map(p => `
         <div class="col ${p.m === selected ? 'on' : ''}" onclick="pick('${p.m}')" title="${monthLabel(p.m, 'long')} : ${p.reco} demande(s), ${usd(p.recoCost)}">
-          <div class="bars"><span class="bar cost" style="height:${p.recoCost / maxCost * 100}%"></span></div>
+          <div class="bars">${costStack(p, colors, ranked, maxCost)}</div>
           <span class="n">${p.recoCost ? usd(p.recoCost) : ''}</span>
           <span class="m">${monthLabel(p.m)}</span>
         </div>`).join('')}</div>
-      <div class="legend"><span class="k">Coût estimé des appels à Claude</span><span>Total depuis le début : <strong>${usd(totalRecoCost())}</strong></span></div>
+      <div class="legend" style="flex-wrap:wrap;">
+        ${shown.map(e => `<span class="who" style="--c:${colors[e]}">${esc(e)} · ${usd(totals[e])}</span>`).join('')}
+        ${others.length ? `<span class="who" style="--c:${OTHERS_COLOR}">${others.length} autre${others.length > 1 ? 's' : ''} compte${others.length > 1 ? 's' : ''} · ${usd(others.reduce((n, e) => n + totals[e], 0))}</span>` : ''}
+        ${ranked.length ? '' : '<span>Pas encore de demande sur la période.</span>'}
+      </div>
+      <p class="note" style="margin-top:10px;">Coût sur 12 mois, réparti par compte (survole une barre pour le détail). Total depuis le début : <strong>${usd(totalRecoCost())}</strong>.</p>
     </div>
 
     <div class="section card">
       <h2>Recommandations en ${monthLabel(selected, 'long')}</h2>
       ${rows.length ? `<div class="table-wrap"><table>
         <thead><tr><th>E-mail</th><th class="num">Demandes</th><th class="num">Échecs</th><th class="num">Bloquées (limite)</th><th class="num">Ajoutées à la wishlist</th><th class="num">Refusées</th><th class="num">Tokens</th><th class="num">Coût</th><th>Dernière demande</th></tr></thead>
-        <tbody>${rows.map(r => `<tr><td>${esc(r.email)}</td><td class="num">${r.reco}</td><td class="num">${r.recoFailed}</td><td class="num">${r.recoBlocked}</td><td class="num">${r.recoAdded}</td><td class="num">${r.recoDismissed}</td><td class="num">${r.recoTokens.toLocaleString('fr-FR')}</td><td class="num">${usd(r.recoCost)}</td><td>${dateTimeLabel(r.recoLastAt)}</td></tr>`).join('')}</tbody>
+        <tbody>${rows.map(r => `<tr><td><span class="dot" style="background:${colors[r.email] || OTHERS_COLOR}"></span>${esc(r.email)}</td><td class="num">${r.reco}</td><td class="num">${r.recoFailed}</td><td class="num">${r.recoBlocked}</td><td class="num">${r.recoAdded}</td><td class="num">${r.recoDismissed}</td><td class="num">${r.recoTokens.toLocaleString('fr-FR')}</td><td class="num">${usd(r.recoCost)}</td><td>${dateTimeLabel(r.recoLastAt)}</td></tr>`).join('')}</tbody>
       </table></div>` : '<p class="note">Aucune demande de recommandations ce mois-ci.</p>'}
-      <p class="note" style="margin-top:12px;">Coût estimé d'après les tokens consommés et le tarif de Claude Sonnet 5.5 (2 $ / 10 $ par million de tokens en entrée / sortie). La facture réelle est sur <a href="https://platform.claude.com/usage" target="_blank" rel="noopener" style="color:var(--accent)">la console Anthropic</a>. Limite : 5 demandes par compte et par jour.</p>
+      <p class="note" style="margin-top:12px;">${stats.reco ? `En moyenne, une demande a coûté <strong>${usd(avg)}</strong> ce mois-ci. ` : ''}Le coût est estimé d'après la quantité de texte traitée par Claude Sonnet 5.5, mesurée en <em>tokens</em> (un token ≈ ¾ de mot). Anthropic facture 2 $ par million de tokens envoyés à Claude (la collection et les consignes) et 10 $ par million de tokens qu'il écrit (les suggestions et sa réflexion). La facture réelle est sur <a href="https://platform.claude.com/usage" target="_blank" rel="noopener" style="color:var(--accent)">la console Anthropic</a>. Limite : 5 demandes par compte et par jour.</p>
     </div>`;
 }
 
