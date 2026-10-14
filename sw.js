@@ -3,7 +3,7 @@
 //   copie locale seulement si le réseau manque.
 // - Bibliothèques Firebase et polices (adresses versionnées) : copie locale d'abord.
 // - Données (Firestore, connexion, recherches TMDB/RAWG/Open Library) : jamais interceptées.
-const CACHE = 'collection-v6';
+const CACHE = 'collection-v7';
 const CORE = [
   './',
   './index.html',
@@ -21,6 +21,7 @@ const CORE = [
   './js/app.js',
   './js/retro.js',
   './js/share.js',
+  './js/reco.js',
   './icon-192.png',
   './icon-512.png',
   './favicon.ico',
@@ -29,6 +30,7 @@ const LIBS = [
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js',
 ];
 const STATIC_HOSTS = ['www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

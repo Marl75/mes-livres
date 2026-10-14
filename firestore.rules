@@ -27,6 +27,9 @@ service cloud.firestore {
       allow create, update: if request.auth != null && request.auth.uid == userId;
     }
 
+    // recoUsage/{userId} (demandes de recommandations par jour) : écrit seulement par la
+    // fonction serveur (functions/index.js), qui n'est pas soumise à ces règles. Aucun accès depuis l'appli.
+
     // Tout le reste est interdit
     match /{document=**} {
       allow read, write: if false;
