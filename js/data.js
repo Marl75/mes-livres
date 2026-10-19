@@ -142,6 +142,8 @@ let loadedOffline = false;
 // L'appli s'ouvre directement sur la copie locale quand une session existait :
 // la connexion Firebase se confirme ensuite en arrière-plan.
 const SESSION_KEY = 'mes-livres-session';
+// Arrivée par « Créer un compte » depuis le site perso (?signup) : onglet Inscription ouvert d'office
+const WANTS_SIGNUP = new URLSearchParams(location.search).has('signup');
 let bootUid = null;
 
 function bootFromCache() {
@@ -150,7 +152,10 @@ function bootFromCache() {
   try { hadSession = localStorage.getItem(SESSION_KEY) === '1'; } catch (e) {}
   const cached = hadSession ? loadCache() : null;
   if (!cached || !cached.uid) {
-    if (!currentUser) document.getElementById('auth-screen').classList.remove('hidden');
+    if (!currentUser) {
+      document.getElementById('auth-screen').classList.remove('hidden');
+      if (WANTS_SIGNUP) switchAuthTab('register');
+    }
     return;
   }
   bootUid = cached.uid;
@@ -482,7 +487,7 @@ auth.onAuthStateChanged(async user => {
     pendingSave = false;
     document.getElementById('auth-screen').classList.remove('hidden');
     document.getElementById('app-container').style.display = 'none';
-    switchAuthTab('login');
+    switchAuthTab(WANTS_SIGNUP ? 'register' : 'login');
     document.getElementById('auth-error').style.color = '';
     document.getElementById('auth-error').style.borderColor = '';
     document.getElementById('auth-error').style.background = '';
