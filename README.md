@@ -19,7 +19,7 @@ A progressive web app to keep track of everything you read, watch and play: book
 - **Duplicate detection** when adding something you already have
 - **Sharing**: create a read-only link to all or part of your collection, with or without your ratings and reviews
 - **Statistics and yearly goals** per type, plus a **year in review** (favourites, month by month, themes)
-- **Several profiles** per account, synced across devices, with export and import of backups
+- **Synced across devices**, with export and import of backups
 - **Works offline**: changes made without a connection are synced automatically later
 
 ## Stack
