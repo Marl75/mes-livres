@@ -10,6 +10,7 @@ A progressive web app to keep track of everything you read, watch and play: book
 
 ## Features
 
+- **AI recommendations**: personalised suggestions by Claude based on your collection (✨ button), with "Inspired by" explanations; titles you dismiss are remembered
 - **One collection, four types**: books, films, shows and games, each sorted into categories (finished, in progress, to discover, abandoned, wishlist)
 - **Autofill**: search by title, author or ISBN and the app fills in the details and cover (Open Library, Google Books, TMDB, RAWG)
 - **Barcode scanning**: point the phone camera at a book's barcode to add it
@@ -27,6 +28,7 @@ A progressive web app to keep track of everything you read, watch and play: book
 - Demo mode with `?demo` in the address (`js/demo.js`): sample data, no account, nothing saved
 - Language follows the browser; `?lang=en` or `?lang=fr` in the address forces it
 - [Firebase](https://firebase.google.com/) Authentication and Firestore, with security rules in `firestore.rules`
+- Firebase Cloud Functions (`functions/`) call the Claude API for recommendations; the Anthropic key stays on the server
 - Service worker (`sw.js`) for offline use, web app manifest for installation on a phone
 - Usage statistics per account for the owner, shown on the shared admin page [marl75.github.io/admin](https://marl75.github.io/admin/) (`admin.html` redirects there), described in the privacy policy (`privacy-policy.html`)
 
