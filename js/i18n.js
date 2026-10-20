@@ -51,6 +51,7 @@ const I18N = {
     migrated: '✓ {n} livre(s) migré(s) depuis cet appareil', connected: '✓ Connecté — {email}', saved: '✓ Sauvegardé — {email}',
     offline: 'Mode hors-ligne — données locales',
     syncRetry: 'Pas de connexion : tes changements sont gardés sur cet appareil et partiront automatiquement.',
+    sizeFull: 'Ta collection a atteint la place maximale : tes derniers changements restent sur cet appareil. Supprime quelques éléments pour qu\'ils puissent partir, et exporte une sauvegarde.',
     sizeWarning: 'Ta collection occupe {pct} % de la place disponible. Pense à exporter une sauvegarde.', loadError: 'Erreur de chargement : ', saveError: 'Erreur de sauvegarde : ',
     // --- Types ---
     type_tout: 'Tout', type_livre: 'Livres', type_film: 'Films', type_serie: 'Séries', type_jeu: 'Jeux',
@@ -187,6 +188,7 @@ const I18N = {
     migrated: '✓ {n} book(s) migrated from this device', connected: '✓ Signed in — {email}', saved: '✓ Saved — {email}',
     offline: 'Offline mode — local data',
     syncRetry: 'No connection: your changes are kept on this device and will be sent automatically.',
+    sizeFull: 'Your collection has reached the maximum size: your latest changes are kept on this device. Delete a few items so they can be sent, and export a backup.',
     sizeWarning: 'Your collection uses {pct}% of the available space. Consider exporting a backup.', loadError: 'Loading error: ', saveError: 'Saving error: ',
     // --- Types ---
     type_tout: 'All', type_livre: 'Books', type_film: 'Films', type_serie: 'Shows', type_jeu: 'Games',

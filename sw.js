@@ -1,9 +1,11 @@
 // Service worker de Collection : permet d'ouvrir l'appli sans connexion.
-// - Fichiers de l'appli : réseau d'abord (on reçoit toujours la dernière version),
-//   copie locale seulement si le réseau manque.
+// - Fichiers de l'appli : réseau d'abord, en revalidant toujours auprès du serveur
+//   (on reçoit la dernière version sans numéro de version à changer à la main),
+//   copie locale seulement si le réseau manque. Tout nouveau fichier js va dans CORE
+//   (vérifié par tests/sw.test.js).
 // - Bibliothèques Firebase et polices (adresses versionnées) : copie locale d'abord.
 // - Données (Firestore, connexion, recherches TMDB/RAWG/Open Library) : jamais interceptées.
-const CACHE = 'collection-v13';
+const CACHE = 'collection';
 const CORE = [
   './',
   './index.html',
@@ -11,6 +13,7 @@ const CORE = [
   './css/styles.css',
   './js/i18n.js',
   './js/types.js',
+  './js/sync.js',
   './js/data.js',
   './js/demo.js',
   './js/usage.js',
@@ -39,7 +42,10 @@ self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     // Un fichier qui échoue ne doit pas empêcher l'installation
-    await Promise.all([...CORE, ...LIBS].map(url => cache.add(url).catch(() => {})));
+    await Promise.all([
+      ...CORE.map(url => cache.add(new Request(url, { cache: 'reload' })).catch(() => {})),
+      ...LIBS.map(url => cache.add(url).catch(() => {})),
+    ]);
     await self.skipWaiting();
   })());
 });
@@ -68,7 +74,13 @@ self.addEventListener('fetch', event => {
 async function networkFirst(req) {
   const cache = await caches.open(CACHE);
   try {
-    const res = await fetch(req);
+    // cache: 'no-cache' : le navigateur demande toujours au serveur si le fichier a changé
+    // (réponse légère s'il est identique). Une requête de page ne peut pas être recopiée
+    // avec des options : on la refait par son adresse, sauf si celle-ci redirige.
+    let res = req.mode === 'navigate'
+      ? await fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
+      : await fetch(req, { cache: 'no-cache' });
+    if (res.redirected) res = await fetch(req);
     if (res.ok) cache.put(req, res.clone());
     return res;
   } catch (e) {

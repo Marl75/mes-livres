@@ -40,6 +40,8 @@ async function recordVisit() {
       createdByMonth: createdByMonth(),
       itemCount: state.profiles.reduce((n, p) => n + (p.books || []).length, 0),
       profileCount: state.profiles.length,
+      // Taille de la collection (Firestore refuse au-delà de 1 Mo par compte) : visible sur la page de suivi
+      docBytes: docSize(localData()),
     };
     if (!snap.exists || !snap.data().firstSeen) data.firstSeen = now;
     await ref.set(data, { mergeFields: Object.keys(data) });

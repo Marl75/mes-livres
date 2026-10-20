@@ -137,13 +137,7 @@ function syncBooksToProfile() {
 }
 
 // ===== SYNCHRONISATION =====
-// Chaque livre et chaque profil porte une date de modification (updatedAt) et chaque
-// suppression laisse une trace datée (deletedBooks / deletedProfiles). À chaque envoi,
-// on relit la version en ligne et on fusionne élément par élément : un appareil ne peut
-// plus écraser ce qu'un autre vient d'ajouter. Le format reste celui d'avant (un seul
-// document par compte), donc aucune migration n'est nécessaire.
-const TOMBSTONE_TTL = 180 * 24 * 3600 * 1000;   // les traces de suppression sont gardées 6 mois
-const SIZE_WARNING = 800 * 1024;                  // Firestore limite un document à 1 Mo
+// Règles de fusion : voir sync.js
 const PROFILE_KEY = 'mes-livres-profile';
 let unsubscribeRemote = null;
 let pendingSave = false;
@@ -200,40 +194,6 @@ function touch(obj) {
   return obj;
 }
 
-// Garde la version la plus récente ; à égalité (anciennes données sans date), la version locale
-function newest(local, remote) {
-  return (remote.updatedAt || 0) > (local.updatedAt || 0) ? remote : local;
-}
-
-function mergeStamps(a, b) {
-  const out = { ...(a || {}) };
-  Object.entries(b || {}).forEach(([id, ts]) => { if (!out[id] || ts > out[id]) out[id] = ts; });
-  const limit = Date.now() - TOMBSTONE_TTL;
-  Object.keys(out).forEach(id => { if (out[id] < limit) delete out[id]; });
-  return out;
-}
-
-function mergeData(remote, local) {
-  const deletedProfiles = mergeStamps(remote.deletedProfiles, local.deletedProfiles);
-  const pairs = new Map();
-  (remote.profiles || []).forEach(p => pairs.set(p.id, { r: p }));
-  (local.profiles || []).forEach(p => pairs.set(p.id, { ...pairs.get(p.id), l: p }));
-  const profiles = [];
-  pairs.forEach(({ r, l }, id) => {
-    if (deletedProfiles[id]) return;
-    const base = r && l ? newest(l, r) : (l || r);
-    const deletedBooks = mergeStamps(r && r.deletedBooks, l && l.deletedBooks);
-    const byId = new Map();
-    ((r && r.books) || []).forEach(b => byId.set(b.id, b));
-    ((l && l.books) || []).forEach(b => {
-      const other = byId.get(b.id);
-      byId.set(b.id, other ? newest(b, other) : b);
-    });
-    profiles.push({ ...base, books: [...byId.values()].filter(b => !deletedBooks[b.id]), deletedBooks });
-  });
-  return { profiles, deletedProfiles };
-}
-
 function localData() {
   syncBooksToProfile();
   return { profiles: state.profiles, deletedProfiles: state.deletedProfiles || {} };
@@ -272,29 +232,9 @@ function removeProfile(id) {
   state.profiles = state.profiles.filter(x => x.id !== id);
 }
 
-// Remplace tous les livres d'un profil (import) : les anciens sont marqués supprimés
-function replaceBooks(profile, imported) {
-  const keep = new Set(imported.map(b => b.id));
-  const now = Date.now();
-  profile.deletedBooks = { ...(profile.deletedBooks || {}) };
-  (profile.books || []).forEach(b => { if (!keep.has(b.id)) profile.deletedBooks[b.id] = now; });
-  imported.forEach(b => { delete profile.deletedBooks[b.id]; b.updatedAt = now; });
-  profile.books = imported;
-}
-
 // Remplace tous les profils (import d'une sauvegarde complète)
 function replaceProfiles(imported) {
-  const now = Date.now();
-  const keep = new Set(imported.map(p => p.id));
-  state.deletedProfiles = { ...(state.deletedProfiles || {}) };
-  state.profiles.forEach(p => { if (!keep.has(p.id)) state.deletedProfiles[p.id] = now; });
-  state.profiles = imported.map(ip => {
-    delete state.deletedProfiles[ip.id];
-    const existing = state.profiles.find(p => p.id === ip.id);
-    const profile = { ...ip, books: existing ? existing.books : [], deletedBooks: existing ? existing.deletedBooks : {}, updatedAt: now };
-    replaceBooks(profile, ip.books || []);
-    return profile;
-  });
+  replaceAllProfiles(state, imported);
 }
 
 function rememberCurrentProfile() {
@@ -389,7 +329,9 @@ async function saveToFirestore() {
       const snap = await tx.get(ref);
       merged = mergeData(snap.exists ? snap.data() : {}, localData());
       const payload = { profiles: merged.profiles, deletedProfiles: merged.deletedProfiles, currentId: state.currentId, updatedAt: Date.now() };
-      size = new Blob([JSON.stringify(payload)]).size;
+      size = docSize(payload);
+      // Trop gros pour Firestore : inutile d'essayer, l'envoi échouerait à chaque fois
+      if (size >= MAX_DOC_BYTES) throw Object.assign(new Error('document trop gros'), { code: 'too-big' });
       tx.set(ref, payload);
     });
     pendingSave = false;
@@ -407,6 +349,12 @@ async function saveToFirestore() {
     pendingSave = true;
     cacheLocally();
     setSyncBtnState('error');
+    // Collection pleine (notre mesure ou celle de Firestore) : on le dit, sans réessayer en boucle.
+    // Les changements restent sur l'appareil et repartiront après une suppression.
+    if (e.code === 'too-big' || (e.code === 'invalid-argument' && /size/i.test(e.message))) {
+      setSyncStatus(t('sizeFull'), 'err');
+      return;
+    }
     setSyncStatus(t('syncRetry'), 'err');
     retryTimer = setTimeout(saveToFirestore, 15000);
   }

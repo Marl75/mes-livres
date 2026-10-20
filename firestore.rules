@@ -34,11 +34,48 @@ service cloud.firestore {
     }
 
     // Statistiques d'utilisation : chaque compte écrit les siennes ; seule l'administratrice
-    // (son identifiant remplace ADMIN_UID, cf. admin.html) peut toutes les lire
+    // (son identifiant remplace ADMIN_UID, cf. marl75.github.io/admin) peut toutes les lire.
+    // Les écritures sont limitées à ce que fait usage.js : les compteurs du mois en cours
+    // avancent d'au plus 1 à la fois, les mois passés et les chiffres des recommandations
+    // (écrits par la fonction serveur) ne peuvent pas être modifiés, l'e-mail est celui du compte.
     match /usage/{userId} {
+      // Mois au format AAAA-MM, comme monthKey() dans usage.js
+      function ym(t) {
+        return string(t.year()) + '-' + (t.month() < 10 ? '0' : '') + string(t.month());
+      }
+      function step(after, before, f) {
+        return after.get(f, 0) is int
+            && (after.get(f, 0) == before.get(f, 0) || after.get(f, 0) == before.get(f, 0) + 1);
+      }
+      function validMonth(after, before) {
+        return after.diff(before).affectedKeys()
+                 .hasOnly(['sessions', 'modified', 'deleted', 'recoAdded', 'recoDismissed', 'lastSeen'])
+            && step(after, before, 'sessions') && step(after, before, 'modified')
+            && step(after, before, 'deleted') && step(after, before, 'recoAdded')
+            && step(after, before, 'recoDismissed');
+      }
+      function validUsage(after, before) {
+        let changed = after.diff(before).affectedKeys();
+        let months = after.get('months', {});
+        let old = before.get('months', {});
+        // Mois en cours : celui de l'appareil peut différer du mois UTC près d'un changement de mois
+        let m1 = ym(request.time - duration.value(14, 'h'));
+        let m2 = ym(request.time + duration.value(14, 'h'));
+        let changedMonths = months.diff(old).affectedKeys();
+        return changed.hasOnly(['email', 'firstSeen', 'lastSeen', 'createdByMonth', 'itemCount',
+                                'profileCount', 'docBytes', 'months'])
+            && (!('email' in changed) || after.email == request.auth.token.get('email', ''))
+            && (!('firstSeen' in changed) || !('firstSeen' in before))
+            && changedMonths.hasOnly([m1, m2]) && changedMonths.size() <= 1
+            && validMonth(months.get(m1, {}), old.get(m1, {}))
+            && validMonth(months.get(m2, {}), old.get(m2, {}));
+      }
       allow read: if request.auth != null
                   && (request.auth.uid == userId || request.auth.uid == 'ADMIN_UID');
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId
+                    && validUsage(request.resource.data, {});
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && validUsage(request.resource.data, resource.data);
     }
 
     // Recommandations par jour (recoDaily/{AAAA-MM-JJ}) : compteur global et détail par compte,
