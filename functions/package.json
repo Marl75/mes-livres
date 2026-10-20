@@ -8,7 +8,8 @@
     "node": "22"
   },
   "scripts": {
-    "check": "node --check index.js && node --check recommend.js"
+    "check": "node --check index.js && node --check recommend.js && node --check quota.js",
+    "test": "node --test test-quota.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",

@@ -41,6 +41,12 @@ service cloud.firestore {
       allow create, update: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Recommandations par jour (recoDaily/{AAAA-MM-JJ}) : compteur global et détail par compte,
+    // écrit par la fonction serveur ; lisible seulement par l'administratrice
+    match /recoDaily/{day} {
+      allow read: if request.auth != null && request.auth.uid == 'ADMIN_UID';
+    }
+
     // recoUsage/{userId} (demandes de recommandations par jour) : écrit seulement par la
     // fonction serveur (functions/index.js), qui n'est pas soumise à ces règles. Aucun accès depuis l'appli.
 

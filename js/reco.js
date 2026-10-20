@@ -137,7 +137,9 @@ async function runReco() {
     saveRecoCache({ at: Date.now(), type: payload.type, demande: payload.demande, profil: data.profil, recommandations });
   } catch (e) {
     console.warn('Recommandations indisponibles :', e);
-    recoError = e && e.code === 'functions/resource-exhausted' ? t('recoLimit') : t('recoFailed');
+    recoError = e && e.code === 'functions/resource-exhausted'
+      ? t(e.details && e.details.reason === 'global' ? 'recoLimitGlobal' : 'recoLimit')
+      : t('recoFailed');
   }
   recoLoading = false;
   renderReco();
