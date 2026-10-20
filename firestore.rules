@@ -10,12 +10,26 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Wishlists partagées par lien : lisibles par tous, modifiables par leur propriétaire
+    // Wishlists partagées par lien : lisibles par qui a le lien (get, pas de liste de
+    // tous les partages), modifiables par leur propriétaire, au format écrit par share.js
     match /shares/{shareId} {
-      allow read: if true;
-      allow create: if request.auth != null && request.resource.data.owner == request.auth.uid;
+      function validShare(d) {
+        return d.keys().hasOnly(['owner', 'name', 'items', 'config', 'updatedAt'])
+          && d.owner == request.auth.uid
+          && d.name is string && d.name.size() <= 200
+          && d.items is list && d.items.size() <= 2000
+          && d.config is map
+          && d.config.keys().hasOnly(['cats', 'types', 'notes', 'avis'])
+          && d.config.cats is list
+          && d.config.cats.hasOnly(['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'])
+          && d.config.types is list
+          && d.config.types.hasOnly(['livre', 'film', 'serie', 'jeu'])
+          && d.config.notes is bool && d.config.avis is bool;
+      }
+      allow get: if true;
+      allow create: if request.auth != null && validShare(request.resource.data);
       allow update: if request.auth != null && resource.data.owner == request.auth.uid
-                    && request.resource.data.owner == request.auth.uid;
+                    && validShare(request.resource.data);
       allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
     }
 

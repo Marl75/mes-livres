@@ -190,7 +190,21 @@ async function showSharedWishlist() {
       <p><a href="${location.pathname}">${t('sharedOwn')}</a></p></div>`;
     return;
   }
-  const cfg = { ...DEFAULT_SHARE, ...(data.config || {}) };
+  // Le document vient de la base et n'importe quel compte peut en créer un : tout est
+  // revérifié avant affichage (catégories et types connus, note numérique, texte échappé)
+  const conf = data.config || {};
+  const cfg = {
+    cats: Array.isArray(conf.cats) ? conf.cats.filter(c => ALL_CATS.includes(c)) : DEFAULT_SHARE.cats,
+    types: Array.isArray(conf.types) ? conf.types.filter(ty => TYPES.includes(ty)) : DEFAULT_SHARE.types,
+  };
+  data.items = (Array.isArray(data.items) ? data.items : []).filter(i => i && typeof i === 'object').map(i => ({
+    ...i,
+    categorie: ALL_CATS.includes(i.categorie) ? i.categorie : 'wishlist',
+    note: Number(i.note) >= 1 && Number(i.note) <= 5 ? Math.round(Number(i.note)) : 0,
+    titre: String(i.titre || ''),
+    cover: typeof i.cover === 'string' && /^https?:\/\//i.test(i.cover) ? i.cover : '',
+  }));
+  data.name = String(data.name || '');
   const onlyWishlist = cfg.cats.length === 1 && cfg.cats[0] === 'wishlist';
   const pageTitle = t(onlyWishlist ? 'sharedBy' : 'sharedCollectionBy', { name: data.name });
   document.title = pageTitle;
@@ -200,13 +214,13 @@ async function showSharedWishlist() {
     return `
       <h2 class="share-section">${typeIcon(type, 18)} ${t('type_' + type)}</h2>
       <div class="grid posters">${items.map(i => `
-        <div class="poster" data-cat="${i.categorie || 'wishlist'}">
+        <div class="poster" data-cat="${escapeHtml(i.categorie)}">
           <div class="poster-img">${i.cover
             ? `<img class="poster-cover" src="${escapeHtml(i.cover)}" alt="" loading="lazy" data-title="${escapeHtml(i.titre)}" onerror="posterFallback(this)">`
             : posterPlaceholder(i.titre)}</div>
           <div class="poster-title">${escapeHtml(i.titre)}</div>
           <div class="poster-sub">${[i.auteur, i.annee, i.plateforme].filter(Boolean).map(escapeHtml).join(' · ')}</div>
-          ${cfg.cats.length > 1 && i.categorie ? `<span class="share-cat" data-cat="${i.categorie}">${escapeHtml(catOneLabel(i.categorie, type))}</span>` : ''}
+          ${cfg.cats.length > 1 && i.categorie ? `<span class="share-cat" data-cat="${escapeHtml(i.categorie)}">${escapeHtml(catOneLabel(i.categorie, type))}</span>` : ''}
           ${i.note ? renderStars(i.note) : ''}
           ${i.avis ? `<p class="share-avis">${escapeHtml(i.avis)}</p>` : ''}
         </div>`).join('')}</div>`;

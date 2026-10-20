@@ -46,7 +46,9 @@ function sharedQuery(shared) {
     .trim();
   if (!text && shared.url) {
     // Dernier recours : le texte de l'adresse (« mon-titre-2024 » → « mon titre »)
-    const parts = new URL(shared.url).pathname.split('/').filter(p => p && !/^\d+$/.test(p) && p.length > 2);
+    let path = '';
+    try { path = new URL(shared.url).pathname; } catch (e) {}   // adresse partagée mal formée
+    const parts = path.split('/').filter(p => p && !/^\d+$/.test(p) && p.length > 2);
     text = (parts.pop() || '').replace(/[-_]+/g, ' ').replace(/\b\d{4,}\b/g, '').trim();
   }
   return text;

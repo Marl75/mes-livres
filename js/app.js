@@ -19,7 +19,7 @@ function renderProfileSelector() {
   dd.innerHTML =
     (userEmail ? `<div style="padding: 6px 12px 8px; font-size: 12px; color: var(--text-faint); overflow: hidden; text-overflow: ellipsis;">${escapeHtml(userEmail)}</div><div class="profile-divider"></div>` : '') +
     (!multi ? '' : state.profiles.map(p => `
-    <div class="profile-item ${p.id === state.currentId ? 'current' : ''}" onclick="switchProfile('${p.id}')">
+    <div class="profile-item ${p.id === state.currentId ? 'current' : ''}" onclick="switchProfile('${escapeAttr(p.id)}')">
       <span class="avatar" style="background:${p.color}">${initials(p.name)}</span>
       <span>${escapeHtml(p.name)}</span>
       <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${ttn('items', 'tout', (p.books || []).length)}</span>
@@ -32,7 +32,7 @@ function renderProfileSelector() {
     ${multi ? `<button class="profile-action" onclick="openProfileModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       ${t('manageProfilesAction')}
-    </button>` : `<button class="profile-action" onclick="toggleProfileDropdown(); renameProfile('${cur.id}')">
+    </button>` : `<button class="profile-action" onclick="toggleProfileDropdown(); renameProfile('${escapeAttr(cur.id)}')">
       ${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')}${t('renameMe')}
     </button>
     <button class="profile-action" onclick="toggleProfileDropdown(); exportBooks()">
@@ -109,8 +109,8 @@ function renderProfileList() {
         <div class="meta">${ttn('items', 'tout', (p.books || []).length)}</div>
       </div>
       <div class="row-actions">
-        <button onclick="renameProfile('${p.id}')">${t('rename')}</button>
-        ${state.profiles.length > 1 ? `<button class="danger" onclick="deleteProfile('${p.id}')">${t('delete')}</button>` : ''}
+        <button onclick="renameProfile('${escapeAttr(p.id)}')">${t('rename')}</button>
+        ${state.profiles.length > 1 ? `<button class="danger" onclick="deleteProfile('${escapeAttr(p.id)}')">${t('delete')}</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -171,6 +171,30 @@ function exportBooks() {
   URL.revokeObjectURL(a.href);
 }
 
+// Contrôle d'une sauvegarde importée : le fichier peut venir de n'importe où.
+// Identifiants simples, catégorie et type connus, champs texte en texte.
+const SAFE_ID = /^[\w-]{1,64}$/;
+
+function cleanImportedBook(b) {
+  if (!b || typeof b !== 'object' || typeof b.titre !== 'string' || !b.titre.trim()) return null;
+  const out = { ...b };
+  if (!SAFE_ID.test(String(out.id || ''))) out.id = newId();
+  if (!ALL_CATS.includes(out.categorie)) out.categorie = 'lu';
+  if (out.type !== undefined && !TYPES.includes(out.type)) out.type = 'livre';
+  ['titre', 'auteur', 'avis', 'cover', 'plateforme', 'progression', 'recoBy'].forEach(k => {
+    if (out[k] !== undefined && out[k] !== null && typeof out[k] !== 'string') out[k] = String(out[k]);
+  });
+  if (out.cover && !/^https?:\/\//i.test(out.cover)) out.cover = '';
+  out.tags = Array.isArray(out.tags) ? out.tags.filter(x => typeof x === 'string') : [];
+  const note = Number(out.note);
+  out.note = note >= 1 && note <= 5 ? Math.round(note) : 0;
+  return out;
+}
+
+function cleanImportedBooks(list) {
+  return list.map(cleanImportedBook).filter(Boolean);
+}
+
 function importBooks(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -179,8 +203,16 @@ function importBooks(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (Array.isArray(data.profiles) && data.profiles.length) {
-        if (confirm(t('confirmImportProfiles', { n: data.profiles.length }))) {
-          replaceProfiles(data.profiles);
+        const profiles = data.profiles.filter(p => p && typeof p === 'object').map(p => ({
+          ...p,
+          id: SAFE_ID.test(String(p.id || '')) ? p.id : newId(),
+          name: typeof p.name === 'string' && p.name.trim() ? p.name : 'Moi',
+          color: PROFILE_COLORS.includes(p.color) ? p.color : PROFILE_COLORS[0],
+          books: cleanImportedBooks(Array.isArray(p.books) ? p.books : []),
+        }));
+        if (!profiles.length) throw new Error(t('invalidFormat'));
+        if (confirm(t('confirmImportProfiles', { n: profiles.length }))) {
+          replaceProfiles(profiles);
           state.currentId = state.profiles[0].id;
           rememberCurrentProfile();
           bindBooksToProfile();
@@ -190,8 +222,9 @@ function importBooks(e) {
           closeProfileModal();
         }
       } else {
-        const imported = Array.isArray(data) ? data : data.books;
-        if (!Array.isArray(imported)) throw new Error(t('invalidFormat'));
+        const raw = Array.isArray(data) ? data : data.books;
+        if (!Array.isArray(raw)) throw new Error(t('invalidFormat'));
+        const imported = cleanImportedBooks(raw);
         if (confirm(t('confirmImportBooks', { n: imported.length, name: getCurrentProfile().name }))) {
           replaceBooks(getCurrentProfile(), imported);
           bindBooksToProfile();
@@ -285,13 +318,13 @@ function render() {
     const progress = type === 'serie' && b.progression && b.categorie !== 'lu'
       ? `<div class="progress-chip">${escapeHtml(b.progression)}</div>` : '';
     return `
-      <div class="card" data-cat="${b.categorie}">
+      <div class="card" data-cat="${escapeHtml(b.categorie)}">
         <div class="card-top">
           ${renderCover(b)}
           <div class="card-info">
             <div class="card-header">
               <div class="card-title">${escapeHtml(b.titre)}</div>
-              <button class="card-menu" onclick="openCardMenu(event, '${b.id}')" aria-label="${t('actions')}" title="${t('actions')}">
+              <button class="card-menu" onclick="openCardMenu(event, '${escapeAttr(b.id)}')" aria-label="${t('actions')}" title="${t('actions')}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
               </button>
             </div>
@@ -299,7 +332,7 @@ function render() {
             ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
             ${meta.length ? `<div class="card-meta">${meta.join(' · ')}</div>` : ''}
             ${progress}
-            ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${b.id}"></div>` : ''}
+            ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${escapeHtml(b.id)}"></div>` : ''}
             ${stars}
             ${reco}
           </div>
@@ -340,14 +373,14 @@ function renderPoster(b) {
     ? `<img class="poster-cover" src="${escapeHtml(b.cover)}" alt="" loading="lazy" data-title="${escapeHtml(b.titre)}" onerror="posterFallback(this)">`
     : posterPlaceholder(b.titre);
   return `
-    <div class="poster" data-cat="${b.categorie}">
-      <button class="poster-img${chip ? ' has-chip' : ''}" onclick="editBook('${b.id}')" aria-label="${escapeHtml(b.titre)}">${image}${chip}</button>
-      <button class="card-menu poster-menu" onclick="openCardMenu(event, '${b.id}')" aria-label="${t('actions')}" title="${t('actions')}">
+    <div class="poster" data-cat="${escapeHtml(b.categorie)}">
+      <button class="poster-img${chip ? ' has-chip' : ''}" onclick="editBook('${escapeAttr(b.id)}')" aria-label="${escapeHtml(b.titre)}">${image}${chip}</button>
+      <button class="card-menu poster-menu" onclick="openCardMenu(event, '${escapeAttr(b.id)}')" aria-label="${t('actions')}" title="${t('actions')}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
       </button>
       <div class="poster-title">${escapeHtml(b.titre)}</div>
       ${sub ? `<div class="poster-sub">${sub}</div>` : ''}
-      ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${b.id}"></div>` : ''}
+      ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${escapeHtml(b.id)}"></div>` : ''}
       ${b.note ? renderStars(b.note) : ''}
     </div>`;
 }
@@ -436,7 +469,7 @@ function checkDuplicate() {
   const el = document.getElementById('dup-warning');
   const dup = findDuplicate(document.getElementById('f-titre').value, document.getElementById('f-type').value, document.getElementById('edit-id').value);
   if (!dup) { el.style.display = 'none'; el.innerHTML = ''; return; }
-  el.innerHTML = `${t('dupWarning', { cat: catLabel(dup.categorie, typeOf(dup)) })} <button type="button" onclick="editBook('${dup.id}')">${t('dupOpen')}</button>`;
+  el.innerHTML = `${t('dupWarning', { cat: catLabel(dup.categorie, typeOf(dup)) })} <button type="button" onclick="editBook('${escapeAttr(dup.id)}')">${t('dupOpen')}</button>`;
   el.style.display = 'block';
 }
 
@@ -846,10 +879,10 @@ function renderSuggestions(query) {
   // Les 8 tags les plus utilisés, affichés par ordre alphabétique
   all = all.slice(0, 8).sort((a, b) => a.tag.localeCompare(b.tag, locale(), { sensitivity: 'base' }));
 
-  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeAttr(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${ttn('items', 'tout', t.count)}</span></div>`).join('');
+  let html = all.map(t => `<div class="tag-suggestion" data-tag="${escapeHtml(t.tag)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(t.tag)}')">${escapeHtml(t.tag)}<span class="usage">${ttn('items', 'tout', t.count)}</span></div>`).join('');
 
   if (q && !getAllTags().some(t => t.tag === q) && !currentTags.includes(q)) {
-    html += `<div class="tag-suggestion" data-tag="${escapeAttr(q)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(q)}')"><span>${t('createTag', { q: escapeHtml(q) })}</span><span class="new">${t('newTag')}</span></div>`;
+    html += `<div class="tag-suggestion" data-tag="${escapeHtml(q)}" onmousedown="event.preventDefault(); pickSuggestion('${escapeAttr(q)}')"><span>${t('createTag', { q: escapeHtml(q) })}</span><span class="new">${t('newTag')}</span></div>`;
   }
 
   if (!html) { box.classList.remove('active'); return; }
@@ -973,8 +1006,10 @@ function updateModalFields(fromChange) {
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// Chaîne placée entre '…' dans un attribut onclick="…" : échappée pour JavaScript,
+// puis pour HTML (le navigateur décode l'attribut avant d'exécuter le code)
 function escapeAttr(s) {
-  return String(s).replace(/['"\\]/g, '\\$&');
+  return escapeHtml(String(s).replace(/[\\']/g, '\\$&').replace(/\r?\n/g, '\\n'));
 }
 
 // Events
