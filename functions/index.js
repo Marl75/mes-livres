@@ -50,6 +50,18 @@ async function trackDaily(day, uid, usage) {
   }
 }
 
+// Jeton App Check présent et valide (request.app) ou non, compté dans recoDaily/{jour}
+async function trackAppCheck(uid, verified) {
+  const field = verified ? 'appCheckOk' : 'appCheckMissing';
+  if (!verified) logger.warn('recommandations : demande sans jeton App Check valide', { uid });
+  try {
+    await getFirestore().collection('recoDaily').doc(parisDay())
+      .set({ [field]: FieldValue.increment(1), users: { [uid]: { [field]: FieldValue.increment(1) } } }, { merge: true });
+  } catch (e) {
+    logger.warn('suivi App Check non enregistré', e);
+  }
+}
+
 // Suivi pour la page admin.html : ajouté au document usage/{uid} déjà utilisé par l'appli,
 // dans le mois en cours. Statuts : « reco » (réussie), « recoFailed », « recoBlocked » (limite du compte),
 // « recoBlockedGlobal » (plafond de tous les comptes).
@@ -73,6 +85,9 @@ export const recommendations = onCall({ secrets: [ANTHROPIC_API_KEY], timeoutSec
   if (!request.auth) throw new HttpsError('unauthenticated', 'Connexion requise.');
   const input = cleanInput(request.data);
   const uid = request.auth.uid;
+  // App Check en observation : on compte les demandes avec ou sans jeton valide, sans bloquer.
+  // Pour bloquer ensuite : ajouter enforceAppCheck: true aux options de onCall.
+  await trackAppCheck(uid, !!request.app);
   const quota = await takeQuota(uid);
   if (quota.blocked) {
     // « recoBlocked » : limite du compte ; « recoBlockedGlobal » : plafond de tous les comptes

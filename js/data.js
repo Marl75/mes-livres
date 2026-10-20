@@ -10,6 +10,16 @@ const firebaseConfig = {
   appId: "1:832888789850:web:82352a1b18640f89aab163",
 };
 firebase.initializeApp(firebaseConfig);
+// App Check : chaque appel à Firebase porte un jeton prouvant qu'il vient de cette appli
+// (vérification reCAPTCHA Enterprise invisible). Clé publique, comme la configuration ci-dessus.
+// La fonction des recommandations le vérifie (functions/index.js).
+const RECAPTCHA_KEY = '6Le9jvctAAAAAI9L_MTeX21clp5PGgXLWtkH-8LD';
+// Pas en démo : rien n'y est envoyé à Firebase (et chaque vérification compte dans le quota gratuit)
+if (!DEMO) try {
+  firebase.appCheck().activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(RECAPTCHA_KEY), true);
+} catch (e) {
+  console.warn('App Check indisponible :', e);
+}
 const auth = firebase.auth();
 const db = firebase.firestore();
 
