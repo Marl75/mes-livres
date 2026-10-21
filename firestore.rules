@@ -49,10 +49,12 @@ service cloud.firestore {
       }
       function validMonth(after, before) {
         return after.diff(before).affectedKeys()
-                 .hasOnly(['sessions', 'modified', 'deleted', 'recoAdded', 'recoDismissed', 'lastSeen'])
+                 .hasOnly(['sessions', 'modified', 'deleted', 'recoAdded', 'recoDismissed',
+                           'typesChosen', 'typesSkipped', 'lastSeen'])
             && step(after, before, 'sessions') && step(after, before, 'modified')
             && step(after, before, 'deleted') && step(after, before, 'recoAdded')
-            && step(after, before, 'recoDismissed');
+            && step(after, before, 'recoDismissed') && step(after, before, 'typesChosen')
+            && step(after, before, 'typesSkipped');
       }
       function validUsage(after, before) {
         let changed = after.diff(before).affectedKeys();
@@ -63,7 +65,7 @@ service cloud.firestore {
         let m2 = ym(request.time + duration.value(14, 'h'));
         let changedMonths = months.diff(old).affectedKeys();
         return changed.hasOnly(['email', 'firstSeen', 'lastSeen', 'createdByMonth', 'itemCount',
-                                'profileCount', 'docBytes', 'months'])
+                                'profileCount', 'docBytes', 'types', 'typesCustom', 'months'])
             && (!('email' in changed) || after.email == request.auth.token.get('email', ''))
             && (!('firstSeen' in changed) || !('firstSeen' in before))
             && changedMonths.hasOnly([m1, m2]) && changedMonths.size() <= 1

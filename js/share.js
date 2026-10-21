@@ -11,8 +11,15 @@ function shareConfig(profile) {
   return { ...DEFAULT_SHARE, ...(profile.shareConfig || {}) };
 }
 
+// Types partagés : ceux cochés et affichés dans le profil (un type masqué n'est pas partagé,
+// mais son choix est gardé pour le jour où il est réaffiché)
+function sharedTypes(profile, cfg) {
+  return cfg.types.filter(ty => visibleTypes(profile).includes(ty));
+}
+
 function sharedItems(profile, cfg) {
-  return (profile.books || []).filter(b => cfg.cats.includes(b.categorie) && cfg.types.includes(typeOf(b)));
+  const types = sharedTypes(profile, cfg);
+  return (profile.books || []).filter(b => cfg.cats.includes(b.categorie) && types.includes(typeOf(b)));
 }
 
 function shareLink(shareId) {
@@ -36,7 +43,7 @@ function sharedPayload(profile) {
     if (b.plateforme) item.plateforme = b.plateforme;
     return item;
   });
-  return { owner: currentUser.uid, name: profile.name, items, config: { cats: cfg.cats, types: cfg.types, notes: cfg.notes, avis: cfg.avis } };
+  return { owner: currentUser.uid, name: profile.name, items, config: { cats: cfg.cats, types: sharedTypes(profile, cfg), notes: cfg.notes, avis: cfg.avis } };
 }
 
 async function writeShare(profile) {
@@ -70,6 +77,7 @@ function closeShareModal() {
 function shareOptionsHtml(p) {
   const cfg = shareConfig(p);
   const count = sharedItems(p, cfg).length;
+  const types = visibleTypes(p);
   const check = (group, value, label, on) => `
     <label class="check-chip ${on ? 'on' : ''}">
       <input type="checkbox" data-group="${group}" value="${value}" ${on ? 'checked' : ''} onchange="updateShareConfig()">${label}
@@ -78,22 +86,27 @@ function shareOptionsHtml(p) {
     <div class="share-options">
       <div class="share-option-title">${t('shareCats')}</div>
       <div class="check-row">${ALL_CATS.map(c => check('cats', c, catLabel(c, 'tout'), cfg.cats.includes(c))).join('')}</div>
-      <div class="share-option-title">${t('shareTypes')}</div>
-      <div class="check-row">${TYPES.map(ty => check('types', ty, `${typeIcon(ty, 14)} ${t('type_' + ty)}`, cfg.types.includes(ty))).join('')}</div>
+      ${types.length > 1 ? `<div class="share-option-title">${t('shareTypes')}</div>
+      <div class="check-row">${types.map(ty => check('types', ty, `${typeIcon(ty, 14)} ${t('type_' + ty)}`, cfg.types.includes(ty))).join('')}</div>` : ''}
       <div class="check-row">
         ${check('notes', '1', `★ ${t('shareNotes')}`, cfg.notes)}
         ${check('avis', '1', t('shareAvis'), cfg.avis)}
       </div>
-      <p class="share-count">${cfg.cats.length && cfg.types.length ? ttn('shareVisible', 'tout', count, { items: ttn('items', 'tout', count) }) : t('shareNothing')}</p>
+      <p class="share-count">${cfg.cats.length && sharedTypes(p, cfg).length ? ttn('shareVisible', 'tout', count, { items: ttn('items', 'tout', count) }) : t('shareNothing')}</p>
     </div>`;
 }
 
 function updateShareConfig() {
   const p = getCurrentProfile();
   const picked = group => [...document.querySelectorAll(`#share-content input[data-group="${group}"]:checked`)].map(i => i.value);
-  p.shareConfig = { cats: picked('cats'), types: picked('types'), notes: picked('notes').length > 0, avis: picked('avis').length > 0 };
+  // Types masqués (pas proposés) : leur choix est gardé ; un seul type affiché : pas de choix du tout
+  const old = shareConfig(p).types;
+  const types = document.querySelector('#share-content input[data-group="types"]')
+    ? [...picked('types'), ...old.filter(ty => !isVisibleType(ty))]
+    : old;
+  p.shareConfig = { cats: picked('cats'), types, notes: picked('notes').length > 0, avis: picked('avis').length > 0 };
   touch(p);
-  if (p.shareId && p.shareConfig.cats.length && p.shareConfig.types.length) save();   // le lien se met à jour après l'envoi
+  if (p.shareId && p.shareConfig.cats.length && sharedTypes(p, p.shareConfig).length) save();   // le lien se met à jour après l'envoi
   else cacheLocally();
   renderShareModal();
 }
@@ -103,7 +116,7 @@ function renderShareModal(message) {
   const cfg = shareConfig(p);
   const box = document.getElementById('share-content');
   const note = message ? `<p class="share-message">${message}</p>` : '';
-  const ready = cfg.cats.length > 0 && cfg.types.length > 0;
+  const ready = cfg.cats.length > 0 && sharedTypes(p, cfg).length > 0;
   if (!p.shareId) {
     box.innerHTML = `
       <p class="share-intro">${t('shareIntro')}</p>

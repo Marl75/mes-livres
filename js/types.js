@@ -98,6 +98,13 @@ function isVisibleType(type) {
   return visibleTypes().includes(type);
 }
 
+// Sous-titre de l'appli : les types affichés (« Livres et films »), sinon le sous-titre complet
+function taglineFor(types) {
+  if (types.length === TYPES.length) return t('tagline');
+  const names = types.map((ty, i) => i ? t('type_' + ty).toLowerCase() : t('type_' + ty));
+  return names.length > 1 ? names.slice(0, -1).join(', ') + t('and') + names[names.length - 1] : names[0];
+}
+
 // Onglets affichés : « Tout » seulement s'il y a au moins deux types, sinon le type seul
 function tabTypes() {
   const types = visibleTypes();

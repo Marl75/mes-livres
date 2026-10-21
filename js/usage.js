@@ -26,6 +26,14 @@ function createdByMonth() {
   return counts;
 }
 
+// Sections affichées (« Mes collections ») : pour chaque type, le nombre de profils qui l'affichent
+function typesShown() {
+  const counts = {};
+  TYPES.forEach(ty => { counts[ty] = 0; });
+  state.profiles.forEach(p => visibleTypes(p).forEach(ty => counts[ty]++));
+  return counts;
+}
+
 // Une fois par ouverture de l'appli, après le chargement de la collection
 async function recordVisit() {
   if (!currentUser || usageRecorded) return;
@@ -42,6 +50,8 @@ async function recordVisit() {
       profileCount: state.profiles.length,
       // Taille de la collection (Firestore refuse au-delà de 1 Mo par compte) : visible sur la page de suivi
       docBytes: docSize(localData()),
+      types: typesShown(),
+      typesCustom: state.profiles.filter(p => Array.isArray(p.types)).length,
     };
     if (!snap.exists || !snap.data().firstSeen) data.firstSeen = now;
     await ref.set(data, { mergeFields: Object.keys(data) });
@@ -52,7 +62,8 @@ async function recordVisit() {
   }
 }
 
-// Compte une action du mois en cours : 'modified', 'deleted', 'recoAdded' ou 'recoDismissed'
+// Compte une action du mois en cours : 'modified', 'deleted', 'recoAdded', 'recoDismissed',
+// 'typesChosen' ou 'typesSkipped' (réponse à la question d'accueil « Que veux-tu suivre ? »)
 // (les demandes de recommandations et leur coût sont comptés par la fonction serveur)
 function trackUsage(field) {
   if (!currentUser) return;

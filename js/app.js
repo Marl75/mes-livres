@@ -426,6 +426,7 @@ function renderTypeUI() {
   const counts = { tout: scopedCount() };
   TYPES.forEach(ty => { counts[ty] = 0; });
   books.forEach(b => counts[typeOf(b)]++);
+  document.getElementById('app-tagline').textContent = taglineFor(visibleTypes());
   const nav = document.getElementById('type-tabs');
   // Un seul type affiché : pas d'onglets, l'appli devient celle de ce type
   nav.style.display = tabs.length > 1 ? '' : 'none';

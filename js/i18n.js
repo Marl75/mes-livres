@@ -56,7 +56,7 @@ const I18N = {
     // --- Types ---
     type_tout: 'Tout', type_livre: 'Livres', type_film: 'Films', type_serie: 'Séries', type_jeu: 'Jeux',
     typeOne_livre: 'Livre', typeOne_film: 'Film', typeOne_serie: 'Série', typeOne_jeu: 'Jeu', typeLabel: 'Type',
-    tagline: 'Livres, films, séries et jeux',
+    tagline: 'Livres, films, séries et jeux', and: ' et ',
     'cat_lu__tout': 'Terminés', 'cat_en-cours__tout': 'En cours', 'cat_a-lire__tout': 'À découvrir', 'cat_abandonne__tout': 'Abandonnés',
     'sub_lu__tout': 'lus, vus, finis', 'sub_en-cours__tout': 'en ce moment', 'sub_a-lire__tout': 'à lire, voir, jouer', 'sub_abandonne__tout': 'commencés, non finis', 'sub_wishlist__tout': 'envies et recos',
     'cat_lu__film': 'Vus', 'cat_a-lire__film': 'À voir',
@@ -201,7 +201,7 @@ const I18N = {
     // --- Types ---
     type_tout: 'All', type_livre: 'Books', type_film: 'Films', type_serie: 'Shows', type_jeu: 'Games',
     typeOne_livre: 'Book', typeOne_film: 'Film', typeOne_serie: 'Show', typeOne_jeu: 'Game', typeLabel: 'Type',
-    tagline: 'Books, films, shows and games',
+    tagline: 'Books, films, shows and games', and: ' and ',
     'cat_lu__tout': 'Finished', 'cat_en-cours__tout': 'In progress', 'cat_a-lire__tout': 'To discover', 'cat_abandonne__tout': 'Abandoned',
     'sub_lu__tout': 'read, watched, played', 'sub_en-cours__tout': 'right now', 'sub_a-lire__tout': 'to read, watch, play', 'sub_abandonne__tout': 'started, not finished', 'sub_wishlist__tout': 'wishes and recs',
     'cat_lu__film': 'Watched', 'cat_a-lire__film': 'To watch',

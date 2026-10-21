@@ -66,12 +66,14 @@ function applyTypes(types) {
 
 function saveTypes() {
   if (!typesDraft.length) return;
+  if (typesOnboarding) trackUsage('typesChosen');
   applyTypes(typesDraft);
   closeTypesModal();
 }
 
 // Accueil passé : tout reste affiché
 function skipTypes() {
+  trackUsage('typesSkipped');
   closeTypesModal();
 }
 
