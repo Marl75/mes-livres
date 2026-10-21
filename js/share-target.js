@@ -68,7 +68,12 @@ async function handleSharedItem() {
       if (top) type = top.media_type === 'tv' ? 'serie' : 'film';
     } catch (e) {}
   }
-  if (!TYPES.includes(type)) type = TYPES.includes(currentType) ? currentType : 'livre';
+  if (!TYPES.includes(type)) type = defaultAddType();
+  // Type masqué pour ce profil : on propose de le réafficher, sinon on ajoute dans un type affiché
+  else if (!isVisibleType(type)) {
+    if (confirm(t('typeHiddenConfirm', { type: t('type_' + type) }))) showType(type);
+    else type = defaultAddType();
+  }
   openModal();
   pickType(type);
   if (!query) return;

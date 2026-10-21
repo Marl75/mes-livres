@@ -24,6 +24,7 @@ const CORE = [
   './js/app.js',
   './js/retro.js',
   './js/share.js',
+  './js/collections.js',
   './js/reco.js',
   './icon-192.png',
   './icon-512.png',

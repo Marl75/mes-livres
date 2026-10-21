@@ -84,7 +84,27 @@ function viewMode() {
   return viewByType[currentType] || (currentType === 'film' || currentType === 'serie' ? 'posters' : 'cards');
 }
 
-// Éléments du profil dans l'onglet de type courant
+// ----- Types affichés pour le profil -----
+// Chaque profil peut masquer des types (profile.types : liste des types affichés).
+// Masquer ne supprime rien : les éléments restent dans la collection et réapparaissent
+// quand le type est réaffiché. Sans réglage (profils existants), tout est affiché.
+function visibleTypes(profile) {
+  const p = profile || (typeof getCurrentProfile === 'function' ? getCurrentProfile() : null);
+  const chosen = p && Array.isArray(p.types) ? TYPES.filter(ty => p.types.includes(ty)) : [];
+  return chosen.length ? chosen : TYPES;
+}
+
+function isVisibleType(type) {
+  return visibleTypes().includes(type);
+}
+
+// Onglets affichés : « Tout » seulement s'il y a au moins deux types, sinon le type seul
+function tabTypes() {
+  const types = visibleTypes();
+  return types.length > 1 ? ['tout', ...types] : types;
+}
+
+// Éléments du profil dans l'onglet de type courant (« Tout » : les types affichés)
 function scopedItems() {
-  return currentType === 'tout' ? books : books.filter(b => typeOf(b) === currentType);
+  return currentType === 'tout' ? books.filter(b => isVisibleType(typeOf(b))) : books.filter(b => typeOf(b) === currentType);
 }

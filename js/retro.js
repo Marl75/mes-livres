@@ -4,12 +4,12 @@
 let retroYear = new Date().getFullYear();
 
 function finishedIn(year) {
-  return books.filter(b => b.categorie === 'lu' && (b.dateFinished || '').startsWith(String(year)))
+  return books.filter(b => b.categorie === 'lu' && isVisibleType(typeOf(b)) && (b.dateFinished || '').startsWith(String(year)))
     .sort((a, b) => a.dateFinished.localeCompare(b.dateFinished));
 }
 
 function retroYears() {
-  const years = new Set(books.filter(b => b.categorie === 'lu' && b.dateFinished).map(b => +b.dateFinished.slice(0, 4)));
+  const years = new Set(books.filter(b => b.categorie === 'lu' && b.dateFinished && isVisibleType(typeOf(b))).map(b => +b.dateFinished.slice(0, 4)));
   years.add(new Date().getFullYear());
   return [...years].sort((a, b) => a - b);
 }

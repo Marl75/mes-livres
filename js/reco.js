@@ -30,6 +30,7 @@ function openReco() {
   // Reprend le type de la dernière recherche, sinon l'onglet affiché
   const cache = loadRecoCache();
   recoType = cache ? cache.type || 'tout' : currentType;
+  if (!tabTypes().includes(recoType)) recoType = tabTypes()[0];
   recoError = '';
   renderReco();
   document.getElementById('reco-modal').classList.add('active');
@@ -48,18 +49,18 @@ function renderReco() {
   const cache = loadRecoCache();
   const demande = document.getElementById('reco-demande');
   const typed = demande ? demande.value : '';
-  const tabs = ['tout', ...TYPES].map(type => `
+  const tabs = tabTypes().length < 2 ? '' : tabTypes().map(type => `
     <button type="button" class="reco-type ${recoType === type ? 'active' : ''}" onclick="setRecoType('${type}')">
       ${TYPE_EMOJI[type]} ${t('type_' + type)}
     </button>`).join('');
   const results = cache && cache.recommandations
     ? `${recoSourceHtml(cache, typed)}
        <p class="reco-profil">${escapeHtml(cache.profil || '')}</p>
-       <div class="reco-list">${cache.recommandations.map(recoCard).join('') || `<p class="share-intro">${t('recoAllDone')}</p>`}</div>`
+       <div class="reco-list">${cache.recommandations.filter(r => !TYPES.includes(r.type) || isVisibleType(r.type)).map(recoCard).join('') || `<p class="share-intro">${t('recoAllDone')}</p>`}</div>`
     : '';
   document.getElementById('reco-content').innerHTML = `
     <p class="share-intro">${t('recoIntro')}</p>
-    <div class="reco-types">${tabs}</div>
+    ${tabs ? `<div class="reco-types">${tabs}</div>` : ''}
     <div class="field">
       <input type="text" id="reco-demande" maxlength="200" placeholder="${escapeHtml(t('recoAskPh'))}" value="${escapeHtml(typed)}">
     </div>
@@ -116,7 +117,7 @@ function recoPayload() {
   const p = getCurrentProfile();
   const demande = document.getElementById('reco-demande');
   return {
-    items: books.map(b => ({ titre: b.titre, auteur: b.auteur, type: typeOf(b), categorie: b.categorie, note: b.note, avis: b.avis, tags: b.tags })),
+    items: books.filter(b => isVisibleType(typeOf(b))).map(b => ({ titre: b.titre, auteur: b.auteur, type: typeOf(b), categorie: b.categorie, note: b.note, avis: b.avis, tags: b.tags })),
     type: recoType,
     demande: demande ? demande.value.trim() : '',
     refuses: (p && p.recoDismissed) || [],
