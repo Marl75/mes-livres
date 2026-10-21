@@ -145,3 +145,18 @@ test('taille du document : les accents comptent pour 2 octets', () => {
   assert.equal(docSize({ t: 'é' }), JSON.stringify({ t: 'x' }).length + 1);
   assert.ok(docSize({ big: 'x'.repeat(MAX_DOC_BYTES) }) > MAX_DOC_BYTES);
 });
+
+test('types affichés : le réglage passe d\'un appareil à l\'autre, sans rien supprimer', () => {
+  const base = { profiles: [profile('p1', [book('a', 1, { type: 'livre' })])] };
+  // Téléphone : ne garde que les livres ; ordinateur : ajoute un film en même temps
+  const phone = clone(base); Object.assign(phone.profiles[0], { types: ['livre'], updatedAt: 10 });
+  const laptop = clone(base); laptop.profiles[0].books.push(book('f', 11, { type: 'film' }));
+  const m = mergeBoth(phone, laptop);
+  assert.deepEqual(m.profiles[0].types, ['livre']);
+  assert.deepEqual(ids(m.profiles[0]), ['a', 'f'], 'le film est masqué, pas supprimé');
+  // Tout réaffiché (réglage retiré) sur l'ordinateur, plus récent : le téléphone le reçoit
+  const laptop2 = clone(m); delete laptop2.profiles[0].types; laptop2.profiles[0].updatedAt = 20;
+  const m2 = mergeData(m, laptop2, NOW);
+  assert.equal(m2.profiles[0].types, undefined);
+  assert.deepEqual(ids(m2.profiles[0]), ['a', 'f']);
+});
