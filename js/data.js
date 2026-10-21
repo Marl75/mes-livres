@@ -247,6 +247,7 @@ function savedCurrentProfile() {
 
 // ----- Échanges avec Firestore -----
 async function loadFromFirestore() {
+  let newAccount = false;
   setSyncStatus(t('loading'));
   setSyncBtnState('syncing');
   try {
@@ -273,6 +274,7 @@ async function loadFromFirestore() {
         const id = newId();
         state.profiles = [touch({ id, name, color: PROFILE_COLORS[0], books: [], createdAt: Date.now() })];
         state.currentId = id;
+        newAccount = true;
         await saveToFirestore();
       }
     }
@@ -300,6 +302,8 @@ async function loadFromFirestore() {
     }
   }
   refreshUI();
+  // Nouveau compte : on demande ce que la personne veut suivre
+  if (newAccount) openTypesModal({ onboarding: true });
   handleSharedItem();
 }
 

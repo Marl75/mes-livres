@@ -12,6 +12,7 @@ A progressive web app to keep track of everything you read, watch and play: book
 
 - **AI recommendations**: personalised suggestions by Claude based on your collection (✨ button), with "Inspired by" explanations; titles you dismiss are remembered
 - **One collection, four types**: books, films, shows and games, each sorted into categories (finished, in progress, to discover, abandoned, wishlist)
+- **Choose what you track**: each profile picks its sections on first use or later in "My collections"; hidden sections keep their items, and with a single section the tabs disappear
 - **Autofill**: search by title, author or ISBN and the app fills in the details and cover (Open Library, Google Books, TMDB, RAWG)
 - **Barcode scanning**: point the phone camera at a book's barcode to add it
 - **Where to watch**: streaming availability for films and shows (JustWatch)

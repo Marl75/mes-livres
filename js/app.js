@@ -25,6 +25,9 @@ function renderProfileSelector() {
       <span style="color: var(--text-faint); font-size: 12px; margin-left: auto;">${ttn('items', 'tout', (p.books || []).length)}</span>
     </div>
   `).join('') + '<div class="profile-divider"></div>') + `
+    <button class="profile-action" onclick="openTypesModal()">
+      ${icon('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>')}${t('typesAction')}
+    </button>
     <button class="profile-action" onclick="openShareModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
       ${t('shareWishlist')}
@@ -131,6 +134,7 @@ function createProfileFromForm() {
   renderProfileSelector();
   render();
   closeProfileModal();
+  openTypesModal({ onboarding: true });
 }
 
 function renameProfile(id) {
@@ -253,6 +257,7 @@ document.addEventListener('click', e => {
 // ===== RENDER =====
 function render() {
   const grid = document.getElementById('grid');
+  fixCurrentType();
   const items = scopedItems();
   renderTypeUI();
   const matchesSearch = b => !currentSearch
@@ -402,11 +407,30 @@ function setViewMode(mode) {
 // ===== TYPES (interface) =====
 const LAST_TYPE_KEY = 'mes-livres-last-type';
 
+// L'onglet mémorisé sur l'appareil peut être masqué pour le profil courant :
+// on se replace sur le premier onglet affiché
+function fixCurrentType() {
+  const tabs = tabTypes();
+  if (tabs.includes(currentType)) return;
+  currentType = tabs[0];
+  const cats = catsFor(currentType);
+  const wanted = catByType[currentType] || currentCat;
+  currentCat = cats.includes(wanted) ? wanted : cats[0];
+  activeTagFilters = [];
+  showActiveCat('instant');
+}
+
 // Onglets de type, cartes de catégories et libellés qui dépendent du type affiché
 function renderTypeUI() {
-  const counts = { tout: books.length, livre: 0, film: 0, serie: 0, jeu: 0 };
+  const tabs = tabTypes();
+  const counts = { tout: scopedCount() };
+  TYPES.forEach(ty => { counts[ty] = 0; });
   books.forEach(b => counts[typeOf(b)]++);
-  document.getElementById('type-tabs').innerHTML = ['tout', ...TYPES].map(ty => `
+  const nav = document.getElementById('type-tabs');
+  // Un seul type affiché : pas d'onglets, l'appli devient celle de ce type
+  nav.style.display = tabs.length > 1 ? '' : 'none';
+  nav.style.setProperty('--tab-count', tabs.length);
+  nav.innerHTML = tabs.map(ty => `
     <button class="type-tab ${ty === currentType ? 'active' : ''}" onclick="setActiveType('${ty}')" aria-pressed="${ty === currentType}">
       ${typeIcon(ty, 17)}<span class="type-tab-label">${t('type_' + ty)}</span><span class="type-tab-count">${counts[ty]}</span>
     </button>`).join('');
@@ -440,19 +464,28 @@ function setActiveType(type, cat) {
   if (document.getElementById('stats-modal').classList.contains('active')) renderStats();
 }
 
-// Type proposé par défaut dans le formulaire : l'onglet ouvert, sinon le dernier type ajouté
-function defaultAddType() {
-  if (TYPES.includes(currentType)) return currentType;
-  try {
-    const last = localStorage.getItem(LAST_TYPE_KEY);
-    if (TYPES.includes(last)) return last;
-  } catch (e) {}
-  return 'livre';
+// Nombre d'éléments affichés dans « Tout » (types masqués exclus)
+function scopedCount() {
+  return books.filter(b => isVisibleType(typeOf(b))).length;
 }
 
+// Type proposé par défaut dans le formulaire : l'onglet ouvert, sinon le dernier type ajouté
+function defaultAddType() {
+  if (TYPES.includes(currentType) && isVisibleType(currentType)) return currentType;
+  try {
+    const last = localStorage.getItem(LAST_TYPE_KEY);
+    if (TYPES.includes(last) && isVisibleType(last)) return last;
+  } catch (e) {}
+  return visibleTypes()[0];
+}
+
+// Types proposés dans le formulaire : ceux affichés, plus celui de l'élément modifié s'il est masqué
 function renderTypePicker() {
   const current = document.getElementById('f-type').value;
-  document.getElementById('type-picker').innerHTML = TYPES.map(ty => `
+  const types = TYPES.filter(ty => isVisibleType(ty) || ty === current);
+  const picker = document.getElementById('type-picker');
+  picker.style.display = types.length > 1 ? '' : 'none';
+  picker.innerHTML = types.map(ty => `
     <button type="button" role="radio" aria-checked="${ty === current}" class="type-option ${ty === current ? 'active' : ''}" onclick="pickType('${ty}')">
       ${typeIcon(ty, 18)}<span>${t('typeOne_' + ty)}</span>
     </button>`).join('');
@@ -629,7 +662,7 @@ function goalFor(p, type) {
 // Onglet « Tout » : un bloc par type plutôt qu'un total qui mélange livres, films et jeux
 function typeStatsHtml(year) {
   const p = getCurrentProfile();
-  const tiles = TYPES.map(type => {
+  const tiles = visibleTypes().map(type => {
     const items = books.filter(b => typeOf(b) === type);
     const done = items.filter(b => b.categorie === 'lu');
     const n = done.filter(b => (b.dateFinished || '').startsWith(year)).length;
@@ -651,7 +684,7 @@ function byYearPerTypeHtml(read) {
   const years = [...new Set(read.map(b => (b.dateFinished || '').slice(0, 4)).filter(Boolean))].sort().reverse().slice(0, 6);
   if (!years.length) return '';
   return `<div class="stats-section"><h3>${tt('byYear', 'tout')}</h3>${years.map(y => `
-    <div class="year-row"><span class="y">${y}</span>${TYPES.map(type => {
+    <div class="year-row"><span class="y">${y}</span>${visibleTypes().map(type => {
       const n = read.filter(b => typeOf(b) === type && (b.dateFinished || '').startsWith(y)).length;
       return n ? `<span title="${t('type_' + type)}">${typeIcon(type, 13)} ${n}</span>` : '';
     }).join('')}</div>`).join('')}</div>`;
@@ -1107,6 +1140,6 @@ if (!SHARE_VIEW_PARAM) bootFromCache();
 showActiveCat('instant');
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeShareModal(); closeRetro(); closeModal(); closeProfileModal(); closeStatsModal(); }
+  if (e.key === 'Escape') { closeScanner(); closeCardMenu(); closeTypesModal(); closeShareModal(); closeRetro(); closeModal(); closeProfileModal(); closeStatsModal(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search').focus(); }
 });
