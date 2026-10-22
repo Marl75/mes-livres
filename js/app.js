@@ -1024,7 +1024,9 @@ function updateModalFields(fromChange) {
   document.getElementById('field-platform').style.display = type === 'jeu' ? 'block' : 'none';
   document.getElementById('field-progress').style.display = type === 'serie' && cat !== 'lu' ? 'block' : 'none';
   document.getElementById('field-note').style.display = (cat === 'lu' || cat === 'abandonne') ? 'block' : 'none';
-  document.getElementById('field-avis').style.display = (cat === 'lu' || cat === 'en-cours' || cat === 'abandonne') ? 'block' : 'none';
+  document.getElementById('field-avis').style.display = (cat === 'lu' || cat === 'en-cours' || cat === 'abandonne' || cat === 'wishlist') ? 'block' : 'none';
+  // En wishlist, le champ sert de notes en vrac (ce qu'on en a dit, pourquoi ça tente…)
+  document.getElementById('label-avis').textContent = t(cat === 'wishlist' ? 'notes' : 'review');
   document.getElementById('field-reco').style.display = cat === 'wishlist' ? 'block' : 'none';
   document.getElementById('field-finished').style.display = cat === 'lu' ? 'block' : 'none';
   const finished = document.getElementById('f-finished');
@@ -1034,6 +1036,7 @@ function updateModalFields(fromChange) {
   const avis = document.getElementById('f-avis');
   if (cat === 'en-cours') avis.placeholder = t('reviewPhReading');
   else if (cat === 'abandonne') avis.placeholder = t('reviewPhAbandoned');
+  else if (cat === 'wishlist') avis.placeholder = t('reviewPhWishlist');
   else avis.placeholder = t('reviewPh');
 }
 

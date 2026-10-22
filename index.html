@@ -127,14 +127,14 @@
       <div class="stat-value" id="count-a-lire">0</div>
       <div class="stat-sub"></div>
     </div>
-    <div class="stat-card" data-cat="abandonne">
-      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
-      <div class="stat-value" id="count-abandonne">0</div>
-      <div class="stat-sub"></div>
-    </div>
     <div class="stat-card" data-cat="wishlist">
       <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
       <div class="stat-value" id="count-wishlist">0</div>
+      <div class="stat-sub"></div>
+    </div>
+    <div class="stat-card" data-cat="abandonne">
+      <div class="stat-label"><span class="dot"></span> <span class="cat-name"></span></div>
+      <div class="stat-value" id="count-abandonne">0</div>
       <div class="stat-sub"></div>
     </div>
   </div>
@@ -204,7 +204,7 @@
 <!-- Partage de la wishlist -->
 <div class="modal-overlay" id="share-modal">
   <div class="modal">
-    <h2 data-i18n="shareWishlist">Partager ma wishlist</h2>
+    <h2 data-i18n="shareWishlist">Partager ma collection</h2>
     <div id="share-content"></div>
   </div>
 </div>
@@ -332,7 +332,7 @@
       </div>
     </div>
     <div class="field" id="field-avis">
-      <label data-i18n="review">Avis</label>
+      <label id="label-avis" data-i18n="review">Avis</label>
       <textarea id="f-avis" placeholder="Ce que tu en as pens&eacute;&hellip;"></textarea>
     </div>
     <div class="field" id="field-reco" style="display:none;">
