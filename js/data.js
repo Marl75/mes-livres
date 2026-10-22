@@ -172,10 +172,15 @@ function bootFromCache() {
   refreshUI();
 }   // l'appli a démarré sans réseau : on recharge au retour de la connexion
 
+// Les messages de réussite disparaissent d'eux-mêmes ; hors connexion et erreurs restent affichés.
+// Une synchro normale n'affiche rien : le bouton de synchro passe au vert un instant.
+let syncStatusTimer = null;
 function setSyncStatus(msg, type) {
   const el = document.getElementById('sync-status');
   if (!el) return;
+  clearTimeout(syncStatusTimer);
   el.innerHTML = msg ? `<span class="${type || ''}">${msg}</span>` : '';
+  if (msg && type === 'ok') syncStatusTimer = setTimeout(() => { el.innerHTML = ''; }, 4000);
 }
 
 function setSyncBtnState(s) {
@@ -248,6 +253,7 @@ function savedCurrentProfile() {
 // ----- Échanges avec Firestore -----
 async function loadFromFirestore() {
   let newAccount = false;
+  let notice = '';
   setSyncStatus(t('loading'));
   setSyncBtnState('syncing');
   try {
@@ -268,7 +274,7 @@ async function loadFromFirestore() {
         state.currentId = localState.currentId || state.profiles[0].id;
         await saveToFirestore();
         const totalBooks = state.profiles.reduce((n, p) => n + (p.books || []).length, 0);
-        setSyncStatus(t('migrated', { n: totalBooks }), 'ok');
+        notice = t('migrated', { n: totalBooks });
       } else {
         const name = currentUser.displayName || 'Moi';
         const id = newId();
@@ -284,7 +290,7 @@ async function loadFromFirestore() {
     loadedOffline = false;
     recordVisit();
     setSyncBtnState('synced');
-    setSyncStatus(t('connected', { email: escapeHtml(currentUser.email) }), 'ok');
+    setSyncStatus(notice, 'ok');
     setTimeout(() => setSyncBtnState(null), 2000);
   } catch (e) {
     const cached = loadCache();
@@ -345,7 +351,7 @@ async function saveToFirestore() {
     if (size > SIZE_WARNING) {
       setSyncStatus(t('sizeWarning', { pct: Math.round(size / (1024 * 1024) * 100) }), 'err');
     } else {
-      setSyncStatus(t('saved', { email: escapeHtml(currentUser.email) }), 'ok');
+      setSyncStatus('');
     }
     setTimeout(() => setSyncBtnState(null), 2000);
   } catch (e) {

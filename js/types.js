@@ -2,7 +2,7 @@
 // Un élément sans champ `type` (tous les livres enregistrés avant) est un livre :
 // les données existantes restent valables telles quelles.
 const TYPES = ['livre', 'film', 'serie', 'jeu'];
-const ALL_CATS = ['lu', 'en-cours', 'a-lire', 'abandonne', 'wishlist'];
+const ALL_CATS = ['lu', 'en-cours', 'a-lire', 'wishlist', 'abandonne'];
 // Catégories proposées pour chaque type (un film ne se regarde pas « en cours »)
 const TYPE_CATS = {
   tout: ALL_CATS,
