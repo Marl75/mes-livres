@@ -276,6 +276,8 @@ function render() {
   });
 
   renderTagFilterBar();
+  // Dans les recommandés, un encart rappelle que Claude peut proposer des idées (pas pendant une recherche)
+  document.getElementById('reco-hint').style.display = currentCat === 'wishlist' && !someFilterActive ? '' : 'none';
 
   const filtered = sortBooks(items.filter(b =>
     b.categorie === currentCat

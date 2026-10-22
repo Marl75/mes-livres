@@ -96,8 +96,9 @@
         </button>
         <div class="profile-dropdown" id="profile-dropdown"></div>
       </div>
-      <button class="icon-btn" onclick="openReco()" title="Recommandations" data-i18n-title="recoOpen">
+      <button class="icon-btn reco-btn" onclick="openReco()" title="Recommandations" data-i18n-title="recoOpen">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+        <span class="reco-btn-text" data-i18n="recoShort">Idées</span>
       </button>
       <button class="icon-btn" onclick="openStatsModal()" title="Statistiques" data-i18n-title="stats">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -160,6 +161,11 @@
     </select>
     </div>
   </div>
+  <button type="button" class="reco-hint" id="reco-hint" onclick="openReco()" style="display:none;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+    <span class="reco-hint-text" data-i18n="recoHint">Envie de nouvelles idées ?</span>
+    <span class="reco-hint-cta" data-i18n="recoHintCta">Demander à Claude</span>
+  </button>
   <div class="grid" id="grid"></div>
   <button class="fab" id="fab" onclick="openModal()" data-i18n-title="add">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
