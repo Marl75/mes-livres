@@ -1526,6 +1526,7 @@ button.empty-state:hover { border-color: var(--accent); background: var(--accent
     text-align: left;
     font-size: 11px;
   }
+  .sync-status:empty { display: none; }
   .auth-card { padding: 28px 22px; }
   .auth-brand h1 { font-size: 28px; }
   .card-top { gap: 12px; }
