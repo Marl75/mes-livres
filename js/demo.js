@@ -1,6 +1,7 @@
 // ===== MODE DÉMO =====
 // ?demo dans l'adresse : l'appli s'ouvre sans compte sur une collection d'exemple.
 // Rien n'est enregistré (ni en ligne, ni sur l'appareil) : tout disparaît au rechargement.
+// Seule l'ouverture est comptée, de façon anonyme (countDemoOpening).
 function demoItems() {
   const en = currentLang === 'en';
   const ol = isbn => `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
@@ -33,7 +34,34 @@ function demoItems() {
   }));
 }
 
+// Compteur anonyme des ouvertures de la démo (page de suivi marl75.github.io/admin) :
+// un événement GoatCounter « collection-demo » sur le site marlenemenoire, sans cookie ni
+// identifiant, et rien sur la collection. Seulement les ouvertures qui ne viennent pas du site :
+// celles-là y sont déjà comptées (clic-demo), on peut donc additionner les deux sans doublon.
+// Pas compté en local, ni sur un appareil où le site a été ouvert avec #toggle-goatcounter
+// (GoatCounter ne se souvient de ce réglage que sur le site : ici, ouvrir ?demo#toggle-goatcounter).
+function countDemoOpening() {
+  try {
+    if (location.hash === '#toggle-goatcounter') {
+      const skip = localStorage.getItem('skipgc') === 't';
+      skip ? localStorage.removeItem('skipgc') : localStorage.setItem('skipgc', 't');
+      alert(skip ? 'GoatCounter : ouvertures de la démo à nouveau comptées sur cet appareil.' : 'GoatCounter : ouvertures de la démo plus comptées sur cet appareil.');
+      return;
+    }
+    if (localStorage.getItem('skipgc') === 't') return;
+  } catch (e) { /* stockage local bloqué : on compte quand même */ }
+  if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || navigator.webdriver) return;
+  let from = '';
+  try { from = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) { /* adresse illisible */ }
+  if (/(^|\.)marlenemenoire\.com$/.test(from)) return;
+  const url = 'https://marlenemenoire.goatcounter.com/count?e=true&p=collection-demo&t=' + encodeURIComponent('Démo Collection')
+    + (from ? '&r=' + encodeURIComponent('https://' + from) : '') + '&rnd=' + Math.random().toString(36).slice(2);
+  try { if (navigator.sendBeacon && navigator.sendBeacon(url)) return; } catch (e) { /* repli sur l'image */ }
+  new Image().src = url;
+}
+
 function startDemo() {
+  countDemoOpening();
   state = { profiles: [{ id: 'demo', name: 'Demo', color: PROFILE_COLORS[0], books: demoItems(), createdAt: Date.now() }], deletedProfiles: {}, currentId: 'demo' };
   bindBooksToProfile();
   document.getElementById('auth-screen').classList.add('hidden');

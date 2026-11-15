@@ -1,5 +1,6 @@
 // ===== STATISTIQUES D'UTILISATION (pour la page de suivi marl75.github.io/admin) =====
-// Un document usage/{uid} par compte : e-mail, première et dernière visite, et par mois
+// Un document usage/{uid} par compte : e-mail, première et dernière visite, nombre d'éléments
+// par section, et par mois
 // le nombre d'ouvertures de l'appli, d'éléments modifiés et supprimés. Les éléments créés
 // sont recalculés à partir des dates d'ajout (historique complet). Aucun contenu
 // (titres, avis…) n'est enregistré ici. Lisible seulement par le compte lui-même et
@@ -34,6 +35,15 @@ function typesShown() {
   return counts;
 }
 
+// Éléments par section (livre, film, serie, jeu), tous profils confondus : dit quelle section
+// est vraiment utilisée, là où typesShown() ne dit que laquelle est affichée
+function itemsByType() {
+  const counts = {};
+  TYPES.forEach(ty => { counts[ty] = 0; });
+  state.profiles.forEach(p => (p.books || []).forEach(b => counts[typeOf(b)]++));
+  return counts;
+}
+
 // Une fois par ouverture de l'appli, après le chargement de la collection
 async function recordVisit() {
   if (!currentUser || usageRecorded) return;
@@ -51,6 +61,7 @@ async function recordVisit() {
       // Taille de la collection (Firestore refuse au-delà de 1 Mo par compte) : visible sur la page de suivi
       docBytes: docSize(localData()),
       types: typesShown(),
+      itemsByType: itemsByType(),
       typesCustom: state.profiles.filter(p => Array.isArray(p.types)).length,
     };
     if (!snap.exists || !snap.data().firstSeen) data.firstSeen = now;
