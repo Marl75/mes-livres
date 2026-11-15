@@ -31,7 +31,7 @@ A progressive web app to keep track of everything you read, watch and play: book
 - [Firebase](https://firebase.google.com/) Authentication and Firestore, with security rules in `firestore.rules`
 - Firebase Cloud Functions (`functions/`) call the Claude API for recommendations; the Anthropic key stays on the server
 - Service worker (`sw.js`) for offline use, web app manifest for installation on a phone
-- Usage statistics per account for the owner, shown on the shared admin page [marl75.github.io/admin](https://marl75.github.io/admin/) (`admin.html` redirects there), described in the privacy policy (`privacy-policy.html`)
+- Usage statistics per account for the owner, shown on the shared admin page [marl75.github.io/admin](https://marl75.github.io/admin/) (`admin.html` redirects there), described in the privacy policy (`privacy-policy.html`); demo openings that don't come from the personal site are counted anonymously with GoatCounter (`collection-demo` event, no cookie, see `js/demo.js`)
 
 ## Run locally
 

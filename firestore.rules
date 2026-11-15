@@ -65,7 +65,10 @@ service cloud.firestore {
         let m2 = ym(request.time + duration.value(14, 'h'));
         let changedMonths = months.diff(old).affectedKeys();
         return changed.hasOnly(['email', 'firstSeen', 'lastSeen', 'createdByMonth', 'itemCount',
-                                'profileCount', 'docBytes', 'types', 'typesCustom', 'months'])
+                                'profileCount', 'docBytes', 'types', 'typesCustom', 'itemsByType',
+                                'months'])
+            && (!('itemsByType' in changed) || (after.itemsByType is map
+                && after.itemsByType.keys().hasOnly(['livre', 'film', 'serie', 'jeu'])))
             && (!('email' in changed) || after.email == request.auth.token.get('email', ''))
             && (!('firstSeen' in changed) || !('firstSeen' in before))
             && changedMonths.hasOnly([m1, m2]) && changedMonths.size() <= 1
