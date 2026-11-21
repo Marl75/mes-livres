@@ -51,7 +51,7 @@ function renderReco() {
   const typed = demande ? demande.value : '';
   const tabs = tabTypes().length < 2 ? '' : tabTypes().map(type => `
     <button type="button" class="reco-type ${recoType === type ? 'active' : ''}" onclick="setRecoType('${type}')">
-      ${TYPE_EMOJI[type]} ${t('type_' + type)}
+      ${typeIcon(type, 14)} ${t('type_' + type)}
     </button>`).join('');
   const results = cache && cache.recommandations
     ? `${recoSourceHtml(cache, typed)}
@@ -87,11 +87,10 @@ function recoSourceHtml(cache, typed) {
 }
 
 function recoCard(r, i) {
-  // Si l'image ne charge pas (service saturé, lien mort), l'emoji du type la remplace
-  const placeholder = `<span class="poster-cover placeholder">${TYPE_EMOJI[r.type] || ''}</span>`;
+  // Si l'image ne charge pas (service saturé, lien mort), la reliure avec le titre la remplace
   const cover = r.cover
-    ? `<img class="poster-cover" src="${escapeHtml(r.cover)}" alt="" loading="lazy" onerror="this.outerHTML='${escapeHtml(placeholder)}'">`
-    : placeholder;
+    ? `<img class="poster-cover" src="${escapeHtml(r.cover)}" alt="" loading="lazy" data-title="${escapeHtml(r.titre || '')}" onerror="posterFallback(this)">`
+    : posterPlaceholder(r.titre);
   const meta = [t('typeOne_' + r.type), r.createur, r.annee].filter(Boolean).map(escapeHtml).join(' · ');
   const because = (r.base_sur || []).length
     ? `<div class="reco-because">${t('recoBecause', { titles: r.base_sur.map(x => (currentLang === 'en' ? `“${escapeHtml(x)}”` : `« ${escapeHtml(x)} »`)).join(', ') })}</div>` : '';
@@ -103,7 +102,7 @@ function recoCard(r, i) {
     <div class="reco-card">
       <div class="reco-cover">${cover}</div>
       <div class="reco-body">
-        <div class="reco-title">${r.audacieux ? '<span class="reco-bold" title="' + escapeHtml(t('recoBoldTitle')) + '">🎲</span> ' : ''}${escapeHtml(r.titre)}</div>
+        <div class="reco-title">${r.audacieux ? '<span class="reco-bold" title="' + escapeHtml(t('recoBoldTitle')) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.289 1.725l.355.517"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg></span> ' : ''}${escapeHtml(r.titre)}</div>
         <div class="reco-meta">${meta}</div>
         <p class="reco-why">${escapeHtml(r.pourquoi)}</p>
         ${because}

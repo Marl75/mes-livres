@@ -199,7 +199,7 @@ async function showSharedWishlist() {
     console.warn(e);
   }
   if (!data) {
-    view.innerHTML = `<div class="empty-state"><div class="icon">🔗</div><h3>${t('sharedMissing')}</h3>
+    view.innerHTML = `<div class="empty-state"><div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div><h3>${t('sharedMissing')}</h3>
       <p><a href="${location.pathname}">${t('sharedOwn')}</a></p></div>`;
     return;
   }
@@ -245,7 +245,7 @@ async function showSharedWishlist() {
       <h1>${escapeHtml(pageTitle)}</h1>
       <p class="share-meta">${ttn('items', 'tout', (data.items || []).length)}${updated ? ' · ' + t('sharedUpdated', { date: updated }) : ''}</p>
     </header>
-    ${sections || `<div class="empty-state"><div class="icon">✨</div><h3>${t('sharedEmpty')}</h3></div>`}
+    ${sections || `<div class="empty-state"><div class="icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><h3>${t('sharedEmpty')}</h3></div>`}
     <footer class="credits"><a href="${location.pathname}">${t('sharedOwn')}</a></footer>`;
 }
 

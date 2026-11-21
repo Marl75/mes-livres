@@ -20,7 +20,6 @@ const TYPE_ICONS = {
   serie: '<rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/>',
   jeu: '<rect x="2" y="6" width="20" height="12" rx="6"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/>',
 };
-const TYPE_EMOJI = { tout: '✨', livre: '📖', film: '🎬', serie: '📺', jeu: '🎮' };
 
 function typeIcon(type, size) {
   return `<svg width="${size || 16}" height="${size || 16}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${TYPE_ICONS[type]}</svg>`;
