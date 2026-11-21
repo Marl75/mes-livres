@@ -1,13 +1,14 @@
 // ===== PROFILS =====
 function initials(name) {
-  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+  // Échappé : le résultat est inséré tel quel dans le HTML des listes de profils
+  return escapeHtml(String(name || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?');
 }
 
 function renderProfileSelector() {
   const cur = getCurrentProfile();
   if (!cur) return;
   const avatar = document.getElementById('profile-pill-avatar');
-  avatar.textContent = initials(cur.name);
+  avatar.innerHTML = initials(cur.name);
   avatar.style.background = cur.color;
   document.getElementById('profile-pill-name').textContent = cur.name;
 
@@ -189,6 +190,10 @@ function cleanImportedBook(b) {
     if (out[k] !== undefined && out[k] !== null && typeof out[k] !== 'string') out[k] = String(out[k]);
   });
   if (out.cover && !/^https?:\/\//i.test(out.cover)) out.cover = '';
+  // Année et date de fin d'une sauvegarde importée : au bon format, sinon effacées
+  const annee = parseInt(out.annee, 10);
+  out.annee = annee >= 1850 && annee <= 2100 ? annee : null;
+  if (typeof out.dateFinished !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(out.dateFinished)) out.dateFinished = null;
   out.tags = Array.isArray(out.tags) ? out.tags.filter(x => typeof x === 'string') : [];
   const note = Number(out.note);
   out.note = note >= 1 && note <= 5 ? Math.round(note) : 0;
@@ -295,61 +300,73 @@ function render() {
     const sub = currentSearch ? t('tryAnother') : tt('emptyHint', currentType);
     const cta = currentSearch ? t('addQuery', { q: query }) : (TYPES.includes(currentType) ? tt('addBook', currentType) : t('add'));
     grid.innerHTML = `<button type="button" class="empty-state" onclick="addFromEmpty()">
-      <span class="icon">${TYPE_EMOJI[currentType]}</span><span class="empty-title">${msg}</span>
+      <span class="icon">${typeIcon(currentType, 40)}</span><span class="empty-title">${msg}</span>
       <span class="empty-sub">${sub}</span><span class="empty-cta">+ ${escapeHtml(cta)}</span></button>`;
     return;
   }
 
   const posters = viewMode() === 'posters';
   grid.classList.toggle('posters', posters);
+  grid.classList.toggle('journal', !posters);
   if (posters) {
     grid.innerHTML = filtered.map(renderPoster).join('');
     hydrateProviders();
     return;
   }
 
-  grid.innerHTML = filtered.map(b => {
-    const stars = b.note ? renderStars(b.note) : '';
-    const reco = b.recoBy ? `<div class="reco-by">✨ ${escapeHtml(b.recoBy)}</div>` : '';
-    const note = b.avis ? `<div class="note">${escapeHtml(b.avis)}</div>` : '';
-    const tags = (b.tags && b.tags.length)
-      ? `<div class="tags">${b.tags.map(t => `<span class="tag" onclick="filterByTag('${escapeAttr(t)}')">${escapeHtml(t)}</span>`).join('')}</div>`
-      : '';
-    const type = typeOf(b);
-    const meta = [];
-    if (b.categorie === 'lu' && b.dateFinished) meta.push(tt('readIn', type, { date: formatMonthYear(b.dateFinished) }));
-    if (b.annee) meta.push(b.annee);
-    const chip = currentType === 'tout'
-      ? `<span class="type-chip">${typeIcon(type, 12)}${t('typeOne_' + type)}${b.plateforme ? ' · ' + escapeHtml(b.plateforme) : ''}</span>`
-      : (b.plateforme ? `<span class="type-chip">${typeIcon(type, 12)}${escapeHtml(b.plateforme)}</span>` : '');
-    const progress = type === 'serie' && b.progression && b.categorie !== 'lu'
-      ? `<div class="progress-chip">${escapeHtml(b.progression)}</div>` : '';
-    return `
-      <div class="card" data-cat="${escapeHtml(b.categorie)}">
-        <div class="card-top">
-          ${renderCover(b)}
-          <div class="card-info">
-            <div class="card-header">
-              <div class="card-title">${escapeHtml(b.titre)}</div>
-              <button class="card-menu" onclick="openCardMenu(event, '${escapeAttr(b.id)}')" aria-label="${t('actions')}" title="${t('actions')}">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
-              </button>
-            </div>
-            ${chip}
-            ${b.auteur ? `<div class="card-author">${escapeHtml(b.auteur)}</div>` : ''}
-            ${meta.length ? `<div class="card-meta">${meta.join(' · ')}</div>` : ''}
-            ${progress}
-            ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${escapeHtml(b.id)}"></div>` : ''}
-            ${stars}
-            ${reco}
-          </div>
-        </div>
-        ${tags}
-        ${note}
-      </div>
-    `;
-  }).join('');
+  // Journal : une ligne par élément, regroupées par année quand on trie les terminés par date
+  const byYear = currentSort === 'finished' && currentCat === 'lu';
+  const yearOf = b => (b.dateFinished || '').slice(0, 4);
+  const perYear = {};
+  if (byYear) filtered.forEach(b => { perYear[yearOf(b)] = (perYear[yearOf(b)] || 0) + 1; });
+  let html = '';
+  let year = null;
+  filtered.forEach(b => {
+    if (byYear && yearOf(b) !== year) {
+      year = yearOf(b);
+      html += `<div class="journal-year"><h3>${year || t('noDate')}</h3><span>${ttn('items', currentType, perYear[year])}</span></div>`;
+    }
+    html += renderRow(b, byYear);
+  });
+  grid.innerHTML = html;
   hydrateProviders();
+}
+
+const ICON_USER = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+
+function renderRow(b, byYear) {
+  const type = typeOf(b);
+  const when = b.categorie === 'lu' && b.dateFinished
+    ? (byYear ? formatMonthShort(b.dateFinished) : formatMonthYear(b.dateFinished)) : '';
+  const meta = [b.auteur, b.annee, b.plateforme].filter(Boolean)
+    .map(v => `<span>${escapeHtml(String(v))}</span>`).join('<span class="sep">·</span>');
+  const typeName = t('typeOne_' + type);
+  const progress = type === 'serie' && b.progression && b.categorie !== 'lu'
+    ? `<div class="row-progress">${escapeHtml(b.progression)}</div>` : '';
+  const reco = b.recoBy ? `<div class="reco-by">${ICON_USER}${escapeHtml(b.recoBy)}</div>` : '';
+  const tags = (b.tags && b.tags.length)
+    ? `<div class="row-tags">${b.tags.map(tg => `<button type="button" class="row-tag" onclick="filterByTag('${escapeAttr(tg)}')">${escapeHtml(tg)}</button>`).join('')}</div>`
+    : '';
+  return `
+    <article class="row" data-cat="${escapeHtml(b.categorie)}">
+      ${renderCover(b)}
+      <div class="row-body">
+        <div class="row-head">
+          <h3 class="row-title">${escapeHtml(b.titre)}</h3>
+          ${when ? `<time class="row-when">${when}</time>` : ''}
+          <button class="card-menu" onclick="openCardMenu(event, '${escapeAttr(b.id)}')" aria-label="${t('actions')}" title="${t('actions')}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+          </button>
+        </div>
+        <div class="row-meta"><span class="row-type" role="img" aria-label="${typeName}" title="${typeName}">${typeIcon(type, 14)}</span>${meta}</div>
+        ${progress}
+        ${wantsWatchInfo(b) ? `<div class="providers" data-watch="${escapeHtml(b.id)}"></div>` : ''}
+        ${b.note ? renderStars(b.note) : ''}
+        ${reco}
+        ${b.avis ? `<p class="row-review">${escapeHtml(b.avis)}</p>` : ''}
+        ${tags}
+      </div>
+    </article>`;
 }
 
 // Page publique d'une liste partagée (?share=…) : pas de démarrage sur la collection locale
@@ -381,7 +398,7 @@ function renderPoster(b) {
     : posterPlaceholder(b.titre);
   return `
     <div class="poster" data-cat="${escapeHtml(b.categorie)}">
-      <button class="poster-img${chip ? ' has-chip' : ''}" onclick="editBook('${escapeAttr(b.id)}')" aria-label="${escapeHtml(b.titre)}">${image}${chip}</button>
+      <button class="poster-img${chip ? ' has-chip' : ''}" onclick="editBook('${escapeAttr(b.id)}')" aria-label="${escapeHtml(b.titre)}">${image}${chip}${b.categorie === 'en-cours' ? RIBBON : ''}</button>
       <button class="card-menu poster-menu" onclick="openCardMenu(event, '${escapeAttr(b.id)}')" aria-label="${t('actions')}" title="${t('actions')}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
       </button>
@@ -392,9 +409,13 @@ function renderPoster(b) {
     </div>`;
 }
 
+// Couverture absente : une reliure toilée avec le titre
 function posterPlaceholder(titre) {
-  return `<span class="poster-cover placeholder">${escapeHtml(titre || '')}</span>`;
+  return `<span class="poster-cover placeholder"><span class="ph-title">${escapeHtml(titre || '')}</span><span class="ph-rule"></span></span>`;
 }
+
+// Signet en laiton sur ce qui est en cours
+const RIBBON = '<span class="ribbon" aria-hidden="true"></span>';
 
 function posterFallback(img) {
   img.outerHTML = posterPlaceholder(img.dataset.title);
@@ -435,7 +456,7 @@ function renderTypeUI() {
   nav.style.setProperty('--tab-count', tabs.length);
   nav.innerHTML = tabs.map(ty => `
     <button class="type-tab ${ty === currentType ? 'active' : ''}" onclick="setActiveType('${ty}')" aria-pressed="${ty === currentType}">
-      ${typeIcon(ty, 17)}<span class="type-tab-label">${t('type_' + ty)}</span><span class="type-tab-count">${counts[ty]}</span>
+      <span class="type-tab-label">${t('type_' + ty)}</span><span class="type-tab-count">${counts[ty]}</span>
     </button>`).join('');
   const cats = catsFor(currentType);
   document.querySelectorAll('.stat-card').forEach(c => {
@@ -557,23 +578,29 @@ function sortBooks(list) {
 
 // ===== COUVERTURES & PROGRESSION =====
 function coverPlaceholder(titre) {
-  const letter = escapeHtml(((titre || '?').trim()[0] || '?').toUpperCase());
-  return `<div class="cover placeholder">${letter}</div>`;
+  return `<span class="cover-ph"><span class="ph-title">${escapeHtml(titre || '')}</span><span class="ph-rule"></span></span>`;
 }
 
 function renderCover(b) {
-  if (!b.cover) return coverPlaceholder(b.titre);
-  return `<img class="cover" src="${escapeHtml(b.cover)}" alt="" loading="lazy" data-letter="${escapeHtml(b.titre)}" onerror="coverFallback(this)">`;
+  const inner = b.cover
+    ? `<img src="${escapeHtml(b.cover)}" alt="" loading="lazy" decoding="async" data-title="${escapeHtml(b.titre || '')}" onerror="coverFallback(this)">`
+    : coverPlaceholder(b.titre);
+  return `<span class="cover">${inner}${b.categorie === 'en-cours' ? RIBBON : ''}</span>`;
 }
 
 function coverFallback(img) {
-  img.outerHTML = coverPlaceholder(img.dataset.letter);
+  img.outerHTML = coverPlaceholder(img.dataset.title);
 }
 
 // ===== DATES =====
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function formatMonthShort(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return isNaN(d) ? '' : d.toLocaleDateString(locale(), { month: 'short' });
 }
 
 function formatMonthYear(iso) {
@@ -712,7 +739,7 @@ function renderStats() {
 
   const pct = goal ? Math.min(100, Math.round(readThisYear.length / goal * 100)) : 0;
   document.getElementById('stats-content').innerHTML = `
-    <button class="retro-open" onclick="openRetro()">✨ ${t('retroOpen', { year })}</button>
+    <button class="retro-open" onclick="openRetro()">${t('retroOpen', { year })}</button>
     ${ty === 'tout' ? typeStatsHtml(year) : `<div class="goal-card">
       <div class="goal-head">
         <div class="goal-count">${readThisYear.length} <small>${goal ? tt('goalOf', ty, { goal, year }) : ttn('readYear', ty, readThisYear.length, { year })}</small></div>
